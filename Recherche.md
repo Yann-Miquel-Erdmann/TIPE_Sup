@@ -15,3 +15,7 @@ https://en.wikipedia.org/wiki/Motion_estimation    \
 
 
  # automate cellulaire 
+
+automates cellulaires souvent utilisés pour la génération de clefs de chiffrement (génération de nombres aléatoire)
+pas forcémént ce que l'on veut voir
+=> plus de recherches nécessaires
