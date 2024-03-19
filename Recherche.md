@@ -10,6 +10,13 @@ fortran 90
 :warning: https://fr.wikipedia.org/wiki/Fortran#Fortran_moderne_2 code max 132 char / ligne + & pour continuer sur la ligne suivante
 
 
+https://catalogue-archipel.univ-toulouse.fr/permalink/f/18iboda/TN_cdi_ieee_primary_9797331
+Schneider, Larissa, and Dominik Schultes. Evaluating Swift-to-Kotlin and Kotlin-to-Swift Transpilers. 2022 IEEE/ACM 9th International Conference on Mobile Software Engineering and Systems (MobileSoft), 2022, pp. 102106. 
+
+
+https://ieeexplore-ieee-org.gorgone.univ-toulouse.fr/document/10186853
+https://ieeexplore-ieee-org.gorgone.univ-toulouse.fr/document/9034617
+
 var
 list
 string
