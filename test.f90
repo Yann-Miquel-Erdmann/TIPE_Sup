@@ -1,10 +1,8 @@
 program addNumbers
 
 ! This simple program adds two numbers
-    implicit none
-
-! Type declarations
-   real :: a , b , result
+   implicit none
+   real :: a ,  b , result
 
 ! Executable statements
    a = 12.0
@@ -12,4 +10,5 @@ program addNumbers
    result = a + b
    print * , 'The total is ' , result
 
+    
 end program addNumbers
