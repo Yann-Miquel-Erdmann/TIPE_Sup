@@ -377,7 +377,7 @@ let rec print_alive (d:dico) : unit =
 let search (d:dico) (s:search) (c: char): dico =
   let rec sub_search d s c d2 = 
     match d, s with
-    | [], _ -> d2
+    | [], _ -> List.rev d2
     | N(s1, -2, t, false)::q, (_, index, _)->
       begin
         if (s1.[index] != c) then
