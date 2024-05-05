@@ -6,5 +6,5 @@ program addNumbers
     
     result = a + b
     print * , 'The total is ' , result
-
 end program addNumbers
+   

@@ -1,4 +1,3 @@
-
 type data_type = 
   (* types *)
   | Entier of int
@@ -13,6 +12,7 @@ type operateur =
   | Fois
   | Division
   | Puissance
+  | Assignation
 
 type comparateur =  
   | PlusPetit
@@ -32,21 +32,18 @@ type operateur_logique =
 
 
 type syntax = 
+  | End
   | Allocatable	
   | Allocate	
   | Assign	
   | Assignment	
   | Block_data	
-  | Call	
   | Case	
   | Character	
   | Common	
   | Complex	
   | Contains	
-  | Continue	
-  | Cycle	
   | Data	
-  | Deallocate	
   | Default	
   | Do	
   | End_do  
@@ -76,8 +73,6 @@ type syntax =
   | Logical	
   | Module	
   | End_module  
-  | Namelist	
-  | Nullify	
   | Only	
   | Operator	
   | Optional	
@@ -92,11 +87,9 @@ type syntax =
   | Real	
   | Recursive	
   | Result	
-  | Return	
   | Save	
   | Select_case	
   | End_select  
-  | Stop	
   | Subroutine	
   | End_subroutine
   | Target	
@@ -107,143 +100,305 @@ type syntax =
   | Where	
   | End_where  
   | While
+  | AllocateBackspace
+  |  Call
+  |  Close
+  |  Continue
+  |  Cycle
+  |  Deallocate
+  |  Endfile
+  |  Error_stop
+  |  Event_post
+  |  Event_wait
+  |  Fail_image
+  |  Flush
+  |  Form_team
+  |  Format
+  |  Inquire
+  |  Lock
+  |  Namelist
+  |  Nullify
+  |  Open
+  |  Print
+  |  Read
+  |  Return
+  |  Rewind
+  |  Stop
+  |  Sync_all
+  |  Sync_images
+  |  Sync_memory
+  |  Sync_team
+  |  Unlock
+  |  Wait
+  |  Write
 
 
 type intrinsic_function =
+  | Abort
   | Abs
-  | AChar
-  | ACos
-  | AImag
+  | Access
+  | Achar
+  | Acos
+  | Acosd
+  | Acosh
+  | Adjustl
+  | Adjustr
+  | Aimag
+  | Aint
+  | Alarm
   | All
-  | Allocatable
-  | Allocate
-  | AnInt
+  | Allocated
+  | Anint
   | Any
-  | ASin
+  | Asin
+  | Asind
+  | Asinh
   | Associated
-  | ATan
-  | ATan2
-  | Bessel_J0
-  | Bessel_J1
-  | Bessel_JN
-  | Bessel_Y0
-  | Bessel_Y1
-  | Bessel_YN
-  | Bit_Size
-  | BTest
-  | Cabs
+  | Atan
+  | Atand
+  | Atan2
+  | Atan2d
+  | Atanh
+  | Atomic_add
+  | Atomic_and
+  | Atomic_cas
+  | Atomic_define
+  | Atomic_fetch_add
+  | Atomic_fetch_and
+  | Atomic_fetch_or
+  | Atomic_fetch_xor
+  | Atomic_or
+  | Atomic_ref
+  | Atomic_xor
+  | Backtrace
+  | Bessel_j0
+  | Bessel_j1
+  | Bessel_jn
+  | Bessel_y0
+  | Bessel_y1
+  | Bessel_yn
+  | Bge
+  | Bgt
+  | Bit_size
+  | Ble
+  | Blt
+  | Btest
   | Ceiling
   | Char
+  | Chdir
+  | Chmod
   | Cmplx
+  | Co_broadcast
+  | Co_max
+  | Co_min
+  | Co_reduce
+  | Co_sum
+  | Command_argument_count
+  | Complex
   | Conjg
   | Cos
+  | Cosd
   | Cosh
+  | Cotan
+  | Cotand
   | Count
+  | Cpu_time
   | Cshift
+  | Ctime
+  | Date_and_time
   | Dble
-  | DChar
-  | DImag
-  | Dot_Product
-  | DProd
-  | DReal
+  | Digits
+  | Dim
+  | Dot_product
+  | Dprod
+  | Dshiftl
+  | Dshiftr
+  | Eoshift
   | Epsilon
+  | Erf
+  | Erfc
+  | Erfc_scaled
+  | Etime
+  | Event_query
+  | Execute_command_line
+  | Exit
   | Exp
   | Exponent
-  | FDate
-  | FFlush
-  | FGet
+  | Extends_type_of
+  | Fdate
+  | Fget
+  | Fgetc
+  | Findloc
   | Floor
-  | FPut
-  | FSeek
-  | FStat
-  | FTell
-  | FWrite
-  | GError
-  | GSet
-  | HostNm
+  | Flush
+  | Fnum
+  | Fput
+  | Fputc
+  | Fraction
+  | Free
+  | Fseek
+  | Fstat
+  | Ftell
+  | Gamma
+  | Gerror
+  | Getarg
+  | Get_command
+  | Get_command_argument
+  | Getcwd
+  | Getenv
+  | Get_environment_variable
+  | Getgid
+  | Getlog
+  | Getpid
+  | Getuid
+  | Gmtime
+  | Hostnm
+  | Huge
   | Hypot
-  | IAbs
-  | IAnd
-  | IBClr
-  | IBits
-  | IChar
+  | Iachar
+  | Iall
+  | Iand
+  | Iany
+  | Iargc
+  | Ibclr
+  | Ibits
+  | Ibset
+  | Ichar
+  | Idate
   | Ieor
-  | IErr
-  | Image
+  | Ieorno
+  | Image_index
   | Index
   | Int
   | Int2
   | Int8
-  | IOr
-  | ISHFT
-  | ISHFTC
-  | ISign
+  | Ior
+  | Iparity
+  | Irand
+  | Is_contiguous
+  | Is_iostat_end
+  | Is_iostat_eor
+  | Isatty
+  | Ishft
+  | Ishftc
+  | Isnan
+  | Itime
+  | Kill
   | Kind
-  | LBound
+  | Lbound
+  | Lcobound
+  | Leadz
   | Len
-  | Len_Trim
-  | LGe
-  | LGt
-  | LLe
-  | LLt
+  | Len_trim
+  | Lge
+  | Lgt
+  | Link
+  | Lle
+  | Llt
+  | Lnblnk
+  | Loc
   | Log
   | Log10
-  | Log_Gamma
+  | Log_gamma
+  | Logical
+  | Lshift
+  | Lstat
+  | Ltime
+  | Malloc
+  | Maskl
+  | Maskr
   | Matmul
   | Max
+  | Maxexponent
   | Maxloc
   | Maxval
+  | Mclock
+  | Mclock8
   | Merge
+  | Merge_bits
   | Min
+  | Minexponent
   | Minloc
   | Minval
   | Mod
   | Modulo
-  | Move_Alloc
-  | NChar
+  | Move_alloc
+  | Mvbits
   | Nearest
-  | New_Line
-  | NInt
+  | New_line
+  | Nint
+  | Norm2
   | Not
   | Null
-  | Or
   | Pack
+  | Parity
+  | Perror
+  | Popcnt
+  | Poppar
   | Precision
   | Present
   | Product
   | Radix
-  | Random_Number
-  | Random_Seed
+  | Ran
+  | Rand
+  | Random_init
+  | Random_number
+  | Random_seed
   | Range
+  | Rank
   | Real
+  | Rename
   | Repeat
   | Reshape
-  | RRSpacing
-  | RShift
-  | Same_Type_As
+  | Rrspacing
+  | Rshift
+  | Same_type_as
   | Scale
   | Scan
-  | Selected_Char_Kind
-  | Selected_Int_Kind
-  | Selected_Real_Kind
-  | Set_Exponent
+  | Secnds
+  | Second
+  | Selected_char_kind
+  | Selected_int_kind
+  | Selected_real_kind
+  | Set_exponent
   | Shape
+  | Shifta
+  | Shiftl
+  | Shiftr
   | Sign
+  | Signal
   | Sin
+  | Sind
   | Sinh
   | Size
-  | Sngl
-  | Sqrt
+  | Sizeof
+  | Sleep
+  | Spacing
   | Spread
+  | Sqrt
+  | Srand
+  | Stat
+  | Storage_size
   | Sum
-  | System_Clock
+  | Symlnk
+  | System
+  | System_clock
   | Tan
+  | Tand
   | Tanh
+  | This_image
+  | Time
+  | Time8
   | Tiny
+  | Trailz
   | Transfer
   | Transpose
   | Trim
-  | UBound
+  | Ttynam
+  | Ubound
+  | Ucobound
+  | Umask
+  | Unlink
   | Unpack
   | Verify
   | Xor
@@ -255,5 +410,16 @@ type token =
   | OperateurLogique of operateur_logique
   | Syntax of syntax
   | IntrinsicFunction of intrinsic_function
-  | Ident of string
+  | Identificateur of string
+  | NewLine
+  | Space
+  | Name of char list
+  | Integer of char list
+  | Floating of char list
+  | Virgule
+  | QuatrePoints
+  | StringDelimiter1
+  | StringDelimiter2
 
+
+type ast = Noeud of token * (token list)
