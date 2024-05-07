@@ -327,7 +327,17 @@ let rec analyse_ligne (c: char list) (d: dico) (s:search) (t:token list): token 
 (* outputs the token list of the tokens *)
 let rec analyse (s: string list) (t: token list): token list =
   match s with
-  | [] -> List.rev t
+  | [] -> 
+    begin
+      let rec reverse l out=
+      match l with
+      | [] -> out
+      | (Integer x)::q -> reverse q (DataType (Entier (String.of_seq (List.to_seq x)))::out)
+      | (Floating x)::q -> reverse q (DataType (Flotant (String.of_seq (List.to_seq x)))::out)
+      | (Name x)::q -> reverse q (Identificateur (String.of_seq (List.to_seq x))::out)
+      | x::q -> reverse q (x::out)
+    in reverse t []
+    end
   | x::q ->
     let c = string_to_char x [] 0 in
       let t = (NewLine::analyse_ligne c dico (0, 0, false) t) in

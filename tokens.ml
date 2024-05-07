@@ -1,7 +1,7 @@
 type data_type = 
   (* types *)
-  | Entier of int
-  | Flotant of float
+  | Entier of string
+  | Flotant of string
   | Imaginaire of float*float
   | Booleen of bool
   | Caractere of string
