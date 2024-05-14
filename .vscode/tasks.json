@@ -4,7 +4,8 @@
     {
       "label": "build",
       "type": "shell",
-      "command": "ocamlc tokens.ml parser.ml create_ast.ml main.ml -o build/a.out"
+      "command": "ocamlc tokens.ml regex.ml parser.ml create_ast.ml main.ml -o build/a.out",
+      "problemMatcher": []
     },
     {
       "label": "run",

@@ -1,3 +1,6 @@
 {
-    "fortran.fortls.disabled": true
+    "fortran.fortls.disabled": true,
+    "nasc-touchbar.toggleSidebar": true,
+    "nasc-touchbar.addCursorBelow": false,
+    "nasc-touchbar.gitSync": true
 }

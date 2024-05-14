@@ -1,84 +1,22 @@
+open Regex
 open Tokens
 
-type automaton =
-| N of string*int*token*bool (* N for normal, searches for the string *)
-| C of (char list)*int*token*bool (* C for complex, searches the regular expression ex : (1|2|3|4|5|6|7|8|9|0) *)
-;;
-
 type dico = automaton list;;
-type search = int*int*bool;; (* first for text index the second for index in the current world and the last for the current word in dico the bool is to know if it is the end of the line*)
 
 let file = open_in "test.f90";;
 let rec lire file liste = 
   let line = input_line file in
     ();
-    (*print_string line;
-    print_newline ();*)
   try lire file (line::liste) with End_of_file->
     close_in file;
     line::liste
 ;;
 
-let print_list (c: char list) : unit =
-  print_char '[';
-  let rec print_list_aux (c:char list) =
-    match c with
-    | [] -> ()
-    | x::[] -> print_char x;
-    | x::q -> print_char x; print_char ','; print_list_aux q;
-  in print_list_aux c;
-  print_char ']';
-  print_newline ()
-;;
-
-let rec string_to_char_2 (s:string) (c : char list) (index: int): char list =
-  if index == String.length s then
-    begin
-      print_list c;
-      List.rev c
-    end
-  else
-    string_to_char_2 s (s.[index]::c) (index + 1)
-;;
-
-let rec sub_gen_list (i1: int) (i2: int) (out:char list): char list =
-  if i1 > i2 then
-    begin
-      print_list out;
-      out
-    end
-  else
-    sub_gen_list (i1+1) i2 ((char_of_int i1)::out)
-;;
-
-let rec gen_list (s: char list) (out: char list) ((i1, b):char*bool): char list =
-  match s with
-  | [] -> out
-  | '-'::q ->
-    begin
-      if i1 <> '-' && not b then
-        gen_list q out (i1, true) 
-      else 
-        failwith "Invalid type"
-      end
-  | x::q ->
-    if b then
-      begin
-        (*print_char i1; print_char x;*)
-        gen_list q (sub_gen_list (int_of_char i1) (int_of_char x) out) ('-', false)
-      end
-    else 
-      if i1 <> '-' then
-        gen_list q (i1::out) (x, false)
-      else
-        gen_list q out (x, false)
-;;
-
 let rec is_one_alive (d: dico) : bool =
   match d with
   | [] -> false
-  | N(s, -2, _, _)::q -> (*print_string s; print_string " is alive"; print_newline();*) true
-  | C(l, -2, _, _)::q -> (*print_list l; print_string " is alive"; print_newline();*) true
+  | N(s, -2, _, _)::q -> true
+  | C(l, -2, _, _)::q -> true
   | _::q -> is_one_alive q
 ;;
 
@@ -90,13 +28,7 @@ let print_bool b =
 let rec search_list (c:'a) (l: 'a list) : bool =
   match l with
   | [] -> false
-  | x::q -> (*print_char x; print_char ' '; print_char c; print_char ' '; print_bool(x == c); print_newline ();*) if x == c then true else search_list c q
-;;
-  
-let rec index_list (l: 'a list) (i: int) : 'a =
-  match l with
-  | [] -> failwith "Invalid index"
-  | x::q -> if i == 0 then x else index_list q (i-1)
+  | x::q -> if x == c then true else search_list c q
 ;;
 
 let rec print_alive (d:dico) : unit =
