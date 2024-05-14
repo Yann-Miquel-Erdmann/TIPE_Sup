@@ -103,37 +103,38 @@ type syntax =
   | End_where  
   | While
   | AllocateBackspace
-  |  Call
-  |  Close
-  |  Continue
-  |  Cycle
-  |  Deallocate
-  |  Endfile
-  |  Error_stop
-  |  Event_post
-  |  Event_wait
-  |  Fail_image
-  |  Flush
-  |  Form_team
-  |  Format
-  |  Inquire
-  |  Lock
-  |  Namelist
-  |  Nullify
-  |  Open
-  |  Print
-  |  Read
-  |  Return
-  |  Rewind
-  |  Stop
-  |  Sync_all
-  |  Sync_images
-  |  Sync_memory
-  |  Sync_team
-  |  Unlock
-  |  Wait
-  |  Write
-;;
+  | Call
+  | Close
+  | Continue
+  | Cycle
+  | Deallocate
+  | Endfile
+  | Error_stop
+  | Event_post
+  | Event_wait
+  | Fail_image
+  | Flush
+  | Form_team
+  | Format
+  | Inquire
+  | Lock
+  | Namelist
+  | Nullify
+  | Open
+  | Print
+  | Read
+  | Return
+  | Rewind
+  | Stop
+  | Sync_all
+  | Sync_images
+  | Sync_memory
+  | Sync_team
+  | Unlock
+  | Wait
+  | Write
+  | Select
+
 
 type intrinsic_function =
   | Abort
@@ -424,6 +425,8 @@ type token =
   | StringDelimiter1
   | StringDelimiter2
   | Commentaire
+  | Parentheseouvrante
+  | Parenthesefermante
 ;;
 
 type ast = Noeud of token * (token list)

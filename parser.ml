@@ -1,15 +1,18 @@
+
 open Tokens
+module Parser = struct 
 
 type automaton =
-| N of string*int*token*bool (* N for normal, searches for the string *)
-| C of (char list)*int*token*bool (* C for complex, searches the regular expression ex : (1|2|3|4|5|6|7|8|9|0) *)
+| N of string*int*Tokens.token*bool (* N for normal, searches for the string *)
+| C of (char list)*int*Tokens.token*bool (* C for complex, searches the regular expression ex : (1|2|3|4|5|6|7|8|9|0) *)
 ;;
 
 type dico = automaton list;;
 type search = int*int*bool;; (* first for text index the second for index in the current world and the last for the current word in dico the bool is to know if it is the end of the line*)
 
 let file = open_in "test.f90";;
-let rec lire file liste = 
+let read_file (file_name: string):string list = 
+  let rec lire file liste = 
   let line = input_line file in
     ();
     (*print_string line;
@@ -17,6 +20,7 @@ let rec lire file liste =
   try lire file (line::liste) with End_of_file->
     close_in file;
     line::liste
+  in List.rev (lire (open_in file_name) [])
 ;;
 
 let print_list (c: char list) : unit =
@@ -148,8 +152,8 @@ let search (d:dico) (s:search) (c: char): dico =
 ;;
 
 
-let autoN (s:string) (t: token): automaton = N(s, -2, t, false);;
-let autoC (s:string) (t: token) : automaton = C(gen_list (string_to_char_2 s [] 0) [] ('-', false), -2, t, false);;
+let autoN (s:string) (t: Tokens.token): automaton = N(s, -2, t, false);;
+let autoC (s:string) (t: Tokens.token) : automaton = C(gen_list (string_to_char_2 s [] 0) [] ('-', false), -2, t, false);;
 
 let rec string_to_char (s:string) (c : char list) (index: int): char list =
   if index == String.length s then
@@ -165,8 +169,6 @@ let rec string_to_char (s:string) (c : char list) (index: int): char list =
         else string_to_char s (s.[index]::c) (index + 1)
       end
 ;;
-
-let texte = lire file [];;
 
 let dico = [
   autoN "allocatable" (Syntax Allocatable);
@@ -239,15 +241,26 @@ let dico = [
   autoN "\"" StringDelimiter1;
   autoN "'" StringDelimiter2;
   autoN " " Space;
-  autoN "*" (Operateur Fois);
   autoN "," Virgule;
+  autoN "*" (Operateur Fois);
   autoN "+" (Operateur Plus);
   autoN "=" (Operateur Assignation);
+  autoN "<" (Comparateur StrictPlusPetit);
+  autoN ">" (Comparateur StrictPlusGrand);
+  autoN "<=" (Comparateur PlusPetit);
+  autoN ">=" (Comparateur PlusGrand);
   autoN "::" QuatrePoints;
+  autoN "(" Parentheseouvrante;
+  autoN ")" Parenthesefermante;
   autoN "!" Commentaire;
+
+
+
+  
   autoC "0-9" (Integer []);
   autoC ".0-9" (Floating []);
   autoC "a-zA-Z0-9" (Name []);
+
 ];;
 
 let rec print_char_list (c: char list) : unit =
@@ -288,7 +301,7 @@ let rec test (str:char list) (d:dico) (s:search) : dico*search =
 ;;
 
 (* checks for the automaton that died last *)
-let rec last_alive (d:dico) (t_max:token) (max:int) : token option * int =
+let rec last_alive (d:dico) (t_max:Tokens.token) (max:int) : Tokens.token option * int =
   match d with
   | [] -> if max < 0 then (None,0) else (Some t_max, max)
   | N(s, _, t, true)::q -> begin print_int (String.length s); print_char ' '; print_string s; print_newline(); if (String.length s) > max then last_alive q t (String.length s) else last_alive q t_max max end
@@ -305,16 +318,15 @@ let rec clear_list (l : 'a list) (i:  int) : 'a list =
   | x::q -> if i > 0 then begin print_char x; print_string " cleared"; print_newline(); clear_list q (i-1) end else begin print_string "end"; print_newline(); l end 
 ;;
 
-let texte = List.rev texte
 
-let rec analyse_ligne (c: char list) (d: dico) (s:search) (t:token list): token list =
+let rec analyse_ligne (c: char list) (d: dico) (s:search) (t:Tokens.token list): Tokens.token list =
   let (i01, i02, b0) = s in
   match c with
   | [] -> t
   | c ->
     let (d, (i1, i2, b)) = test c dico s in
-    let token = last_alive d NewLine (0) in
-      match token with
+    let tok = last_alive d NewLine (0) in
+      match tok with
       | None, max -> print_list c; failwith "word not recognized"
       | Some x, max -> let t = (x::t) in
     (*print_char (index_list c i2);*)
@@ -325,8 +337,9 @@ let rec analyse_ligne (c: char list) (d: dico) (s:search) (t:token list): token 
     analyse_ligne c d s t
 ;;
 
+
 (* outputs the token list of the tokens *)
-let rec analyse (s: string list) (t: token list): token list =
+let rec analyse (s: string list) (t: Tokens.token list): Tokens.token list =
   match s with
   | [] -> 
     begin
@@ -345,8 +358,5 @@ let rec analyse (s: string list) (t: token list): token list =
         analyse q t
 ;;
 
-let text = ["a = 12.0"];;
-let a = analyse texte [];;
-(*match a with
-| (Name x)::q -> print_string "result : '";print_string (String.of_seq (List.to_seq (List.rev x))); print_char '\'';
-| _ -> ()*)
+end 
+
