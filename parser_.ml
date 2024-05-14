@@ -1,11 +1,7 @@
 open Regex
 open Tokens
-module Parser = struct 
 
-type automaton =
-| N of string*int*Tokens.token*bool (* N for normal, searches for the string *)
-| C of (char list)*int*Tokens.token*bool (* C for complex, searches the regular expression ex : (1|2|3|4|5|6|7|8|9|0) *)
-;;
+module Parser_ = struct 
 
 type dico = automaton list;;
 
@@ -17,13 +13,14 @@ let read_file (file_name: string):string list =
   try lire file (line::liste) with End_of_file->
     close_in file;
     line::liste
+  in List.rev (lire (open_in file_name) [])
 ;;
 
 let rec is_one_alive (d: dico) : bool =
   match d with
   | [] -> false
   | N(s, -2, _, _)::q -> true
-  | C(l, -2, _, _, _)::q -> true
+  | C(l, -2, _, _, _, _)::q -> true
   | _::q -> is_one_alive q
 ;;
 
@@ -42,7 +39,7 @@ let rec print_alive (d:dico) : unit =
   match d with
   | [] -> ();
   | N(s, -2, _, _)::q -> print_string s; print_string " is alive"; print_newline(); print_alive q;
-  | C(l, -2, _, _, _)::q -> print_string "automaton is alive"; print_newline(); print_alive q;
+  | C(l, -2, _, _, _, _)::q -> print_string "automaton is alive"; print_newline(); print_alive q;
   | _::q -> print_alive q;
 ;;
 
@@ -60,35 +57,15 @@ let search (d:dico) (s:search) (c: char): dico =
           else
               sub_search q s c (N(s1, -2, t, false)::d2)
       end
-    | C(l, -2, t, _)::q, (_, index, b1) -> 
-      begin
-        if search_list c l then
-          if b1 then 
-            match t with
-            | Name x -> sub_search q s c (C(l, index, (Name (List.rev (c::x))), true)::d2)
-            | Integer x -> sub_search q s c (C(l, index, (Integer (List.rev (c::x))), true)::d2)
-            | Floating x -> sub_search q s c (C(l, index, (Floating (List.rev (c::x))), true)::d2)
-            | _ -> sub_search q s c (C(l, index, t, true)::d2)
-          else 
-            match t with
-            | Name x -> sub_search q s c (C(l, -2, (Name (c::x)), true)::d2)
-            | Integer x -> sub_search q s c (C(l, -2, (Integer (c::x)), true)::d2)
-            | Floating x -> sub_search q s c (C(l, -2, (Floating (c::x)), true)::d2)
-            | _ -> sub_search q s c (C(l, -2, t, true)::d2)
-        else
-          match t with
-            | Name x -> begin sub_search q s c (C(l, index-1, (Name (List.rev x)), true)::d2) end
-            | Integer x -> begin sub_search q s c (C(l, index-1, (Name (List.rev x)), true)::d2) end
-            | Floating x -> begin sub_search q s c (C(l, index-1, (Name (List.rev x)), true)::d2) end
-            | _ -> sub_search q s c (C(l, index-1, t, true)::d2)
-      end
+    | C(r, -2, t, i, b, l)::q, (_, index, b1) -> 
+      sub_search q s c ((match_regex (C(r, -2, t, i, b, l)) s c)::d2)
     | x::q, _ -> sub_search q s c (x::d2)
   in sub_search d s c []
 ;;
 
 
 let autoN (s:string) (t: token): automaton = N(s, -2, t, false);;
-let autoC (s:string) (t: token) : automaton = C(gen_regex s, -2, t, 0, false);;
+let autoC (s:string) (t: token) : automaton = C(gen_regex s, -2, t, 0, false, []);;
 
 let rec string_to_char (s:string) (c : char list) (index: int): char list =
   if index == String.length s then
@@ -173,8 +150,6 @@ let dico = [
   autoN "where" (Syntax Where);
   autoN "while" (Syntax While);
   autoN "end" (Syntax End);
-  autoN "\"" StringDelimiter1;
-  autoN "'" StringDelimiter2;
   autoN " " Space;
   autoN "," Virgule;
   autoN "*" (Operateur Fois);
@@ -189,12 +164,11 @@ let dico = [
   autoN ")" Parenthesefermante;
   autoN "!" Commentaire;
 
-
-
-  
-  autoC "0-9" (Integer []);
-  autoC ".0-9" (Floating []);
-  autoC "a-zA-Z0-9" (Name []);
+  autoC "[0-9]+" (Integer []);
+  autoC "[0-9]+\\.[0-9]+" (Floating []);
+  autoC "[a-zA-Z0-9]+" (Name []);
+  autoC "\".*\"" (Chaine []);
+  autoC "'.*'" (Chaine []);
 
 ];;
 
@@ -207,10 +181,7 @@ let rec reset_dico (d:dico) (out:dico) : dico =
   match d with
   | [] -> List.rev out
   | N(s, _, t, _)::q -> reset_dico q (N(s, -2, t, false)::out)
-  | C(s, _, Name _, _, _)::q -> reset_dico q (C(s, -2, Name [], 0, false)::out)
-  | C(s, _, Integer _, _, _)::q -> reset_dico q (C(s, -2, Integer [], 0, false)::out)
-  | C(s, _, Floating _, _, _)::q -> reset_dico q (C(s, -2, Floating [], 0, false)::out)
-  | C(s, _, t, _, _)::q -> reset_dico q (C(s, -2, t, 0, false)::out)
+  | C(r, _, t, _, _, _)::q -> reset_dico q (C(reset_regex r, -2, t, 0, false, [])::out)
 ;;
 
 (* ne renvoie pas s pour le moment mais besoin pour plusieurs mots *)
@@ -240,10 +211,11 @@ let rec last_alive (d:dico) (t_max:Tokens.token) (max:int) : Tokens.token option
   match d with
   | [] -> if max < 0 then (None,0) else (Some t_max, max)
   | N(s, _, t, true)::q -> begin print_int (String.length s); print_char ' '; print_string s; print_newline(); if (String.length s) > max then last_alive q t (String.length s) else last_alive q t_max max end
-  | C(_, _, Name x, true)::q -> if (List.length x) > max then begin print_int (List.length x); print_char ' '; print_int max; print_newline(); last_alive q (Name x) (List.length x) end else last_alive q t_max max
-  | C(_, _, Integer x, true)::q -> if (List.length x) > max then last_alive q (Integer x) (List.length x) else last_alive q t_max max
-  | C(_, _, Floating x, true)::q -> if (List.length x) > max then begin print_int (List.length x); print_char ' '; print_int max; last_alive q (Floating x) (List.length x) end else last_alive q t_max max
-  | C(l, i, t, true)::q -> if i > max then last_alive q t i else last_alive q t_max max
+  | C(r, _, Name _, _, true, l)::q -> if List.length l > max then last_alive q (Name (List.rev l)) (List.length l) else last_alive q t_max max
+  | C(r, _, Floating _, _, true, l)::q -> if List.length l > max then last_alive q (Floating (List.rev l)) (List.length l) else last_alive q t_max max
+  | C(r, _, Integer _, _, true, l)::q -> if List.length l > max then last_alive q (Integer (List.rev l)) (List.length l) else last_alive q t_max max
+  | C(r, _, Chaine _, _, true, l)::q -> if List.length l > max then last_alive q (Chaine (List.rev l)) (List.length l) else last_alive q t_max max
+  | C(r, _, t, _, true, l)::q -> if List.length l > max then last_alive q t (List.length l) else last_alive q t_max max
   | _::q -> last_alive q t_max max
 ;;
 
@@ -253,6 +225,13 @@ let rec clear_list (l : 'a list) (i:  int) : 'a list =
   | x::q -> if i > 0 then begin print_char x; print_string " cleared"; print_newline(); clear_list q (i-1) end else begin print_string "end"; print_newline(); l end 
 ;;
 
+let rec end_of_text (d:dico) (endIndex: int) (out:dico): dico =
+  match d with
+  | [] -> List.rev out
+  | C(r, -2, t, i, bool, l)::q -> end_of_text q endIndex ((C(r, endIndex, t, i, true, l))::out)
+  | C(r, e, t, i, false, l)::q -> end_of_text q endIndex ((C(r, e, t, i, true, l))::out)
+  | x:: q -> end_of_text q endIndex (x::out)
+;;
 
 let rec analyse_ligne (c: char list) (d: dico) (s:search) (t:Tokens.token list): Tokens.token list =
   let (i01, i02, b0) = s in
@@ -260,12 +239,14 @@ let rec analyse_ligne (c: char list) (d: dico) (s:search) (t:Tokens.token list):
   | [] -> t
   | c ->
     let (d, (i1, i2, b)) = test c dico s in
+    let d = if i2 == List.length c then end_of_text d i2 [] else d in
     let tok = last_alive d NewLine (0) in
       match tok with
-      | None, max -> print_list c; failwith "word not recognized"
+      | None, _ -> print_list c; failwith "word not recognized"
       | Some x, max -> let t = (x::t) in
     (*print_char (index_list c i2);*)
-    print_char '_';print_int max; print_newline();
+    print_int i1;print_char ':';print_int i2;print_string "->";print_int (List.length c);
+    print_char '_';print_char (index_list c 0);print_int max; print_newline();
     let s = (i01+max, 0, false) in
     let d = reset_dico d [] in
     let c = clear_list c (max) in
@@ -274,16 +255,17 @@ let rec analyse_ligne (c: char list) (d: dico) (s:search) (t:Tokens.token list):
 
 
 (* outputs the token list of the tokens *)
-let rec analyse (s: string list) (t: Tokens.token list): Tokens.token list =
+let rec analyse (s: string list) (t: token list): token list =
   match s with
   | [] -> 
     begin
-      let rec reverse l out=
+      let rec reverse l out =
       match l with
       | [] -> out
       | (Integer x)::q -> reverse q (DataType (Entier (String.of_seq (List.to_seq x)))::out)
       | (Floating x)::q -> reverse q (DataType (Flotant (String.of_seq (List.to_seq x)))::out)
       | (Name x)::q -> reverse q (Identificateur (String.of_seq (List.to_seq x))::out)
+      | (Chaine x)::q -> reverse q (DataType (Caractere (String.of_seq (List.to_seq x)))::out)
       | x::q -> reverse q (x::out)
     in reverse t []
     end

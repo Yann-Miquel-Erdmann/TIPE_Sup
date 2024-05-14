@@ -1,5 +1,5 @@
 open Tokens
-open Parser
+open Parser_
 open Environnement
 
 type ast = Noeud of Tokens.token * (ast list) * (ast list)
@@ -89,8 +89,8 @@ let test (file_name: string) =
   compact_ast_list (
     create_ast (
       merge_syntax (
-        Parser.analyse (
-          Parser.read_file file_name
+        Parser_.analyse (
+          Parser_.read_file file_name
         ) []
       )
     )

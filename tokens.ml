@@ -422,8 +422,7 @@ type token =
   | Floating of char list
   | Virgule
   | QuatrePoints
-  | StringDelimiter1
-  | StringDelimiter2
+  | Chaine of char list
   | Commentaire
   | Parentheseouvrante
   | Parenthesefermante
