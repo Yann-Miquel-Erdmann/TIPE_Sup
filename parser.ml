@@ -16,7 +16,7 @@ let rec is_one_alive (d: dico) : bool =
   match d with
   | [] -> false
   | N(s, -2, _, _)::q -> true
-  | C(l, -2, _, _)::q -> true
+  | C(l, -2, _, _, _)::q -> true
   | _::q -> is_one_alive q
 ;;
 
@@ -35,7 +35,7 @@ let rec print_alive (d:dico) : unit =
   match d with
   | [] -> ();
   | N(s, -2, _, _)::q -> print_string s; print_string " is alive"; print_newline(); print_alive q;
-  | C(l, -2, _, _)::q -> print_list l; print_string " is alive"; print_newline(); print_alive q;
+  | C(l, -2, _, _, _)::q -> print_string "automaton is alive"; print_newline(); print_alive q;
   | _::q -> print_alive q;
 ;;
 
@@ -81,7 +81,7 @@ let search (d:dico) (s:search) (c: char): dico =
 
 
 let autoN (s:string) (t: token): automaton = N(s, -2, t, false);;
-let autoC (s:string) (t: token) : automaton = C(gen_list (string_to_char_2 s [] 0) [] ('-', false), -2, t, false);;
+let autoC (s:string) (t: token) : automaton = C(gen_regex s, -2, t, 0, false);;
 
 let rec string_to_char (s:string) (c : char list) (index: int): char list =
   if index == String.length s then
@@ -191,10 +191,10 @@ let rec reset_dico (d:dico) (out:dico) : dico =
   match d with
   | [] -> List.rev out
   | N(s, _, t, _)::q -> reset_dico q (N(s, -2, t, false)::out)
-  | C(s, _, Name _, _)::q -> reset_dico q (C(s, -2, Name [], false)::out)
-  | C(s, _, Integer _, _)::q -> reset_dico q (C(s, -2, Integer [], false)::out)
-  | C(s, _, Floating _, _)::q -> reset_dico q (C(s, -2, Floating [], false)::out)
-  | C(s, _, t, _)::q -> reset_dico q (C(s, -2, t, false)::out)
+  | C(s, _, Name _, _, _)::q -> reset_dico q (C(s, -2, Name [], 0, false)::out)
+  | C(s, _, Integer _, _, _)::q -> reset_dico q (C(s, -2, Integer [], 0, false)::out)
+  | C(s, _, Floating _, _, _)::q -> reset_dico q (C(s, -2, Floating [], 0, false)::out)
+  | C(s, _, t, _, _)::q -> reset_dico q (C(s, -2, t, 0, false)::out)
 ;;
 
 (* ne renvoie pas s pour le moment mais besoin pour plusieurs mots *)
