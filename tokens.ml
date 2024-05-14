@@ -5,6 +5,7 @@ type data_type =
   | Imaginaire of float*float
   | Booleen of bool
   | Caractere of string
+;;
 
 type operateur = 
   | Plus
@@ -13,6 +14,7 @@ type operateur =
   | Division
   | Puissance
   | Assignation
+;;
 
 type comparateur =  
   | PlusPetit
@@ -21,6 +23,7 @@ type comparateur =
   | StrictPlusGrand
   | Egal
   | NonEgal
+;;
 
 type operateur_logique = 
   | Et
@@ -28,8 +31,7 @@ type operateur_logique =
   | Non
   | Equivalent
   | NonEquivalent
-
-
+;;
 
 type syntax = 
   | End
@@ -131,7 +133,7 @@ type syntax =
   |  Unlock
   |  Wait
   |  Write
-
+;;
 
 type intrinsic_function =
   | Abort
@@ -402,6 +404,7 @@ type intrinsic_function =
   | Unpack
   | Verify
   | Xor
+;;
 
 type token = 
   | DataType of data_type
@@ -420,6 +423,7 @@ type token =
   | QuatrePoints
   | StringDelimiter1
   | StringDelimiter2
-
+  | Commentaire
+;;
 
 type ast = Noeud of token * (token list)

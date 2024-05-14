@@ -244,6 +244,7 @@ let dico = [
   autoN "+" (Operateur Plus);
   autoN "=" (Operateur Assignation);
   autoN "::" QuatrePoints;
+  autoN "!" Commentaire;
   autoC "0-9" (Integer []);
   autoC ".0-9" (Floating []);
   autoC "a-zA-Z0-9" (Name []);
