@@ -95,13 +95,15 @@ let rec gen_regex (str:string) : regex =
           | x::q -> reverse q (x::out)
         in reverse reg []
       end
+    | 'n'::q, '\\', Litteral (l, i)::q2 -> gen_regex_aux q (Litteral('\n'::l, i)::q2) ' '
+    | 'n'::q, '\\', _ -> gen_regex_aux q (Litteral(['\n'], 0)::reg) ' '
     | x::q, '\\', Litteral (l, i)::q2 -> gen_regex_aux q (Litteral(x::l, i)::q2) ' '
     | x::q, '\\', _ -> gen_regex_aux q (Litteral([x], 0)::reg) ' '
     | ']'::q, '[', Litteral(l, -1)::q2 -> gen_regex_aux q (Range (gen_list l [] (None, false))::q2) ' '
     | ']'::q, '[', _ -> failwith "[] need at least one range"
     | x::q, '[', Litteral (l, -1)::q2 -> gen_regex_aux q (Litteral(x::l, -1)::q2) '['
     | x::q, '[', _ -> gen_regex_aux q (Litteral([x], -1)::reg) '['
-    | x::q, _ , Litteral (l, -1)::q2 -> failwith "range not matched"
+    | x::q, _ , Litteral (l, -1)::q2 -> failwith "[ not matched"
     | ']'::q, _, _ -> failwith "missing ["
     | '\\'::q, _, _ -> gen_regex_aux q reg '\\'
     | '.'::q, _, _ -> gen_regex_aux q (AllChars::reg) ' '
@@ -250,6 +252,7 @@ gen_regex "[0-9]+\\.[0-9]+";;
 gen_regex "\".*\"";;
 gen_regex "'.*'";;
 gen_regex "[0-9]+";;
+gen_regex "!.*\n";;
 let num_reg = gen_regex "\".*\"";;
 
 let num = match_regex (C(num_reg, -2, Integer [], 0, false, [])) (0, 0, false) '"'

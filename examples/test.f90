@@ -1,4 +1,5 @@
 program addNumbers
+    ! ceci est un commentaire
     implicit none
     real :: a, b, result
     a = 12.0

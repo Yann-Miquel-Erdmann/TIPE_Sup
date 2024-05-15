@@ -5,6 +5,7 @@ type data_type =
   | Imaginaire of float*float
   | Booleen of bool
   | Caractere of string
+  | Commentaire of string
 ;;
 
 type operateur = 
@@ -423,7 +424,7 @@ type token =
   | Virgule
   | QuatrePoints
   | Chaine of char list
-  | Commentaire
+  | Commentaire of char list
   | Parentheseouvrante
   | Parenthesefermante
 ;;

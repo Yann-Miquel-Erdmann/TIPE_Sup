@@ -162,13 +162,13 @@ let dico = [
   autoN "::" QuatrePoints;
   autoN "(" Parentheseouvrante;
   autoN ")" Parenthesefermante;
-  autoN "!" Commentaire;
 
   autoC "[0-9]+" (Integer []);
   autoC "[0-9]+\\.[0-9]+" (Floating []);
   autoC "[a-zA-Z0-9]+" (Name []);
   autoC "\".*\"" (Chaine []);
   autoC "'.*'" (Chaine []);
+  autoC "!.*\n" (Commentaire []);
 
 ];;
 
@@ -215,6 +215,7 @@ let rec last_alive (d:dico) (t_max:Tokens.token) (max:int) : Tokens.token option
   | C(r, _, Floating _, _, true, l)::q -> if List.length l > max then last_alive q (Floating (List.rev l)) (List.length l) else last_alive q t_max max
   | C(r, _, Integer _, _, true, l)::q -> if List.length l > max then last_alive q (Integer (List.rev l)) (List.length l) else last_alive q t_max max
   | C(r, _, Chaine _, _, true, l)::q -> if List.length l > max then last_alive q (Chaine (List.rev l)) (List.length l) else last_alive q t_max max
+  | C(r, _, Commentaire _, _, true, l)::q -> if List.length l > max then last_alive q (Commentaire (List.rev l)) (List.length l) else last_alive q t_max max
   | C(r, _, t, _, true, l)::q -> if List.length l > max then last_alive q t (List.length l) else last_alive q t_max max
   | _::q -> last_alive q t_max max
 ;;
@@ -266,6 +267,7 @@ let rec analyse (s: string list) (t: token list): token list =
       | (Floating x)::q -> reverse q (DataType (Flotant (String.of_seq (List.to_seq x)))::out)
       | (Name x)::q -> reverse q (Identificateur (String.of_seq (List.to_seq x))::out)
       | (Chaine x)::q -> reverse q (DataType (Caractere (String.of_seq (List.to_seq x)))::out)
+      | (Commentaire x)::q -> reverse q (DataType (Commentaire (String.of_seq (List.to_seq x)))::out)
       | x::q -> reverse q (x::out)
     in reverse t []
     end
