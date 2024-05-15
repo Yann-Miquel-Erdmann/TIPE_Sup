@@ -49,7 +49,7 @@ let search (d:dico) (s:search) (c: char): dico =
     | [], _ -> List.rev d2
     | N(s1, -2, t, false)::q, (_, index, _)->
       begin
-        if (s1.[index] != c) then
+        if (s1.[index] != c && int_of_char s1.[index] != int_of_char c+32) then
           sub_search q s c (N(s1, index-1, t, false)::d2)
         else 
           if ((index + 1) == String.length s1) then 
@@ -76,9 +76,7 @@ let rec string_to_char (s:string) (c : char list) (index: int): char list =
     else
       begin
         (*print_char s.[index];*)
-        if (int_of_char s.[index]) >= 65 && (int_of_char s.[index]) <= 90 then
-          string_to_char s ((char_of_int((int_of_char(s.[index]))+32))::c) (index+1)
-        else string_to_char s (s.[index]::c) (index + 1)
+        string_to_char s (s.[index]::c) (index + 1)
       end
 ;;
 
@@ -150,15 +148,24 @@ let dico = [
   autoN "where" (Syntax Where);
   autoN "while" (Syntax While);
   autoN "end" (Syntax End);
+
   autoN " " Space;
   autoN "," Virgule;
+
   autoN "*" (Operateur Fois);
   autoN "+" (Operateur Plus);
+  autoN "-" (Operateur Moins);
+  autoN "/" (Operateur Division);
   autoN "=" (Operateur Assignation);
+  autoN "**" (Operateur Puissance);
+
   autoN "<" (Comparateur StrictPlusPetit);
   autoN ">" (Comparateur StrictPlusGrand);
   autoN "<=" (Comparateur PlusPetit);
   autoN ">=" (Comparateur PlusGrand);
+  autoN "/=" (Comparateur NonEgal);
+  autoN "==" (Comparateur Egal);
+
   autoN "::" QuatrePoints;
   autoN "(" Parentheseouvrante;
   autoN ")" Parenthesefermante;
@@ -243,15 +250,23 @@ let rec analyse_ligne (c: char list) (d: dico) (s:search) (t:Tokens.token list):
     let d = if i2 == List.length c then end_of_text d i2 [] else d in
     let tok = last_alive d NewLine (0) in
       match tok with
-      | None, _ -> print_list c; failwith "word not recognized"
+      | None, _ -> print_list c; failwith "word not recognized\n"
       | Some x, max -> let t = (x::t) in
     (*print_char (index_list c i2);*)
-    print_int i1;print_char ':';print_int i2;print_string "->";print_int (List.length c);
-    print_char '_';print_char (index_list c 0);print_int max; print_newline();
-    let s = (i01+max, 0, false) in
-    let d = reset_dico d [] in
-    let c = clear_list c (max) in
-    analyse_ligne c d s t
+    if max == 0 then
+      begin
+        print_char '\'';
+        print_char (index_list c 0);
+        print_string "' is not recognised\n";
+        raise(Failure "")
+      end
+    else 
+      print_int i1;print_char ':';print_int i2;print_string "->";print_int (List.length c);
+      print_char '_';print_char (index_list c 0);print_int max; print_newline();
+      let s = (i01+max, 0, false) in
+      let d = reset_dico d [] in
+      let c = clear_list c (max) in
+      analyse_ligne c d s t
 ;;
 
 
