@@ -27,6 +27,13 @@ https://ieeexplore-ieee-org.gorgone.univ-toulouse.fr/document/9034617
 W. Jordan, A. Bejo and A. G. Persada, "The Development of Lexer and Parser as Parts of Compiler for GAMA32 Processor’s Instruction-set using Python," 2019 International Seminar on Research of Information Technology and Intelligent Systems (ISRITI), Yogyakarta, Indonesia, 2019, pp. 450-455, doi: 10.1109/ISRITI48646.2019.9034617.
 ```
 
+definition trasnpilation + usage :
+https://ieeexplore-ieee-org.gorgone.univ-toulouse.fr/document/8247456
+=> cite as
+```
+B. F. Andrés and M. Pérez, "Transpiler-based architecture for multi-platform web applications," 2017 IEEE Second Ecuador Technical Chapters Meeting (ETCM), Salinas, Ecuador, 2017, pp. 1-6, doi: 10.1109/ETCM.2017.8247456.
+```
+
 var
 list
 string
