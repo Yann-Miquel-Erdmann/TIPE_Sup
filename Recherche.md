@@ -20,11 +20,12 @@ Schneider, Larissa, and Dominik Schultes. Evaluating Swift-to-Kotlin and Kotlin-
 
 
 https://ieeexplore-ieee-org.gorgone.univ-toulouse.fr/document/10186853
+
+https://ieeexplore-ieee-org.gorgone.univ-toulouse.fr/document/9034617
 => cite as
 ```
 W. Jordan, A. Bejo and A. G. Persada, "The Development of Lexer and Parser as Parts of Compiler for GAMA32 Processor’s Instruction-set using Python," 2019 International Seminar on Research of Information Technology and Intelligent Systems (ISRITI), Yogyakarta, Indonesia, 2019, pp. 450-455, doi: 10.1109/ISRITI48646.2019.9034617.
 ```
-https://ieeexplore-ieee-org.gorgone.univ-toulouse.fr/document/9034617
 
 var
 list
