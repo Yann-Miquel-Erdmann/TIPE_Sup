@@ -4,6 +4,10 @@ https://d1wqtxts1xzle7.cloudfront.net/6710782/pxc387619-libre.pdf?1390847692=&re
 
 lien possible (login ut3 requis)
 https://ieeexplore-ieee-org.gorgone.univ-toulouse.fr/document/7836839
+=> cite as
+```
+M. Bysiek, A. Drozd and S. Matsuoka, "Migrating Legacy Fortran to Python While Retaining Fortran-Level Performance through Transpilation and Type Hints," 2016 6th Workshop on Python for High-Performance and Scientific Computing (PyHPC), Salt Lake City, UT, USA, 2016, pp. 9-18, doi: 10.1109/PyHPC.2016.006.
+```
 
 
 fortran 90
