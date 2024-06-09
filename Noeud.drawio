@@ -1,19 +1,19 @@
-<mxfile host="app.diagrams.net" modified="2024-06-04T09:59:01.953Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36" etag="xZ6Hqr3ckkFisvAT6YUH" version="24.4.13" type="github">
+<mxfile host="app.diagrams.net" modified="2024-06-09T19:17:43.902Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36" etag="XfW_zN76XcDHblpz241L" version="24.4.13" type="github">
   <diagram name="Page-1" id="FVy7eie-tYwdXl4JtP40">
-    <mxGraphModel dx="632" dy="483" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="872" dy="479" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="oEsdsfnfrlNJ93cB_e0w-18" value="Noeud" style="swimlane;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="oEsdsfnfrlNJ93cB_e0w-18" value="Noeud" style="swimlane;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="120" y="80" width="200" height="200" as="geometry" />
         </mxCell>
-        <mxCell id="oEsdsfnfrlNJ93cB_e0w-21" value="&lt;u&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;entité lexicale&lt;/font&gt;&lt;/u&gt;" style="whiteSpace=wrap;html=1;" vertex="1" parent="oEsdsfnfrlNJ93cB_e0w-18">
+        <mxCell id="oEsdsfnfrlNJ93cB_e0w-21" value="&lt;span style=&quot;font-size: 14px;&quot;&gt;&lt;u&gt;lexème&lt;/u&gt;&lt;/span&gt;" style="whiteSpace=wrap;html=1;" parent="oEsdsfnfrlNJ93cB_e0w-18" vertex="1">
           <mxGeometry x="10" y="30" width="180" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="oEsdsfnfrlNJ93cB_e0w-24" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;u&gt;liste de paramètres&lt;/u&gt;&lt;/font&gt;&lt;div&gt;&lt;b&gt;type&lt;/b&gt;: liste de &lt;b&gt;Noeuds&lt;/b&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;" vertex="1" parent="oEsdsfnfrlNJ93cB_e0w-18">
+        <mxCell id="oEsdsfnfrlNJ93cB_e0w-24" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;u&gt;liste de paramètres&lt;/u&gt;&lt;/font&gt;&lt;div&gt;&lt;b&gt;type&lt;/b&gt;: liste de &lt;b&gt;Noeuds&lt;/b&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;" parent="oEsdsfnfrlNJ93cB_e0w-18" vertex="1">
           <mxGeometry x="10" y="80" width="180" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="oEsdsfnfrlNJ93cB_e0w-25" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;u style=&quot;&quot;&gt;liste d&#39;instructions&lt;/u&gt;&lt;/font&gt;&lt;div style=&quot;&quot;&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;&lt;b style=&quot;&quot;&gt;type: &lt;/b&gt;liste de&amp;nbsp;&lt;b style=&quot;&quot;&gt;Noeuds&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;" vertex="1" parent="oEsdsfnfrlNJ93cB_e0w-18">
+        <mxCell id="oEsdsfnfrlNJ93cB_e0w-25" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;u style=&quot;&quot;&gt;liste d&#39;instructions&lt;/u&gt;&lt;/font&gt;&lt;div style=&quot;&quot;&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;&lt;b style=&quot;&quot;&gt;type: &lt;/b&gt;liste de&amp;nbsp;&lt;b style=&quot;&quot;&gt;Noeuds&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;" parent="oEsdsfnfrlNJ93cB_e0w-18" vertex="1">
           <mxGeometry x="10" y="140" width="180" height="50" as="geometry" />
         </mxCell>
       </root>
