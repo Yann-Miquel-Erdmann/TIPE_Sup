@@ -6,7 +6,7 @@ https://d1wqtxts1xzle7.cloudfront.net/6710782/pxc387619-libre.pdf?1390847692=&re
 ❔ : not sure <br>
 ✅ : will use
 
-Livre compilation
+✅Livre compilation
 => cite as
 ```
 LEGENDRE, Romain et SCHWARZENTRUBER, François. Compilation: analyse lexicale et syntaxique. Ellipses, 2015.
