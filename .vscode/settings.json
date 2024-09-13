@@ -2,5 +2,9 @@
     "fortran.fortls.disabled": true,
     "nasc-touchbar.toggleSidebar": true,
     "nasc-touchbar.addCursorBelow": false,
-    "nasc-touchbar.gitSync": true
+    "nasc-touchbar.gitSync": true,
+    "ocaml.sandbox": {
+        "kind": "opam",
+        "switch": "default"
+    }
 }
