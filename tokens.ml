@@ -1,7 +1,7 @@
 type data_type = 
   (* types *)
   | Entier of string
-  | Flotant of string
+  | Flottant of string
   | Imaginaire of float*float
   | Booleen of bool
   | Caractere of string
@@ -427,6 +427,6 @@ type token =
   | Commentaire of char list
   | Parentheseouvrante
   | Parenthesefermante
+  | PointVirgule
 ;;
 
-type ast = Noeud of token * (token list)
