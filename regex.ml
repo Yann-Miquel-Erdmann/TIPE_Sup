@@ -1,34 +1,52 @@
-(* ".*" *)
-(* '.*' *)
-(* [a-zA-Z0-9_]+ *)
-(* [0-9]+\.[0-9]+ *)
-(* [0-9]+ *)
-
 open Tokens
 
 type regcomponent =
-| Range of (int*int) list
-| Litteral of char list*int
-| UnPlus of regcomponent*int
-| ZeroPlus of regcomponent*int
-| AllChars
+  (* teste si l'entier associé au caractère donné est entre le premier entier et le dernier entier inclus *)
+| Range of (int*int) list 
+
+  (* teste un par un les cractères donnés à ceux de la liste de caractère et garde l'index dans l'entier *)
+| Litteral of char list*int 
+
+  (* teste le recomponent tant qu'il peut être comparé et stocke le nombre de fois dans l'entier *)
+| UnPlus of regcomponent*int 
+
+  (* Même chose *)
+| ZeroPlus of regcomponent*int 
+
+  (* correspond à n'importe quel caractère *)
+| AllChars 
 ;;
 
 type regex = regcomponent list;;
 
+(* à chacun de ses types est associé
+    - un booléen qui indique si l'automate a fini et réussi
+    - un token, un composant de syntaxe qui sera converti vers le language suivant
+*)
 type automaton =
-| N of string*int*token*bool (* N for normal, searches for the string *)
-| C of regex*int*token*int*bool*char list (* C for complex, searches the regular expression ex : (1|2|3|4|5|6|7|8|9|0) *)
+  (* teste un par un les cractères donnés à ceux de la chaine de caractère, garde l'index dans l'entier *)
+| N of string*int*token*bool 
+
+  (* teste un par un les caractères donnés sur ceux du regex, garde l'index dans l'entier 1er entier
+     stocke l'ensemble des cacarères dans la liste de chaine de caractères
+     le dernier entier sert à savoir quel est l'index du regex a tester
+  *)
+| C of regex*int*token*int*bool*char list 
 ;;
 
-type search = int*int*bool;; (* first for text index the second for index in the current world and the last for the current word in dico the bool is to know if it is the end of the line*)
+(* l'entier sert à savoir quel est l'index du caractère dans le mot
+   le booléen sert pour savoir si l'on est à la fin de la ligne
+*)
+type search = int*bool;;
 
+(* renvoie l'élément de la liste l à l'indice i *)
 let rec index_list (l: 'a list) (i: int) : 'a =
   match l with
-  | [] -> print_int (i+1); print_string " too much\n"; failwith "Invalid index" (* error here for some reason *)
+  | [] -> failwith "Invalid index"
   | x::q -> if i == 0 then x else index_list q (i-1)
 ;;
 
+(* remplace l'élément de la liste l à l'indice i par l'élément e *)
 let replace_index (l: 'a list) (i: int) (e:'a) : 'a list =
   let rec replace_aux (l: 'a list) (i: int) (e:'a) (out:'a list) =
     match l, i with
@@ -40,6 +58,7 @@ let replace_index (l: 'a list) (i: int) (e:'a) : 'a list =
   in replace_aux l i e []
 ;;
 
+(* affiche le contenu de la liste c *)
 let print_list (c: char list) : unit =
   print_char '[';
   let rec print_list_aux (c:char list) =
@@ -52,16 +71,15 @@ let print_list (c: char list) : unit =
   print_newline ()
 ;;
 
+(* converti la chaine de cacatère s à partir de l'index index et l'ajoute à la liste c *)
 let rec string_to_char_2 (s:string) (c : char list) (index: int): char list =
   if index == String.length s then
-    begin
-      List.rev c
-    end
+    List.rev c
   else
     string_to_char_2 s (s.[index]::c) (index + 1)
 ;;
 
-
+(* génère *)
 let rec gen_list (s: char list) (out: (int*int) list) ((buffer, b): char option*bool): (int*int) list =
   match s, buffer, b with
   | [], _, _ -> out
@@ -132,8 +150,8 @@ let rec gen_regex (str:string) : regex =
 
 let rec match_regex (a:automaton) (s:search) (c: char) : automaton =
   match a, s with
-  | N _, (_, index, _)-> a
-  | C (reg, -2, t, index, b, l), (_, indexfin, _) ->
+  | N _, (index, _)-> a
+  | C (reg, -2, t, index, b, l), (indexfin, _) ->
     begin
       if index >= List.length reg then
         C(reg, indexfin, t, index, true, l)
@@ -173,7 +191,6 @@ let rec match_regex (a:automaton) (s:search) (c: char) : automaton =
               | C (r, _, _, _ , true, [x]) -> 2,  index_list r 0
               | C (r, _, _, _ , _, _) -> 0, index_list r 0
           in
-            print_int result; print_newline();
             if result == 0 then
               let a2 = match_regex (C([r], -2, t, 0, b, l)) s c in
               match a2 with
@@ -255,13 +272,13 @@ gen_regex "[0-9]+";;
 gen_regex "!.*\n";;
 let num_reg = gen_regex "\".*\"";;
 
-let num = match_regex (C(num_reg, -2, Integer [], 0, false, [])) (0, 0, false) '"'
-let num = match_regex num (0, 1, false) 'a'
+let num = match_regex (C(num_reg, -2, Integer [], 0, false, [])) (0, false) '"'
+let num = match_regex num (1, false) 'a'
 
-let num = match_regex num (0, 2, false) 'a'
+let num = match_regex num (2, false) 'a'
 
-let num = match_regex num (0, 3, false) 'a'
+let num = match_regex num (3, false) 'a'
 
-let num = match_regex num (0, 4, false) '\''
+let num = match_regex num (4, false) '\''
 
-let num = match_regex num (0, 5, false) '"'
+let num = match_regex num (5, false) '"'
