@@ -44,10 +44,10 @@ let rec print_alive (d:dico) : unit =
 ;;
 
 let search (d:dico) (s:search) (c: char): dico =
-  let rec sub_search d s c d2 = 
+  let rec sub_search (d : dico) (s : search) (c : char) d2 = 
     match d, s with
     | [], _ -> List.rev d2
-    | N(s1, -2, t, false)::q, (_, index, _)->
+    | N(s1, -2, t, false)::q, (index, _)->
       begin
         if (s1.[index] != c && int_of_char s1.[index] != int_of_char c+32) then
           sub_search q s c (N(s1, index-1, t, false)::d2)
@@ -57,7 +57,7 @@ let search (d:dico) (s:search) (c: char): dico =
           else
               sub_search q s c (N(s1, -2, t, false)::d2)
       end
-    | C(r, -2, t, i, b, l)::q, (_, index, b1) -> 
+    | C(r, -2, t, i, b, l)::q, (index, b1) -> 
       sub_search q s c ((match_regex (C(r, -2, t, i, b, l)) s c)::d2)
     | x::q, _ -> sub_search q s c (x::d2)
   in sub_search d s c []
@@ -195,19 +195,19 @@ let rec reset_dico (d:dico) (out:dico) : dico =
 let rec test (str:char list) (d:dico) (s:search) : dico*search =
   match str, s with
   | [], _ -> (d, s)
-  | x::[], (i1, i2, b) ->
+  | x::[], (i2, b) ->
     begin
       if is_one_alive d then
-        let d2 = search d (i1, i2, true) x in 
-          test [] d2 (i1+1, i2+1, b)
+        let d2 = search d (i2, true) x in 
+          test [] d2  (i2+1, b)
       else
         (d, s)
       end
-  | x::q, (i1, i2, _) ->
+  | x::q, (i2, _) ->
     begin
       if is_one_alive d then
         let d2 = search d s x in
-          test q d2 (i1+1, i2+1, false)
+          test q d2 (i2+1, false)
       else
         (d, s)
     end
@@ -242,11 +242,10 @@ let rec end_of_text (d:dico) (endIndex: int) (out:dico): dico =
 ;;
 
 let rec analyse_ligne (c: char list) (d: dico) (s:search) (t:Tokens.token list): Tokens.token list =
-  let (i01, i02, b0) = s in
   match c with
   | [] -> t
   | c ->
-    let (d, (i1, i2, b)) = test c dico s in
+    let (d, (i2, b)) = test c dico s in
     let d = if i2 == List.length c then end_of_text d i2 [] else d in
     let tok = last_alive d NewLine (0) in
       match tok with
@@ -261,9 +260,9 @@ let rec analyse_ligne (c: char list) (d: dico) (s:search) (t:Tokens.token list):
         raise(Failure "")
       end
     else 
-      print_int i1;print_char ':';print_int i2;print_string "->";print_int (List.length c);
+      print_char ':';print_int i2;print_string "->";print_int (List.length c);
       print_char '_';print_char (index_list c 0);print_int max; print_newline();
-      let s = (i01+max, 0, false) in
+      let s = (0, false) in
       let d = reset_dico d [] in
       let c = clear_list c (max) in
       analyse_ligne c d s t
@@ -288,7 +287,7 @@ let rec analyse (s: string list) (t: token list): token list =
     end
   | x::q ->
     let c = string_to_char x [] 0 in
-      let t = (NewLine::analyse_ligne c dico (0, 0, false) t) in
+      let t = (NewLine::analyse_ligne c dico (0, false) t) in
         analyse q t
 ;;
 
