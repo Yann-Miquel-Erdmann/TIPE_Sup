@@ -429,4 +429,4 @@ type token =
   | Parenthesefermante
 ;;
 
-type ast = Noeud of token * (token list)
+(* type ast = Noeud od token * Noeud * Noeud *)
