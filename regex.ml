@@ -1,13 +1,14 @@
 open Tokens
 
+
 type regcomponent =
   (* teste si l'entier associé au caractère donné est entre le premier entier et le dernier entier inclus *)
 | Range of (int*int) list 
 
-  (* teste un par un les cractères donnés à ceux de la liste de caractère et garde l'index dans l'entier *)
+  (* teste un par un les caractères donnés à ceux de la liste de caractère et garde l'index dans l'entier *)
 | Litteral of char list*int 
 
-  (* teste le recomponent tant qu'il peut être comparé et stocke le nombre de fois dans l'entier *)
+  (* teste le regcomponent tant qu'il peut être comparé et stocke le nombre de fois dans l'entier *)
 | UnPlus of regcomponent*int 
 
   (* Même chose *)
@@ -24,11 +25,11 @@ type regex = regcomponent list;;
     - un token, un composant de syntaxe qui sera converti vers le language suivant
 *)
 type automaton =
-  (* teste un par un les cractères donnés à ceux de la chaine de caractère, garde l'index dans l'entier *)
+  (* teste un par un les caractères donnés à ceux de la chaîne de caractère, garde l'index dans l'entier *)
 | N of string*int*token*bool 
 
   (* teste un par un les caractères donnés sur ceux du regex, garde l'index dans l'entier 1er entier
-     stocke l'ensemble des cacarères dans la liste de chaine de caractères
+     stocke l'ensemble des caractères dans la liste de chaîne de caractères
      le dernier entier sert à savoir quel est l'index du regex a tester
   *)
 | C of regex*int*token*int*bool*char list 
@@ -71,7 +72,7 @@ let print_list (c: char list) : unit =
   print_newline ()
 ;;
 
-(* converti la chaine de cacatère s à partir de l'index index et l'ajoute à la liste c *)
+(* converti la chaîne de caractère s à partir de l'index index et l'ajoute à la liste c *)
 let rec string_to_char_2 (s:string) (c : char list) (index: int): char list =
   if index == String.length s then
     List.rev c
@@ -129,14 +130,14 @@ let rec gen_regex (str:string) : regex =
     | '+'::q, _, Litteral (l, i)::q2 ->
       begin
         match l with
-        | [] -> failwith "should not happend"
+        | [] -> failwith "should not happened"
         | [x] -> gen_regex_aux q (UnPlus (Litteral(l, i), 0)::q2) ' '
         | x::q3 -> gen_regex_aux q (UnPlus (Litteral([x], i), 0)::(Litteral (q3, i)::q2)) ' '
       end
     | '*'::q, _, Litteral (l, i)::q2 ->
       begin
         match l with
-        | [] -> failwith "should not happend"
+        | [] -> failwith "should not happened"
         | [x] -> gen_regex_aux q (ZeroPlus (Litteral(l, i), 0)::q2) ' '
         | x::q3 -> gen_regex_aux q (ZeroPlus (Litteral([x], i), 0)::(Litteral (q3, i)::q2)) ' '
       end
