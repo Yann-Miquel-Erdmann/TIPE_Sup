@@ -117,8 +117,8 @@ let test (file_name: string) =
   compact_ast_list ( let a_l, l2 = 
     create_ast (
       merge_syntax (
-        Parser2.analyse (
-          Parser2.read_file file_name
+        Parser2.exec Dictionnaire.syntax_automate_det (
+          List.of_seq (String.to_seq (List.fold_left (fun acc x -> acc ^ "\n" ^ x) "" (Parser2.read_file file_name)))
         ) []
       )
     )
