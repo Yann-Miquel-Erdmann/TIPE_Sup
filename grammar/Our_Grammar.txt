@@ -1,0 +1,183 @@
+StartCommentBlock? ProgramUnit+       -> ExecutableProgram
+EOS  -> StartCommentBlock
+
+MainProgram                           -> ProgramUnit
+
+ProgramStmt? MainRange                -> MainProgram
+BodyConstruct+ EndProgramStmt         -> MainRange
+EndProgramStmt                        -> MainRange
+
+'program' ProgramName EOS              -> ProgramStmt
+'end' EOS                              -> EndProgramStmt
+'end' 'program' EndName? EOS           -> EndProgramStmt
+
+
+SpecificationPartConstruct            -> BodyConstruct
+ExecutableConstruct                   -> BodyConstruct
+
+DeclarationConstruct                  -> SpecificationPartConstruct
+TypeDeclarationStmt                   -> DeclarationConstruct
+
+TypeSpec ':' ':' {EntityDecl ","}+ EOS         -> TypeDeclarationStmt
+TypeSpec {EntityDecl ","}+ EOS -> TypeDeclarationStmt
+
+
+
+
+ObjectName '=' Expr                                   -> EntityDecl
+ObjectName '*' CharLength '=' Expr                    -> EntityDecl
+
+ObjectName                                            -> EntityDecl
+ObjectName '*' CharLength                             -> EntityDecl
+
+'(' TypeParamValue ')'        -> CharLength
+ScalarIntLiteralConstant      -> CharLength
+
+
+'integer'   KindSelector      -> TypeSpec
+'real'      KindSelector      -> TypeSpec
+'double' 'precision'          -> TypeSpec
+'complex'   KindSelector      -> TypeSpec
+'character' CharSelector      -> TypeSpec
+'logical'   KindSelector      -> TypeSpec
+
+'(' ('kind' '=')? Expr ')'                            -> KindSelector
+'(' 'len' '=' TypeParamValue ',' 'kind' '=' Expr ')'  -> CharSelector
+'(' 'len' '=' TypeParamValue ',' Expr ')'             -> CharSelector
+'(' 'len' '=' TypeParamValue ')'                      -> CharSelector
+'(' ('kind' '=')? Expr ')'                            -> CharSelector
+SpecificationExpr | '*'       -> TypeParamValue
+Expr -> SpecificationExpr
+
+
+ActionStmt                    -> ExecutableConstruct
+DoConstruct                   -> ExecutableConstruct
+IfConstruct                   -> ExecutableConstruct
+EndDoStmt                     -> ExecutableConstruct
+
+
+AssignmentStmt                -> ActionStmt
+CallStmt                      -> ActionStmt
+ContinueStmt                  -> ActionStmt
+PrintStmt                     -> ActionStmt
+
+Name '=' Expr EOS                                               -> AssignmentStmt
+
+'call' SubroutineNameUse EOS                           -> CallStmt
+'call' SubroutineNameUse '(' {ActualArg ","}* ')' EOS  -> CallStmt
+
+(Name '=')? Expr                      -> ActualArg
+(Name '=')? '*'                -> ActualArg
+
+'continue' EOS                        -> ContinueStmt
+
+'print' FormatIdentifier ( ',' OutputItemList )? EOS   -> PrintStmt
+'*'                  -> FormatIdentifier
+
+Expr                                  -> OutputItem
+{OutputItem ","}+                     -> OutputItemList
+
+BlockDoConstruct                             -> DoConstruct
+'do' LoopControl EOS                           -> BlockDoConstruct
+'do' EOS                                       -> BlockDoConstruct
+
+'end' 'do' Name? EOS                           -> EndDoStmt
+
+'while' '(' Expr ')'                                                                                  -> LoopControl
+VariableName '=' Int-Real-Dp-Expression ',' Int-Real-Dp-Expression (',' Int-Real-Dp-Expression)?      -> LoopControl
+Expr                                                  -> Int-Real-Dp-Expression
+
+
+IfThenStmt ExecutionPartConstruct* 
+                (ElseIfStmt ExecutionPartConstruct*)* 
+                (ElseStmt   ExecutionPartConstruct*)? 
+         EndIfStmt                                                              -> IfConstruct 
+
+'if' '(' ScalarLogicalExpr ')' 'then' EOS       -> IfThenStmt
+'else' 'if' '(' ScalarLogicalExpr ')' 'then' EOS      -> ElseIfStmt
+'else' EOS                                            -> ElseStmt
+'end' 'if' EOS                                        -> EndIfStmt
+
+ExecutableConstruct                   -> ExecutionPartConstruct
+
+Expr -> ScalarLogicalExpr
+
+
+Level5Expr    -> Expr
+(Level5Expr EquivOp)? EquivOperand    -> Level5Expr
+(EquivOperand OrOp)? OrOperand        -> EquivOperand
+(OrOperand AndOp)? AndOperand         -> OrOperand
+NotOp? Level4Expr                     -> AndOperand
+
+(Level3Expr RelOp)? Level3Expr        -> Level4Expr
+
+(Level3Expr ConcatOp)? Level2Expr     -> Level3Expr
+
+(Level2Expr AddOp)? AddOperand        -> Level2Expr
+Sign AddOperand                       -> Level2Expr
+
+(AddOperand MultOp)? MultOperand      -> AddOperand
+Level1Expr (PowerOp MultOperand)?     -> MultOperand
+
+Primary       -> Level1Expr
+
+UnsignedArithmeticConstant    -> Primary
+Name                          -> Primary
+'(' Expr ')'                  -> Primary
+Scon                          -> Primary
+
+Icon                          -> UnsignedArithmeticConstant
+Rcon                          -> UnsignedArithmeticConstant
+ComplexConst                  -> UnsignedArithmeticConstant
+'(' Expr ',' Expr ')'         -> ComplexConst
+
+
+Ident  -> Name
+Ident  -> ArrayName
+Ident  -> ComponentName
+Ident  -> EndName
+Ident  -> DummyArgName
+Ident  -> FunctionName
+Ident  -> ImpliedDoVariable
+Ident  -> ProgramName
+Ident  -> SubroutineName   
+Ident  -> SubroutineNameUse
+Ident  -> VariableName
+Ident  -> ObjectName
+
+
+'**'                                  -> PowerOp
+'*' | '/'                             -> MultOp
+'+' | '-'                             -> AddOp
+
+'+' | '-'                             -> Sign
+
+
+'//'                                  -> ConcatOp
+'==' | '/=' | '<' | '<=' | '>' | '>='                         -> RelOp
+'.eq.' | '.ne.' | '.lt.' | '.le.' | '.gt.' | '.ge.'           -> RelOp
+
+'.not.'                               -> NotOp 
+'.and.'                               -> AndOp
+'.or.'                                -> OrOp
+'.eqv.' | '.neqv.'                    -> EquivOp
+
+
+
+[0-9]+ "." [0-9]*             -> Rcon
+"." [0-9]+                    -> Rcon
+[0-9]+                        -> Icon
+[\'] (~[\'] | "''")*  [\']    -> SconSingle
+[\"] (~[\"] | '""')*  [\"]    -> SconDouble
+SconSingle | SconDouble       -> Scon
+[0-9]+                        -> ScalarIntLiteralConstant 
+
+
+[A-Za-z][A-Za-z0-9\_]*        -> Ident
+
+(Comment? "\n" [\ \t]* )+ 	-> EOS
+
+"!" ~[\n]*  			-> Comment
+
+
+

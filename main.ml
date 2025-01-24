@@ -1,5 +1,6 @@
 open Parser2
 open Create_ast
+open Bibliotheques
 open Dictionnaire
 
 let write_to_file (filename:string) (content: string) =
@@ -15,21 +16,40 @@ let token_list =
   ) [] 
     
 let ast =
- Create_ast.compact_ast_list ( let a, l = 
-    Create_ast.create_ast (
-      Create_ast.merge_syntax (
-        token_list
+  Create_ast.compact_ast_list ( let a, l = 
+      Create_ast.create_ast (
+        Create_ast.merge_syntax (
+          token_list
+        )
       )
-    )
-    in 
-    (* print_string "compact_start\n";     *)
-    a
-)
+      in 
 
-let env = Create_ast.type_ast ast
+      a
+  )
 
-let res = GenerateC.convert ast env 0
-let _ = write_to_file "out.c" res
-    
-    (* Create_ast.create_ast (Parser2.analyse (Parser2.read_file ("test.f90")) [] )  *)
-    
+let env = Create_ast.env_of_ast ast   
+let c_of_fortran_file (input_filename: string) (output_filename: string): unit = 
+
+  let token_list = Parser2.analyse (
+                    Parser2.read_file input_filename
+                  ) [] 
+  in
+  let ast =
+  Create_ast.compact_ast_list ( let a, l = 
+      Create_ast.create_ast (
+        Create_ast.merge_syntax (
+          token_list
+        )
+      )
+      in 
+
+      a
+  )
+  in
+  let env = Create_ast.env_of_ast ast in
+  let biblios = Create_ast.biblio_of_ast ast in
+  let c_output = GenerateC.convert ast env biblios  in
+  write_to_file output_filename c_output
+
+let in_filename = "test.f90" 
+let out_filename = "test.c" 
