@@ -1,5 +1,6 @@
 open Parser2
 open Create_ast
+open Dictionnaire
 
 let write_to_file (filename:string) (content: string) =
   let oc = open_out filename in  
@@ -8,9 +9,10 @@ let write_to_file (filename:string) (content: string) =
 
 let file_name = "test.f90"
 
-let token_list = Parser2.analyse (
-                  Parser2.read_file file_name
-                ) [] 
+let token_list = 
+  Parser2.exec syntax_automate_det (
+    List.of_seq (String.to_seq (List.fold_left (fun acc x -> acc ^ "\n" ^ x) "" (Parser2.read_file file_name)))
+  ) [] 
     
 let ast =
  Create_ast.compact_ast_list ( let a, l = 

@@ -1,4 +1,4 @@
-open Regex2
+open Regex
 open Tokens
 open Dictionnaire (* la liste des automates *)
 

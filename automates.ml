@@ -1,4 +1,4 @@
-open Regex2
+open Regex
 open Tokens
 open Vector
 
@@ -55,7 +55,7 @@ type automate_det = {
 type automate_det_v2 = {
   mutable nodes : int list;
   debut : int;
-  mutable fin : (int * token) list;
+  mutable fin : token option array;
   mutable transitions_ : (int array) Vector.t; (* arr.(i).(j), i le sommet de départ, j l'entier du caractère *)
 }
 
@@ -95,7 +95,7 @@ let automate_gen (reg : regex) (t : token):  automate_v2 =
     | Vide -> ()
     | Epsilon -> add_transition (node_before, None, node_after);
     | AllChars -> 
-      for i = 0 to 127 do
+      for i = 32 to 127 do
         add_transition (node_before, Some (char_of_int i), node_after)
       done;
     | Caractere x -> add_transition (node_before, Some x, node_after);
@@ -118,8 +118,7 @@ let automate_gen (reg : regex) (t : token):  automate_v2 =
     | [] -> ()
     | x::q -> arr.(x) <- (Hashtbl.find dico x); build_trans q arr
   in 
-  let n = ((List.fold_left max min_int l1) + 1) in
-  let arr = Array.make n [] in
+  let arr = Array.make !next_node [] in
   build_trans l1 arr;
   {
     nodes = range_list !next_node;
@@ -129,8 +128,13 @@ let automate_gen (reg : regex) (t : token):  automate_v2 =
   }
 ;;
 
+let print_transitions (arr : (char option * int) list array) : unit =
+  Array.iteri (fun i x -> print_int i; print_newline(); List.iter (fun (c, e) -> print_int i; print_string " -> "; print_int e; print_string ", "; print_char (match c with | None -> '#' | Some c1 -> c1); print_newline()) x) arr
+;;
+
 let ou_automates (l_a : automate_v2 list) : automate_v2 =
-  let rec ou_automate_aux (l : automate_v2 list) (out : automate_v2) =
+  let rec ou_automate_aux (l : automate_v2 list) (out : automate_v2) (depht : int) =
+    print_int depht; print_newline();
     match l with
     | [] -> out
     | x::q ->
@@ -148,8 +152,16 @@ let ou_automates (l_a : automate_v2 list) : automate_v2 =
         nodes         = out.nodes @ x2.nodes;
         debut_l       = out.debut_l @ x2.debut_l;
         fin           = out.fin @ x2.fin;
-        transitions_  = Array.init (inc + (Array.length x.transitions_)) (fun i -> if i < inc then out.transitions_.(i) else List.map (fun (c, x) -> c, x + inc) x.transitions_.(i-inc));
-      }
+        transitions_  = Array.init (
+          inc + (Array.length x.transitions_))
+          (fun i ->
+            if i < inc then
+              ((*print_char '@'; print_int i; print_char ' '; print_int (Array.length out.transitions_); print_newline();*)
+              out.transitions_.(i))
+            else
+              ((*print_char '_';print_int (i-inc); print_char ' '; print_int (Array.length x.transitions_); print_newline();*)
+              List.map (fun (c, x) -> c, x + inc) x.transitions_.(i-inc)));
+      } (depht+1)
   in
   let a = ou_automate_aux l_a
   {
@@ -157,13 +169,14 @@ let ou_automates (l_a : automate_v2 list) : automate_v2 =
     debut_l       = [];
     fin           = [];
     transitions_  = [||];
-  } in
+  } 0 in
   let nouv_d = List.length a.nodes in
+
   let rec ajouter_debut (l : int list) (out : (char option*int) list array): (char option*int) list array =
     Array.append out [|List.map (fun x -> (None, x)) l|]
-  in 
+  in
   {
-    nodes         = a.nodes;
+    nodes         = nouv_d::a.nodes;
     debut_l       = [nouv_d];
     fin           = a.fin;
     transitions_  = ajouter_debut a.debut_l a.transitions_;
@@ -183,6 +196,7 @@ let ou_automates (l_a : automate_v2 list) : automate_v2 =
 *)
 
 let enleve_epsilon_trans (a : automate_v2) : automate_sans_eps_v2 = 
+
   let len = (List.length a.nodes) in
   (* on stocke les degrés entrants et sortants de chaque sommet *)
   (* les éléments stockés ne sont pas linéarisés *)
@@ -320,7 +334,7 @@ let determinise_v2 (a : automate_sans_eps_v2) : automate_det_v2 =
   let a_det = {
     nodes = [start_node];
     debut = start_node;
-    fin = [];
+    fin = [||];
     transitions_ = Vector.create ~dummy:(Array.make 1 0);
   } in
 
@@ -347,10 +361,11 @@ let determinise_v2 (a : automate_sans_eps_v2) : automate_det_v2 =
 
   (* teste si le sommet elem linéarisé contient des éléments finaux et l'ajoute aux finaux si c'est le cas *)
   let ajouter_fin (elem : int) : unit =
+    
     let res = IntSet.to_list (IntSet.inter fin (delin_v2 elem delin_tbl)) in
       match res with
       | [] -> ()
-      | [e] -> a_det.fin <- (elem, List.assoc e a.fin)::a_det.fin
+      | [e] -> a_det.fin.(elem) <- Some (List.assoc e a.fin)
       | [e1; e2] -> 
         let token1 = List.assoc e1 a.fin in
         let token2 = List.assoc e2 a.fin in
@@ -358,13 +373,14 @@ let determinise_v2 (a : automate_sans_eps_v2) : automate_det_v2 =
           match token1, token2 with
           | Name _, token | token, Name _ ->
             (* L'un des deux est une variable, elle peut être vue autrement donc elle est ignorée *)
-            a_det.fin <- (elem, token)::a_det.fin
+            a_det.fin.(elem) <- Some token
           | _ -> failwith "A syntax can't have more than one output" (* il a plus d'un élément final *)
         end
       | _ -> failwith "A syntax can't have more than one output"
   in
 
   let finished = ref false in
+  let seen = ref IntSet.empty in 
   while not !finished do
     match !todo with
     | [] -> finished := true
@@ -378,22 +394,26 @@ let determinise_v2 (a : automate_sans_eps_v2) : automate_det_v2 =
         
         let arr = Vector.get a_det.transitions_ x in
         for i = 0 to 127 do
-          if suivants.(i) <> -1 then
-            (if (suivants.(i) >= init_len) then
-              (* nouveau noeud, on ajoute a la liste de traitement,
-              on l'ajoute dans l'automate et on vérifie s'il est final *)
-              (todo := suivants.(i)::!todo;
+          if (suivants.(i) >= init_len) then
+            (* si c'est un nouveau noeud, on l'ajoute a la liste de traitement,
+            on l'ajoute dans l'automate et on vérifie s'il est final *)
+            if not (IntSet.mem suivants.(i) !seen) then
+              (seen := IntSet.add suivants.(i) !seen;
+              todo := suivants.(i)::!todo;
               Vector.push a_det.transitions_ (Array.make 128 (-1));
               a_det.nodes <- suivants.(i)::a_det.nodes);
-            (* noeud déjà existant/complétion nouveau noeud, comme on ne traite qu'une fois chaque sommets,
-            on sait que les sommets trouvé sont les bons, on les remplace *)
-            arr.(i) <- suivants.(i))
+          (* noeud déjà existant/complétion nouveau noeud, comme on ne traite qu'une fois chaque sommets,
+          on sait que les sommets trouvé sont les bons, on les remplace *)
+          if suivants.(i) <> -1 then
+            arr.(i) <- suivants.(i)
         done;
         Vector.set a_det.transitions_ x arr
       end
   done;
 
   (* gérer le cas des mots vides, qui sont donc à la fois initiaux et finaux *)
+  a_det.fin <- Array.make (List.length a_det.nodes) None;
+  print_int (Hashtbl.find lin_tbl IntSet.empty); print_newline ();
   List.iter ajouter_fin a_det.nodes;
   a_det
 ;;
@@ -402,12 +422,13 @@ let exec_char (a : automate_det_v2) (node : int) (c : char) : int =
   (Vector.get a.transitions_ node).(int_of_char c)
 ;;
 
-let execution_mot (a : automate_det_v2) (texte : char list) : int * char list =
+let execution_mot (a : automate_det_v2) (texte : char list) : int * char list * char list =
   let node = ref a.debut in
   let last_found = ref (-1) in
   let text_as_last = ref texte in
   let texte = ref texte in
   let text_read = ref [] in
+  let last_read = ref [] in
   while !node != -1 do
     match !texte with
     | [] -> node := -1 (* forcer la fin de la boucle*)
@@ -416,28 +437,45 @@ let execution_mot (a : automate_det_v2) (texte : char list) : int * char list =
         text_read := c::!text_read;
         node := exec_char a !node c;
         texte := q;
-        if (List.exists ((==) !node) (List.map (fun (x, y) -> x) a.fin)) then
-          begin 
-            last_found := !node;
-            text_as_last := !texte
-          end;
+        if !node = -1 then () else 
+        match a.fin.(!node) with
+        | None -> ()
+        | Some t ->
+          last_found := !node;
+          text_as_last := !texte;
+          last_read := !text_read
       end;
   done;
-  !last_found, !text_as_last
+  !last_found, !text_as_last, !last_read
 ;;
 
 let rec exec (a : automate_det_v2) (texte : char list) (out : token list): token list =
   match texte with
-  | [] -> out
+  | [] -> List.rev out
   | _ -> 
     match execution_mot a texte with
-    | (-1, _) -> failwith "lexème non reconnu" 
-    | (x, q) ->
-      match (List.fold_left (fun a (y,t) -> if x == y then t::a else a) [] a.fin) with
-      | [] -> failwith "lexème non reconnu"
-      | [t] -> exec a q (t::out)
-      | _ -> failwith "impossible happened"
+    | (-1, _, s) -> print_string "Le lexème '"; print_string (String.of_seq(List.to_seq (List.rev s))); print_string " n'est pas un lexème reconnu"; failwith ""
+    | (x, q, s) ->
+      let s = (String.of_seq(List.to_seq (List.rev s))) in 
+      match a.fin.(x) with
+      | None -> print_string "Le lexème '"; print_string s; print_string " n'est pas un lexème reconnu"; failwith ""
+      | Some (Name _) -> exec a q (Name s::out) 
+      | Some (Integer _) -> exec a q (Integer s::out)
+      | Some (Floating _) -> exec a q (Floating s::out)
+      | Some (Chaine _) -> exec a q (Chaine s::out)
+      | Some (Commentaire _ ) -> exec a q (Commentaire s::out)
+      | Some t -> exec a q (t::out)
 ;;
+
+(*
+| Name of char list
+| Integer of char list
+| Floating of char list
+| Virgule
+| QuatrePoints
+| Chaine of char list
+| Commentaire of char list
+*)
 
 let a = {
   nodes = [0; 1; 2; 3];

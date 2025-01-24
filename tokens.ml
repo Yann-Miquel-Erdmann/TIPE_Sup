@@ -418,13 +418,13 @@ type token =
   | Identificateur of string
   | NewLine
   | Space
-  | Name of char list
-  | Integer of char list
-  | Floating of char list
+  | Name of string
+  | Integer of string
+  | Floating of string
   | Virgule
   | QuatrePoints
-  | Chaine of char list
-  | Commentaire of char list
+  | Chaine of string
+  | Commentaire of string
   | Parentheseouvrante
   | Parenthesefermante
   | PointVirgule
