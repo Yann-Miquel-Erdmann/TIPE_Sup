@@ -134,7 +134,6 @@ let print_transitions (arr : (char option * int) list array) : unit =
 
 let ou_automates (l_a : automate_v2 list) : automate_v2 =
   let rec ou_automate_aux (l : automate_v2 list) (out : automate_v2) (depht : int) =
-    print_int depht; print_newline();
     match l with
     | [] -> out
     | x::q ->
@@ -156,11 +155,9 @@ let ou_automates (l_a : automate_v2 list) : automate_v2 =
           inc + (Array.length x.transitions_))
           (fun i ->
             if i < inc then
-              ((*print_char '@'; print_int i; print_char ' '; print_int (Array.length out.transitions_); print_newline();*)
-              out.transitions_.(i))
+              out.transitions_.(i)
             else
-              ((*print_char '_';print_int (i-inc); print_char ' '; print_int (Array.length x.transitions_); print_newline();*)
-              List.map (fun (c, x) -> c, x + inc) x.transitions_.(i-inc)));
+              List.map (fun (c, x) -> c, x + inc) x.transitions_.(i-inc));
       } (depht+1)
   in
   let a = ou_automate_aux l_a
@@ -237,7 +234,6 @@ let enleve_epsilon_trans (a : automate_v2) : automate_sans_eps_v2 =
   
   (* applique l'algorithme de supression des epsilon transitions sur chaqun des sommets *)
   List.iter (fun node_i ->
-    print_string "treating node "; print_int node_i; print_newline();
     (* récupération les transitions entrantes avec epsilon transitions qui ne sont pas des boucles + enlever du degré entrant pour chaque epsilon transition *)
     let res = remove_duplicates(List.fold_left (
       fun acc x ->
@@ -250,22 +246,16 @@ let enleve_epsilon_trans (a : automate_v2) : automate_sans_eps_v2 =
           else
             node::acc
     ) [] entrants.(node_i)) in
-    print_int node_i; print_string " has degre "; print_int degres.(node_i); print_newline();
-    List.iter (fun (a, c) -> print_int node_i; print_string " has entring "; print_int a; print_string " with "; print_char (match c with | None -> '#' | Some c -> c); print_newline();) entrants.(node_i);
-    List.iter (fun (c, a) -> print_int node_i; print_string " has exiting "; print_int a; print_string " with "; print_char (match c with | None -> '#' | Some c -> c); print_newline();) !trans_temp.(node_i);
     (* on enlève les epsilon entrants de chaque epsilon transition *)
     entrants.(node_i) <- List.filter (fun (_, c) -> c != None) entrants.(node_i);
-    (* afficher les entrants de node_i *)
-    List.iter (fun (x, c) -> print_int x; print_string " -> "; print_int node_i; print_char ' '; (match c with | None -> print_char '#' | Some c -> print_char c); print_newline()) entrants.(node_i);
     (* on enlève les sortants de chaque epsilon transition *)
-    !trans_temp.(node_i) <- List.filter (fun (c, x) -> if (c == None && x == node_i) then (print_string "removed "; print_int x; print_char '#'; print_int x; print_newline(); false) else true) !trans_temp.(node_i);
-    List.iter (fun x -> !trans_temp.(x) <- List.filter (fun (c, x1) -> if c == None && x1 == node_i then (print_string "removed "; print_int x; print_char '#'; print_int x1; print_newline(); false) else (print_int x; print_string " >> "; print_int x1; print_char ' '; (match c with | None -> print_char '#' | Some c -> print_char c); print_newline(); true)) !trans_temp.(x)) res;
+    !trans_temp.(node_i) <- List.filter (fun (c, x) -> not (c == None && x == node_i)) !trans_temp.(node_i);
+    List.iter (fun x -> !trans_temp.(x) <- List.filter (fun (c, x1) -> not (c == None && x1 == node_i)) !trans_temp.(x)) res;
     (* ajoute les transitions des entrants avec epsilon transitions vers les sortants et actualise les entrants/sortants/degré de deux sommets *)
     List.iter (
       fun x ->
         List.iter (
           fun (c, node) ->
-            print_string "adding "; print_int (x); (match c with | None -> print_char '#' | Some c -> print_char c); print_int (node); print_newline();
             !trans_temp.(x) <-  (c, node)::!trans_temp.(x);
             entrants.(node) <- (x, c)::entrants.(node);
             degres.(node) <- degres.(node) + 1
@@ -276,7 +266,7 @@ let enleve_epsilon_trans (a : automate_v2) : automate_sans_eps_v2 =
     let fins = List.fold_left (fun acc (x, t) -> if x == node_i then t::acc else acc) [] a.fin in
     
     (* applique l'ensemble des états de fin aux sommets qui avaient une epsilon transition *)
-    List.iter (fun x -> List.iter (fun t -> print_int x; print_string " is now final"; print_newline (); fin_temp :=  (x, t)::!fin_temp) fins) res
+    List.iter (fun x -> List.iter (fun t -> fin_temp :=  (x, t)::!fin_temp) fins) res
   ) a.nodes;
   
   (* enlever les nodes qui ne sont plus atteintes *)
@@ -386,7 +376,6 @@ let determinise_v2 (a : automate_sans_eps_v2) : automate_det_v2 =
     | [] -> finished := true
     | x::q ->
       begin
-        print_int x; print_newline();
         let init_len = Hashtbl.find lin_tbl IntSet.empty in 
         todo := q;
         let suivants = Array.make 128 (-1) in
@@ -413,7 +402,6 @@ let determinise_v2 (a : automate_sans_eps_v2) : automate_det_v2 =
 
   (* gérer le cas des mots vides, qui sont donc à la fois initiaux et finaux *)
   a_det.fin <- Array.make (List.length a_det.nodes) None;
-  print_int (Hashtbl.find lin_tbl IntSet.empty); print_newline ();
   List.iter ajouter_fin a_det.nodes;
   a_det
 ;;

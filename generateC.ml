@@ -67,6 +67,7 @@ let rec convert (ast: Create_ast.ast list) (env: Environnement.environnement) (t
 
   | Noeud (Syntax If, condition, instructions)::q ->n_tabs tab ^  "if " ^ convert condition env tab ^ "{\n" ^ (convert instructions env (tab+1)) ^ n_tabs tab ^ "}\n" ^ (convert q env tab)
 
-  | _ ->  print_string "inconnu\n"; ""
+  | Noeud (Commentaire _, [], [])::q -> convert q env tab
+  | _ ->  print_string "La syntaxe donnée n'est pas encore prise en charge\n"; ""
 
 

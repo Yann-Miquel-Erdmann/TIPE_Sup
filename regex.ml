@@ -167,12 +167,6 @@ let rec gen_regex (s : string) : regex =
       concat_reg pile
     else
     let c = pop(caracters) in
-    print_newline();
-    print_string ">> ";
-    print_char c;
-    print_string " : ";
-    print_reg_list pile;
-    print_char ' ';
     if ignore then gen_regex_2 (Caractere c::pile) false
     else
     match c with
@@ -201,7 +195,6 @@ let rec gen_regex (s : string) : regex =
               c := pop(caracters)
             done;
             let s1 = (String.of_seq (List.to_seq (List.rev !l))) in
-            print_newline(); print_string "-> "; print_string s1; print_newline ();
             gen_regex s1
           with Empty_pile -> raise Invalid_syntax
       in 
@@ -236,14 +229,9 @@ let rec gen_regex (s : string) : regex =
                 end;
               c := pop(caracters);
               if !i > 0 then i := !i-1;
-              print_reg_list !pile1; print_string " : ";
-              print_char !c;
-              print_char ' ';
-              print_int !i;
-              print_newline();
             done;
             or_reg !pile1
-          with Empty_pile -> print_char '#';raise Invalid_syntax
+          with Empty_pile -> raise Invalid_syntax
       in 
       gen_regex_2 (reg::pile) false
       end
@@ -251,16 +239,16 @@ let rec gen_regex (s : string) : regex =
       raise Invalid_syntax
     | '|' -> 
       begin
-        print_newline(); print_string "->"; print_newline();
+
         let left = gen_regex_2 [] false in
         match pile, left with
         | [], _ -> raise Invalid_syntax
 
-        | [Caractere _], AllChars | [AllChars], Caractere _ |[Range _], AllChars-> print_newline(); print_string "<- "; print_reg_list[AllChars]; gen_regex_2 [AllChars] false
-        | Caractere _::q, AllChars | AllChars::q, Caractere _ | Range _::q, AllChars -> print_newline(); print_string "<- "; print_reg_list[AllChars]; gen_regex_2 (AllChars::q) false
+        | [Caractere _], AllChars | [AllChars], Caractere _ |[Range _], AllChars->  gen_regex_2 [AllChars] false
+        | Caractere _::q, AllChars | AllChars::q, Caractere _ | Range _::q, AllChars -> gen_regex_2 (AllChars::q) false
 
-        | [x], _ -> print_newline(); print_string "<- "; print_reg_list[Ou(x, left)]; gen_regex_2 [Ou(x, left)] false
-        | x::q, _  -> print_newline(); print_string "<- "; print_reg_list[Ou(x, left)]; gen_regex_2 (Ou(x, left)::q) false
+        | [x], _ -> gen_regex_2 [Ou(x, left)] false
+        | x::q, _  -> gen_regex_2 (Ou(x, left)::q) false
       end
     | '#' -> 
       begin
