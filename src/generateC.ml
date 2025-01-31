@@ -149,7 +149,7 @@ let rec convert_ast (ast: Create_ast.ast list) (env: Environnement.environnement
   | Noeud(Comparateur PlusGrand, [], [p1;p2])::q -> convert_ast [p1] env 0 0 ^ " >= " ^ convert_ast [p2] env 0 0 ^ (convert_ast q env tab 1)
 
 
-  | Noeud (Commentaire _, [], [])::q -> convert q env tab
+  | Noeud (Commentaire _, [], [])::q -> (convert_ast q env tab 1)
   | _ ->  print_string "La syntaxe donnée n'est pas encore prise en charge\n"; ""
 
 

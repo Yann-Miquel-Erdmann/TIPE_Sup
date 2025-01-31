@@ -4,12 +4,14 @@ open Environnement
 
 type ast = Noeud of Tokens.token * (ast list) * (ast list)
 
-(* enlève les définitions des types des paramètres de la fonction et remplace les nom_de_fct = par des returns *)
+(* enlève les définitions des types des paramètres de la fonction et remplace les nom_de_fct = par des returns
 let format_function_instructions (nom: string) (params: ast list) (l: ast  list): ast list =
   match l with
   | [] -> []
   | Noeud(Operateur Assignation, [],Noeud(Identificateur n, [],[])::v )::q when n = nom -> Noeud(Syntax Return,v,[])::
-  | _ -> failwith "type non supporté"
+  | _ -> failwith "type non supporté" *)
+
+
 
 (* met les syntaxes en plusieurs mots en un seul (ex: End Program -> End_program) *)
 let rec merge_syntax (l:Tokens.token list): Tokens.token list=
@@ -51,7 +53,7 @@ let rec compact_ast_list (l:ast list): ast list=
     match l1 with
     | [] -> [] 
     | Noeud(x1,x2,x3)::Noeud(y1,[],[])::Noeud(z1,z2,z3)::q when y1 = t-> 
-        compact_on_token (Noeud(y1,[Noeud(x1, compact_on_token x2 t, compact_on_token x3 t);Noeud(z1, compact_on_token z2 t, compact_on_token z3 t)])::q) t
+        compact_on_token (Noeud(y1,[Noeud(x1, compact_on_token x2 t, compact_on_token x3 t);Noeud(z1, compact_on_token z2 t, compact_on_token z3 t)],[])::q) t
 
     | Noeud(x1, x2, x3)::q -> Noeud(x1, compact_on_token x2 t, compact_on_token x3 t) :: compact_on_token q t
     
@@ -71,7 +73,7 @@ let rec create_ast (l: Tokens.token list): (ast list) * (Tokens.token list) =
 
 
  
-  | Syntax t :: Space :: Syntax Function ::Space:: Identificateur nom :: q1 -> (
+  (* | Syntax t :: Space :: Syntax Function ::Space:: Identificateur nom :: q1 -> (
     let a2, q2 = create_ast q1 in 
     match a2 with
     | Noeud(Parentheseouvrante, [], l1) :: a3 -> (
@@ -81,7 +83,7 @@ let rec create_ast (l: Tokens.token list): (ast list) * (Tokens.token list) =
     | _ -> failwith "la fonction n'a pas de parenthèses"
   )
   | (Syntax End_function)::Space::Identificateur(_)::q1 -> [], q1
-  | Syntax End_function::q1 -> [], q1
+  | Syntax End_function::q1 -> [], q1 *)
 
 
   | Identificateur(x)::q1 ->let a2, q2 = create_ast q1 in Noeud(Identificateur(x), [], []) :: a2, q2
