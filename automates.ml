@@ -110,6 +110,11 @@ let automate_gen (reg : regex) (t : token):  automate_v2 =
     | ZeroPlus e -> automate_gen_aux e (node_before, node_before); automate_gen_aux Epsilon (node_before, node_after)
     | UnPlus e -> automate_gen_aux e (node_before, node_before); automate_gen_aux e (node_before, node_after)
     | Facultatif e -> automate_gen_aux e (node_before, node_after); automate_gen_aux Epsilon (node_before, node_after)
+    | AllBut e -> 
+      for i = 0 to 127 do
+        if e.(i) then 
+          add_transition (node_before, Some (char_of_int i), node_after)
+      done;
   in automate_gen_aux reg (0, 1);
 
   let l1 = List.of_seq (Hashtbl.to_seq_keys dico) in
