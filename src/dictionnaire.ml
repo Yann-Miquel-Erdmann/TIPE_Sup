@@ -107,7 +107,7 @@ let dico = [
 
 let syntax_automate = ou_automates (List.map (fun (x, t) -> automate_gen (gen_regex x) t) dico);;
 
-let syntax_automate_det = determinise_v2 (enleve_epsilon_trans syntax_automate);;
+let syntax_automate_det = determinise (enleve_epsilon_trans syntax_automate);;
 
 let texte = "program hello
   ! This is a comment line; it is ignored by the compiler

@@ -2,6 +2,7 @@
 *.cmi
 *.cmo
 *.o
+*.cma
 
 .*
 !.gitignore

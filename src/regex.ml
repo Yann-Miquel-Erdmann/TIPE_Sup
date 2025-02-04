@@ -33,38 +33,6 @@ type regex =
 | AllBut of bool array
 ;;
 
-(* renvoie l'élément de la liste l à l'indice i *)
-let rec index_list (l: 'a list) (i: int) : 'a =
-  match l with
-  | [] -> failwith "Invalid index"
-  | x::q -> if i == 0 then x else index_list q (i-1)
-;;
-
-(* remplace l'élément de la liste l à l'indice i par l'élément e *)
-let replace_index (l: 'a list) (i: int) (e:'a) : 'a list =
-  let rec replace_aux (l: 'a list) (i: int) (e:'a) (out:'a list) =
-    match l, i with
-    | [], -1 -> List.rev out
-    | [], _ -> failwith "invalid index"
-    | x::q, 0 -> replace_aux q (i-1) e (e::out)
-    | x::q, -1 -> replace_aux q i e (x::out)
-    | x::q, _ -> replace_aux q (i-1) e (x::out)
-  in replace_aux l i e []
-;;
-
-(* affiche le contenu de la liste c *)
-let print_list (c: char list) : unit =
-  print_char '[';
-  let rec print_list_aux (c:char list) =
-    match c with
-    | [] -> ()
-    | x::[] -> print_char x;
-    | x::q -> print_char x; print_char ','; print_list_aux q;
-  in print_list_aux c;
-  print_char ']';
-  print_newline ()
-;;
-
 let print_reg_list (c: regex list) : unit =
   let rec print_list_aux (r:regex list) : unit =
     match r with
