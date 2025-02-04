@@ -30,9 +30,9 @@ let ast =
 let env = Create_ast.env_of_ast ast   
 let c_of_fortran_file (input_filename: string) (output_filename: string): unit = 
 
-  let token_list = Parser2.analyse (
-                    Parser2.read_file input_filename
-                  ) [] 
+  let token_list = Parser2.exec syntax_automate_det (
+    List.of_seq (String.to_seq (List.fold_left (fun acc x -> acc ^ "\n" ^ x) "" (Parser2.read_file file_name)))
+  ) [] 
   in
   let ast =
   Create_ast.compact_ast_list ( let a, l = 
