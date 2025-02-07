@@ -1,215 +1,212 @@
-StartCommentBlock? ProgramUnit+       -> ExecutableProgram
-EOS                                   -> StartCommentBlock
+ExecutableProgram -> StartCommentBlock? ProgramUnit+       
+StartCommentBlock -> EOS                                   
 
-MainProgram                           -> ProgramUnit
+ProgramUnit -> MainProgram                           
 
-Programtmt? MainRange                 -> MainProgram
-BodyConstruct+ EndProgramtmt          -> MainRange
-EndProgramtmt                         -> MainRange
+MainProgram -> Programtmt? MainRange                 
+MainRange -> BodyConstruct+ EndProgramtmt          
+MainRange -> EndProgramtmt                         
 
-Program ProgramName EOS               -> Programtmt
-End EOS                               -> EndProgramtmt
-End Program EndName? EOS              -> EndProgramtmt
-
-
-SpecificationPartConstruct            -> BodyConstruct
-ExecutableConstruct                   -> BodyConstruct
-
-DeclarationConstruct                  -> SpecificationPartConstruct
-TypeDeclarationStmt                   -> DeclarationConstruct
-
-TypeSpec Colon Colon {EntityDecl Comma}+ EOS         -> TypeDeclarationStmt
-TypeSpec {EntityDecl Comma}+ EOS                     -> TypeDeclarationStmt
+Programtmt -> Program ProgramName EOS               
+EndProgramtmt -> End EOS                               
+EndProgramtmt -> End Program EndName? EOS              
 
 
+BodyConstruct -> SpecificationPartConstruct            
+BodyConstruct -> ExecutableConstruct                   
+
+SpecificationPartConstruct -> DeclarationConstruct                  
+DeclarationConstruct -> TypeDeclarationStmt                   
+
+TypeDeclarationStmt -> TypeSpec Colon Colon {EntityDecl Comma}+ EOS         
+TypeDeclarationStmt -> TypeSpec {EntityDecl Comma}+ EOS                     
 
 
-ObjectName Equal Expr                                   -> EntityDecl
-ObjectName Asterisk CharLength Equal Expr               -> EntityDecl
-
-ObjectName                                              -> EntityDecl
-ObjectName Asterisk CharLength                          -> EntityDecl
-
-RParenthesis TypeParamValue LParenthesis        -> CharLength
-ScalarIntLiteralConstant                        -> CharLength
 
 
-Integer   KindSelector      -> TypeSpec
-Real      KindSelector      -> TypeSpec
-Double Precision            -> TypeSpec
-Complex   KindSelector      -> TypeSpec
-Character CharSelector      -> TypeSpec
-Logical   KindSelector      -> TypeSpec
+EntityDecl -> ObjectName Equal Expr                                   
+EntityDecl -> ObjectName Asterisk CharLength Equal Expr               
 
-RParenthesis (Kind Equal)? Expr LParenthesis                              -> KindSelector
-RParenthesis Len Equal TypeParamValue Comma Kind Equal Expr LParenthesis  -> CharSelector
-RParenthesis Len Equal TypeParamValue Comma Expr LParenthesis             -> CharSelector
-RParenthesis Len Equal TypeParamValue LParenthesis                        -> CharSelector
-RParenthesis (Kind Equal)? Expr LParenthesis                              -> CharSelector
-SpecificationExpr | Asterisk       -> TypeParamValue
-Expr -> SpecificationExpr
+EntityDecl -> ObjectName                                              
+EntityDecl -> ObjectName Asterisk CharLength                          
+
+CharLength -> RParenthesis TypeParamValue LParenthesis        
+CharLength -> ScalarIntLiteralConstant                        
 
 
-ActionStmt                    -> ExecutableConstruct
-DoConstruct                   -> ExecutableConstruct
-IfConstruct                   -> ExecutableConstruct
-EndDoStmt                     -> ExecutableConstruct
+TypeSpec -> Integer   KindSelector      
+TypeSpec -> Real      KindSelector      
+TypeSpec -> Double Precision            
+TypeSpec -> Complex   KindSelector      
+TypeSpec -> Character CharSelector      
+TypeSpec -> Logical   KindSelector      
+
+KindSelector -> RParenthesis (Kind Equal)? Expr LParenthesis                              
+CharSelector -> RParenthesis Len Equal TypeParamValue Comma Kind Equal Expr LParenthesis  
+CharSelector -> RParenthesis Len Equal TypeParamValue Comma Expr LParenthesis             
+CharSelector -> RParenthesis Len Equal TypeParamValue LParenthesis                        
+CharSelector -> RParenthesis (Kind Equal)? Expr LParenthesis                              
+TypeParamValue -> SpecificationExpr | Asterisk       
+SpecificationExpr -> Expr 
 
 
-AssignmentStmt                -> ActionStmt
-CallStmt                      -> ActionStmt
-ContinueStmt                  -> ActionStmt
-PrintStmt                     -> ActionStmt
-
-Name Equal Expr EOS           -> AssignmentStmt
-
-Call SubroutineNameUse EOS                                               -> CallStmt
-Call SubroutineNameUse RParenthesis {ActualArg Comma}* LParenthesis EOS  -> CallStmt
-
-(Name Equal)? Expr               -> ActualArg
-(Name Equal)? Asterisk           -> ActualArg
-
-Continue EOS                        -> ContinueStmt
-
-Print FormatIdentifier ( Comma OutputItemList )? EOS   -> PrintStmt
-Asterisk                  -> FormatIdentifier
-
-Expr                                    -> OutputItem
-{OutputItem Comma}+                     -> OutputItemList
-
-BlockDoConstruct                             -> DoConstruct
-Do LoopControl EOS                           -> BlockDoConstruct
-Do EOS                                       -> BlockDoConstruct
-
-End Do Name? EOS                             -> EndDoStmt
-
-While RParenthesis Expr LParenthesis                                                                        -> LoopControl
-VariableName Equal Int-Real-Dp-Expression Comma Int-Real-Dp-Expression (Comma Int-Real-Dp-Expression)?      -> LoopControl
-Expr                                                  -> Int-Real-Dp-Expression
+ExecutableConstruct -> ActionStmt                    
+ExecutableConstruct -> DoConstruct                   
+ExecutableConstruct -> IfConstruct                   
+ExecutableConstruct -> EndDoStmt                     
 
 
-IfThenStmt ExecutionPartConstruct* 
-       (ElseIfStmt ExecutionPartConstruct*)* 
-       (ElseStmt   ExecutionPartConstruct*)? 
-       EndIfStmt                                              -> IfConstruct 
+ActionStmt -> AssignmentStmt                
+ActionStmt -> CallStmt                      
+ActionStmt -> ContinueStmt                  
+ActionStmt -> PrintStmt                     
 
-If RParenthesis ScalarLogicalExpr LParenthesis Then EOS       -> IfThenStmt
-Else If RParenthesis ScalarLogicalExpr LParenthesis Then EOS  -> ElseIfStmt
-Else EOS                                                      -> ElseStmt
-End If EOS                                                    -> EndIfStmt
+AssignmentStmt -> Name Equal Expr EOS           
 
-ExecutableConstruct                   -> ExecutionPartConstruct
+CallStmt -> Call SubroutineNameUse EOS                                               
+CallStmt -> Call SubroutineNameUse RParenthesis {ActualArg Comma}* LParenthesis EOS  
 
-Expr -> ScalarLogicalExpr
+ActualArg -> (Name Equal)? Expr               
+ActualArg -> (Name Equal)? Asterisk           
 
+ContinueStmt -> Continue EOS                        
 
-Level5Expr    -> Expr
-(Level5Expr EquivOp)? EquivOperand    -> Level5Expr
-(EquivOperand OrOp)? OrOperand        -> EquivOperand
-(OrOperand AndOp)? AndOperand         -> OrOperand
-NotOp? Level4Expr                     -> AndOperand
+PrintStmt -> Print FormatIdentifier ( Comma OutputItemList )? EOS   
+FormatIdentifier -> Asterisk                  
 
-(Level3Expr RelOp)? Level3Expr        -> Level4Expr
+OutputItem -> Expr                                    
+OutputItemList -> {OutputItem Comma}+                     
 
-(Level3Expr ConcatOp)? Level2Expr     -> Level3Expr
+DoConstruct -> BlockDoConstruct                             
+BlockDoConstruct -> Do LoopControl EOS                           
+BlockDoConstruct -> Do EOS                                       
 
-(Level2Expr AddOp)? AddOperand        -> Level2Expr
-Sign AddOperand                       -> Level2Expr
+EndDoStmt -> End Do Name? EOS                             
 
-(AddOperand MultOp)? MultOperand      -> AddOperand
-Level1Expr (PowerOp MultOperand)?     -> MultOperand
-
-Primary       -> Level1Expr
-
-UnsignedArithmeticConstant      -> Primary
-Name                            -> Primary
-RParenthesis Expr LParenthesis  -> Primary
-Scon                            -> Primary
-
-Icon                            -> UnsignedArithmeticConstant
-Rcon                            -> UnsignedArithmeticConstant
-ComplexConst                    -> UnsignedArithmeticConstant
-RParenthesis Expr Comma Expr LParenthesis         -> ComplexConst
+LoopControl -> While RParenthesis Expr LParenthesis                                                                        
+LoopControl -> VariableName Equal Int-Real-Dp-Expression Comma Int-Real-Dp-Expression (Comma Int-Real-Dp-Expression)?      
+Int-Real-Dp-Expression -> Expr                                                  
 
 
-Ident  -> Name
-Ident  -> ArrayName
-Ident  -> ComponentName
-Ident  -> EndName
-Ident  -> DummyArgName
-Ident  -> FunctionName
-Ident  -> ImpliedDoVariable
-Ident  -> ProgramName
-Ident  -> SubroutineName   
-Ident  -> SubroutineNameUse
-Ident  -> VariableName
-Ident  -> ObjectName
+IfConstruct  -> IfThenStmt ExecutionPartConstruct* (ElseIfStmt ExecutionPartConstruct*)* (ElseStmt   ExecutionPartConstruct*)? EndIfStmt 
+
+IfThenStmt -> If RParenthesis ScalarLogicalExpr LParenthesis Then EOS       
+ElseIfStmt -> Else If RParenthesis ScalarLogicalExpr LParenthesis Then EOS  
+ElseStmt -> Else EOS                                                      
+EndIfStmt -> End If EOS                                                    
+
+ExecutionPartConstruct -> ExecutableConstruct                   
+
+ScalarLogicalExpr -> Expr 
 
 
-'\*\*'               -> PowerOp
-Asterisk | Divise    -> MultOp
-Sign                 -> AddOp
+Expr -> Level5Expr    
+Level5Expr -> (Level5Expr EquivOp)? EquivOperand    
+EquivOperand -> (EquivOperand OrOp)? OrOperand        
+OrOperand -> (OrOperand AndOp)? AndOperand         
+AndOperand -> NotOp? Level4Expr                     
 
-Plus | Minus         -> Sign
+Level4Expr -> (Level3Expr RelOp)? Level3Expr        
+
+Level3Expr -> (Level3Expr ConcatOp)? Level2Expr     
+
+Level2Expr -> (Level2Expr AddOp)? AddOperand        
+Level2Expr -> Sign AddOperand                       
+
+AddOperand -> (AddOperand MultOp)? MultOperand      
+MultOperand -> Level1Expr (PowerOp MultOperand)?     
+
+Level1Expr -> Primary       
+
+Primary -> UnsignedArithmeticConstant      
+Primary -> Name                            
+Primary -> RParenthesis Expr LParenthesis  
+Primary -> Scon                            
+
+UnsignedArithmeticConstant -> Icon                            
+UnsignedArithmeticConstant -> Rcon                            
+UnsignedArithmeticConstant -> ComplexConst                    
+ComplexConst -> RParenthesis Expr Comma Expr LParenthesis         
 
 
-'//'                                                                       -> ConcatOp
-Equal | NotEqual | StrictLess | LessEqual | StrictGreater | GreaterEqual   -> RelOp
-
-'\.not\.'                               -> NotOp 
-'\.and\.'                               -> AndOp
-'\.or\.'                                -> OrOp
-Equivalent | NotEquivalent              -> EquivOp
-
-Icon                          -> ScalarIntLiteralConstant 
-
-
-'[0-9]+\.[0-9]*'              -> Rcon
-'\.[0-9]+'                    -> Rcon
-'[0-9]+'                      -> Icon
-'[\'](~[\']|\'\')*[\']'       -> SconSingle
-'["](~["]|"")*["]'            -> SconDouble 
-SconSingle | SconDouble       -> Scon
+Name -> Ident  
+ArrayName -> Ident  
+ComponentName -> Ident  
+EndName -> Ident  
+DummyArgName -> Ident  
+FunctionName -> Ident  
+ImpliedDoVariable -> Ident  
+ProgramName -> Ident  
+SubroutineName    -> Ident  
+SubroutineNameUse -> Ident  
+VariableName -> Ident  
+ObjectName -> Ident  
 
 
-'[A-Za-z][A-Za-z0-9_]*'      -> Ident
+PowerOp -> '\*\*'               
+MultOp -> Asterisk | Divise    
+AddOp -> Sign                 
 
-'((!~[\n]*)?\n[ ]*)+' 	  -> EOS
+Sign -> Plus | Minus         
+
+
+ConcatOp -> '//'                                                                       
+RelOp -> Equal | NotEqual | StrictLess | LessEqual | StrictGreater | GreaterEqual   
+
+NotOp  -> '\.not\.'                               
+AndOp -> '\.and\.'                               
+OrOp -> '\.or\.'                                
+EquivOp -> Equivalent | NotEquivalent              
+
+ScalarIntLiteralConstant  -> Icon                          
+
+
+Rcon -> '[0-9]+\.[0-9]*'              
+Rcon -> '\.[0-9]+'                    
+Icon -> '[0-9]+'                      
+SconSingle -> '[\'](~[\']|\'\')*[\']'       
+SconDouble  -> '["](~["]|"")*["]'            
+Scon -> SconSingle | SconDouble       
+
+
+Ident -> '[A-Za-z][A-Za-z0-9_]*'      
+
+EOS -> '((!~[\n]*)?\n[ ]*)+' 	  
 
 % syntax objects
-'program'       -> Program
-'end'           -> End
-':'             -> Colon
-','             -> Comma
-'='             -> Equal
-'\*'            -> Asterisk
-'\('            -> RParenthesis
-'\)'            -> LParenthesis
-'integer'       -> Integer
-'real'          -> Real
-'double'        -> Double
-'precision'     -> Precision
-'complex'       -> Complex
-'character'     -> Character
-'logical'       -> Logical
-'kind'          -> Kind
-'len'           -> Len
-'call'          -> Call
-'continue'      -> Continue
-'print'         -> Print
-'do'            -> Do
-'while'         -> While
-'if'            -> If
-'else'          -> Else
-'then'          -> Then
-'/'             -> Divise
-'\+'            -> Plus
-'-'             -> Minus
-'(==)|(\.eq\.)' -> Equal
-'(/=)|(\.ne\.)' -> NotEqual
-'(<)|(\.lt\.)'  -> StrictLess
-'(<=)|(\.le\.)' -> LessEqual
-'(>)|(\.gt\.)'  -> StrictGreater
-'(>=)|(\.ge\.)' -> GreaterEqual
-'\.eqv\.'       -> Equivalent
-'\.neqv\.'      -> NotEquivalent
+Program -> 'program'       
+End -> 'end'           
+Colon -> ':'             
+Comma -> ','             
+Equal -> '='             
+Asterisk -> '\*'            
+RParenthesis -> '\('            
+LParenthesis -> '\)'            
+Integer -> 'integer'       
+Real -> 'real'          
+Double -> 'double'        
+Precision -> 'precision'     
+Complex -> 'complex'       
+Character -> 'character'     
+Logical -> 'logical'       
+Kind -> 'kind'          
+Len -> 'len'           
+Call -> 'call'          
+Continue -> 'continue'      
+Print -> 'print'         
+Do -> 'do'            
+While -> 'while'         
+If -> 'if'            
+Else -> 'else'          
+Then -> 'then'          
+Divise -> '/'             
+Plus -> '\+'            
+Minus -> '-'             
+Equal -> '(==)|(\.eq\.)' 
+NotEqual -> '(/=)|(\.ne\.)' 
+StrictLess -> '(<)|(\.lt\.)'  
+LessEqual -> '(<=)|(\.le\.)' 
+StrictGreater -> '(>)|(\.gt\.)'  
+GreaterEqual -> '(>=)|(\.ge\.)' 
+Equivalent -> '\.eqv\.'       
+NotEquivalent -> '\.neqv\.'      
