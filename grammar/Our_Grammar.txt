@@ -176,7 +176,6 @@ SconSingle | SconDouble       -> Scon
 
 '((!~[\n]*)?\n[ ]*)+' 	  -> EOS
 
-% syntax objects
 'program'       -> Program
 'end'           -> End
 ':'             -> Colon
