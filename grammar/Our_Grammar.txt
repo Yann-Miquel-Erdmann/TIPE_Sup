@@ -167,12 +167,12 @@ Icon                          -> ScalarIntLiteralConstant
 '[0-9]+\.[0-9]*'              -> Rcon
 '\.[0-9]+'                    -> Rcon
 '[0-9]+'                      -> Icon
-'['](~[']|'')*[']'            -> SconSingle
-'[\"](~[\"]|\"\")*[\"]'       -> SconDouble
+'[\'](~[\']|\'\')*[\']'       -> SconSingle
+'["](~["]|"")*["]'            -> SconDouble 
 SconSingle | SconDouble       -> Scon
 
 
-'[A-Za-z][A-Za-z0-9\_]*'      -> Ident
+'[A-Za-z][A-Za-z0-9_]*'      -> Ident
 
 '((!~[\n]*)?\n[ ]*)+' 	  -> EOS
 
