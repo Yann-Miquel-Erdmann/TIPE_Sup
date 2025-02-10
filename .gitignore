@@ -6,5 +6,6 @@
 
 .*
 !.gitignore
+build/*
 
 research_docs
