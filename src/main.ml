@@ -1,7 +1,18 @@
-open Parser2
+
 open Create_ast
 open Bibliotheques
 open Dictionnaire
+open Automates
+
+
+let read_file (file_name: string):string list = 
+  let rec lire file liste = 
+    let line = input_line file in
+      ();
+    try lire file (line::liste) with End_of_file->
+      close_in file;
+      line::liste
+  in List.rev (lire (open_in file_name) [])
 
 let write_to_file (filename:string) (content: string) =
   let oc = open_out filename in  
@@ -11,8 +22,8 @@ let write_to_file (filename:string) (content: string) =
 let file_name = "test.f90"
 
 let token_list = 
-  Parser2.exec syntax_automate_det (
-    List.of_seq (String.to_seq (List.fold_left (fun acc x -> acc ^ "\n" ^ x) "" (Parser2.read_file file_name)))
+  Automates.exec syntax_automate_det (
+    List.of_seq (String.to_seq (List.fold_left (fun acc  x -> acc ^ "\n" ^ x) "" (read_file file_name)))
   ) [] 
     
 let ast =
@@ -30,8 +41,8 @@ let ast =
 let env = Create_ast.env_of_ast ast   
 let c_of_fortran_file (input_filename: string) (output_filename: string): unit = 
 
-  let token_list = Parser2.exec syntax_automate_det (
-    List.of_seq (String.to_seq (List.fold_left (fun acc x -> acc ^ "\n" ^ x) "" (Parser2.read_file file_name)))
+  let token_list = Automates.exec syntax_automate_det (
+    List.of_seq (String.to_seq (List.fold_left (fun acc x -> acc ^ "\n" ^ x) "" (read_file file_name)))
   ) [] 
   in
   let ast =
