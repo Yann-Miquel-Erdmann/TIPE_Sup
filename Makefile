@@ -57,7 +57,7 @@ $(C_OUTPUT_DIR)/%.c:
 
 
 clean:
-	rm $(EXECUTABLE)
-	rm $(SRC_DIR)/*.cm[ioa]
-	rm $(C_OUTPUT_DIR)/*.c
+	rm -f $(EXECUTABLE)
+	rm -f $(SRC_DIR)/*.cm[ioa]
+	rm -f $(C_OUTPUT_DIR)/*.c
 

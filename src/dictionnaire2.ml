@@ -34,7 +34,7 @@ let remove_form_list (l : 'a list) (to_remove : 'a list) : 'a list=
 
 (** Returns the list of the tokens found in the file [file]
 and the list of all the regex with its matching token. *)
-let define_lexemes (file : string) : string list * (string * string) list=
+let define_lexemes (file : string) : string list * string list * (string * string) list=
   let valid_char(c : char) : bool =
     let x = int_of_char c in
     (x >= 65 && x <= 90) || (x >= 48 && x <= 57) || (x >= 97 && x <= 122)
@@ -72,13 +72,13 @@ let define_lexemes (file : string) : string list * (string * string) list=
       else
         if valid_char x then
           match out with
-          | [] -> get_names q [String.make 1 x] in_string special
-          | x1::q1 -> get_names q ((x1 ^ String.make 1 x)::q1) in_string special
+          | [] -> get_names q [(String.make 1 x, false)] in_string
+          | (x1, b)::q1 -> get_names q ((x1 ^ String.make 1 x, b)::q1) in_string
         else 
           match out with
-          | [] -> get_names q [] in_string special
-          | ""::_ -> get_names q out in_string special
-          | _::_ -> get_names q (""::out) in_string special
+          | [] -> get_names q [] in_string
+          | ("", _)::_ -> get_names q out in_string
+          | _::_ -> get_names q (("", false)::out) in_string
   in
 
   (** Flattens the list [l] and stores the result in [out]. *)
@@ -89,8 +89,12 @@ let define_lexemes (file : string) : string list * (string * string) list=
   in
   let lines = read_file file in
   let reg_l = List.filter (fun (x, t) -> x <> "") (List.map (fun x -> get_regex (List.of_seq (String.to_seq x)) false ("", "")) lines) in
-  let names = remove_duplicates (flatten (List.map (fun x -> get_names (List.of_seq (String.to_seq x)) [] false) lines) []) in
-  names, reg_l
+  
+  let names_1, names_2 = List.fold_left (fun (l1, l2) x -> List.fold_left (fun (lg, ld) (s, b) -> if b then (s::lg, ld) else (lg, s::ld)) ([], []) (get_names (List.of_seq (String.to_seq x)) [] false)) ([], []) lines in 
+  let names_1 = remove_duplicates names_1 in
+  let names_2 = remove_duplicates names_2 in
+  let names_2 = remove_form_list names_2 names_1 in 
+  names_1, names_2, reg_l
 ;;
 
 (** Generates the [tokens.ml] file with the list [l_string] of the tokens taking an argument  and the list [l_no_string]
@@ -105,7 +109,7 @@ let generate_tokens_from_lists (l_string : string list) (l_no_string : string li
 ;;
 
 let generate_tokens (file : string) : unit =
-  let l1, l2 = define_lexemes file in
-  let l3 = List.map (fun (a, b) -> b) l2 in 
-  generate_tokens_from_lists l3 (remove_form_list l1 l3)
+  let l1, l2, l3 = define_lexemes file in
+  let l4 = List.map (fun (a, b) -> b) l3 in 
+  generate_tokens_from_lists l4 l2
 ;;
