@@ -161,17 +161,16 @@ EquivOp -> Equivalent | NotEquivalent
 ScalarIntLiteralConstant -> Icon
 
 
-Rcon -> '[0-9]+\.[0-9]*'
-Rcon -> '\.[0-9]+'
-Icon -> '[0-9]+'
-SconSingle -> '[\'](~[\']|\'\')*[\']'
-SconDouble -> '["](~["]|"")*["]'
+Rcon -> r'([0-9]+\.[0-9]*)|(\.[0-9]+)'
+Icon -> r'[0-9]+'
+SconSingle -> r'[\'](~[\']|\'\')*[\']'
+SconDouble -> r'["](~["]|"")*["]'
 Scon -> SconSingle | SconDouble
 
 
-Ident -> '[A-Za-z][A-Za-z0-9_]*'
+Ident -> r'[A-Za-z][A-Za-z0-9_]*'
 
-EOS -> '((!~[\n]*)?\n[ ]*)+'
+EOS -> r'((!~[\n]*)?\n[ ]*)+'
 
 
 Program -> 'program'
