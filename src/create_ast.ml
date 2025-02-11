@@ -1,6 +1,6 @@
 open Tokens
-open Parser2
 open Environnement
+
 
 type ast = Noeud of Tokens.token * (ast list) * (ast list)
 

@@ -1,6 +1,6 @@
 open Regex
 open Tokens
-(*open Vector*)
+
 
 module IntSet = Set.Make(struct
   type t = int
@@ -27,6 +27,8 @@ type automate_det = {
   mutable fin : token option array;
   mutable transitions : (int array) Vector.t; (* arr.(i).(j), i le sommet de départ, j l'entier du caractère *)
 }
+
+
 
 let range_list (n : int) : int list =
   let l = ref [] in
