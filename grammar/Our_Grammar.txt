@@ -37,7 +37,7 @@ CharLength -> RParenthesis TypeParamValue LParenthesis | ScalarIntLiteralConstan
 TypeParamValue -> Expr_Or_Asterisk 
 
 TypeSpec -> Integer KindSelector| RealKindSelector | Double| Complex KindSelector | Logical KindSelector 
- 
+
 
 KindSelector -> RParenthesis Expr LParenthesis
 

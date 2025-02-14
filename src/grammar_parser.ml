@@ -64,13 +64,15 @@ let get_derivations (s: char list): derivation list =
 (** Returns all the token names in [s] if they respect the regex rule [[A-Za-z0-9]]. Then it is stored in [out].
     [in_string] helps knowing if it is in string to not match there. *)
 let get_rule (line : string): rule =
+  print_endline line;
   let s = List.init (String.length line) (String.get line) in
+  
   let rule_name,s1 = get_rule_name s in
   let derivations = get_derivations (remove_arrow s1) in
   rule_name,derivations
 
 let get_grammar (file_name: string): grammar = 
   let lines = read_file file_name in
-  List.map get_rule lines
-
+  let not_empty_lines = List.filter (fun l -> l <> "") lines in 
+  List.map get_rule not_empty_lines
 
