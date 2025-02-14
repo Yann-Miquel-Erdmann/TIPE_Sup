@@ -21,16 +21,13 @@ EndProgramStmt -> End Program EndName_opt EOS
 
 EndName_opt -> EndName | E
 
-BodyConstruct -> SpecificationPartConstruct
-BodyConstruct -> ExecutableConstruct
+BodyConstruct -> SpecificationPartConstruct | ExecutableConstruct
 
 SpecificationPartConstruct -> DeclarationConstruct
 DeclarationConstruct -> TypeDeclarationStmt
 
 TypeDeclarationStmt -> TypeSpec Colon_Colon_opt EntityDecl EntityDecl_Comma_star EOS
 Colon_Colon_opt -> Colon Colon | E 
-
-
 EntityDecl_Comma_star -> EntityDecl EntityDecl_Comma_star | E
 
 
@@ -39,8 +36,7 @@ Equal_Expr_opt -> Equal Expr | E
 Asterisk_CharLength_opt -> | E
 
 
-CharLength -> RParenthesis TypeParamValue LParenthesis
-CharLength -> ScalarIntLiteralConstant
+CharLength -> RParenthesis TypeParamValue LParenthesis | ScalarIntLiteralConstant
 
 TypeParamValue -> Expr_Or_Asterisk
 
@@ -51,20 +47,15 @@ TypeSpec -> Complex KindSelector
 TypeSpec -> Logical KindSelector
 
 KindSelector -> RParenthesis Expr LParenthesis
+KindSelector -> RParenthesis Expr LParenthesis
 
 
 
 
-ExecutableConstruct -> ActionStmt
-ExecutableConstruct -> DoConstruct
-ExecutableConstruct -> IfConstruct
-ExecutableConstruct -> EndDoStmt
+ExecutableConstruct -> ActionStmt | DoConstruct | IfConstruct | EndDoStmt
 
 
-ActionStmt -> AssignmentStmt
-ActionStmt -> CallStmt
-ActionStmt -> ContinueStmt
-ActionStmt -> PrintStmt
+ActionStmt -> AssignmentStmt | CallStmt | ContinueStmt | PrintStmt
 
 AssignmentStmt -> Name Equal Expr EOS
 
@@ -87,6 +78,7 @@ PrintStmt -> Print FormatIdentifier Comma_OutputItemList_opt EOS
 Comma_OutputItemList_opt -> Comma OutputItemList | E
 
 FormatIdentifier -> Asterisk
+FormatIdentifier -> Asterisk
 
 OutputItem -> Expr
 
@@ -107,9 +99,11 @@ LoopControl -> VariableName Equal IntRealDpExpression Comma IntRealDpExpression 
 Comma_IntRealDpExpression_opt -> Comma IntRealDpExpression | E
 
 IntRealDpExpression -> Expr
+IntRealDpExpression -> Expr
 
 
 
+IfConstruct -> IfThenStmt ExecutionPartConstruct_star ElseIfStmt_ExecutionPartConstruct_star_star ElseStmt_ExecutionPartConstruct_star_opt EndIfStmt 
 IfConstruct -> IfThenStmt ExecutionPartConstruct_star ElseIfStmt_ExecutionPartConstruct_star_star ElseStmt_ExecutionPartConstruct_star_opt EndIfStmt 
 ElseIfStmt_ExecutionPartConstruct_star_star -> ElseIfStmt ExecutionPartConstruct_star ElseIfStmt_ExecutionPartConstruct_star_star | E
 ExecutionPartConstruct_star -> ExecutionPartConstruct ExecutionPartConstruct_star | E
@@ -128,8 +122,10 @@ ScalarLogicalExpr -> Expr
 Expr -> Level5Expr
 
 Level5Expr -> Level5Expr_EquivOp_opt EquivOperand
+Level5Expr -> Level5Expr_EquivOp_opt EquivOperand
 Level5Expr_EquivOp_opt -> Level5Expr EquivOp | E
 
+EquivOperand -> EquivOperand_OrOp_opt OrOperand
 EquivOperand -> EquivOperand_OrOp_opt OrOperand
 EquivOperand_OrOp_opt -> EquivOperand OrOp | E 
 
@@ -140,16 +136,19 @@ AndOperand -> NotOp_opt Level4Expr
 NotOp_opt -> NotOp | E
 
 Level4Expr -> Level3Expr_RelOp_opt Level3Expr
+Level4Expr -> Level3Expr_RelOp_opt Level3Expr
 Level3Expr_RelOp_opt -> Level3Expr RelOp | E
 
 Level3Expr -> Level3Expr_ConcatOp_opt Level2Expr
 Level3Expr_ConcatOp_opt -> Level3Expr ConcatOp | E
 
 Level2Expr -> Level2Expr_AddOp_opt AddOperand
+Level2Expr -> Level2Expr_AddOp_opt AddOperand
 Level2Expr_AddOp_opt -> Level2Expr AddOp | E
 
 Level2Expr -> Sign AddOperand
 
+AddOperand -> AddOperand_MultOp_opt MultOperand
 AddOperand -> AddOperand_MultOp_opt MultOperand
 AddOperand_MultOp_opt -> AddOperand MultOp | E
 
@@ -159,14 +158,9 @@ PowerOp_MultOperand_opt -> PowerOp MultOperand | E
 
 Level1Expr -> Primary
 
-Primary -> UnsignedArithmeticConstant
-Primary -> Name
-Primary -> RParenthesis Expr LParenthesis
-Primary -> Scon
+Primary -> UnsignedArithmeticConstant | Name | RParenthesis Expr LParenthesis | Scon
 
-UnsignedArithmeticConstant -> Icon
-UnsignedArithmeticConstant -> Rcon
-UnsignedArithmeticConstant -> ComplexConst
+UnsignedArithmeticConstant -> Icon | Rcon | ComplexConst
 ComplexConst -> RParenthesis Expr Comma Expr LParenthesis
 
 
@@ -243,7 +237,9 @@ Minus -> '-'
 Equal -> '(==)|(\.eq\.)' 
 NotEqual -> '(/=)|(\.ne\.)' 
 StrictLess -> '(<)|(\.lt\.)'
+StrictLess -> '(<)|(\.lt\.)'
 LessEqual -> '(<=)|(\.le\.)' 
+StrictGreater -> '(>)|(\.gt\.)'
 StrictGreater -> '(>)|(\.gt\.)'
 GreaterEqual -> '(>=)|(\.ge\.)' 
 Equivalent -> '\.eqv\.'
@@ -282,4 +278,5 @@ LessEqual -> '(<=)|(\.le\.)'
 StrictGreater -> '(>)|(\.gt\.)'
 GreaterEqual -> '(>=)|(\.ge\.)'
 Equivalent -> '\.eqv\.'
+NotEquivalent -> '\.neqv\.'
 NotEquivalent -> '\.neqv\.'

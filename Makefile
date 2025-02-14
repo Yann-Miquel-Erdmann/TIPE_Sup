@@ -32,10 +32,9 @@ $(info $(C_OUTPUT_FILES))
 build: $(EXECUTABLE)
 
 
-
 # Compile l'exécutable
 $(EXECUTABLE): $(BUILD_DIR) $(SRC_DIR)/vector.cma $(SRC_DIR)/vector.cmi
-	$(OCAMLC) -I $(SRC_DIR) -o $@ $(SRC_DIR)/vector.cma $(ORDERED_FILES)
+	$(OCAMLC) -I src -o $@ $(SRC_DIR)/vector.cma $(ORDERED_FILES)
 
 
 $(SRC_DIR)/vector.cma:
