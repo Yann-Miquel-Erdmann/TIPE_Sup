@@ -320,6 +320,8 @@ let determinise (a : automate_sans_eps) : automate_det =
         let token2 = List.assoc e2 a.fin in
         begin
           match token1, token2 with
+          (*| token1, token2 ->
+            if token1 = safe_token || *)
           | Name _, token | token, Name _ ->
             (* L'un des deux est une variable, elle peut être vue autrement donc elle est ignorée *)
             a_det.fin.(elem) <- Some token

@@ -1,7 +1,6 @@
 
 open Create_ast
 open Bibliotheques
-open Dictionnaire
 open Automates
 
 

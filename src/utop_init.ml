@@ -8,5 +8,6 @@
 #load "bibliotheques.cmo"
 #load "create_ast.cmo";;
 #load "generateC.cmo";;
+#load "transpiler.cmo";;
 #use "main.ml"
 (* #load "main.cmo";; *)
