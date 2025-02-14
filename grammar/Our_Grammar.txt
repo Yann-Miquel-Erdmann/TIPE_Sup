@@ -28,8 +28,8 @@ EntityDecl_Comma_star -> EntityDecl EntityDecl_Comma_star | E
 
 
 EntityDecl -> ObjectName Asterisk_CharLength_opt Equal_Expr_opt
-Equal_Expr_opt -> Equal Expr| E
-Asterisk_CharLength_opt ->| E
+Equal_Expr_opt -> Equal Expr | E
+Asterisk_CharLength_opt -> Asterisk CharLength | E
 
 
 CharLength -> RParenthesis TypeParamValue LParenthesis | ScalarIntLiteralConstant
