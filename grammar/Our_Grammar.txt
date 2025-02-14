@@ -88,7 +88,7 @@ IntRealDpExpression -> Expr
 
 
 
-IfConstruct-> IfThenStmt ExecutionPartConstruct_star ElseIfStmt_ExecutionPartConstruct_star_star ElseStmt_ExecutionPartConstruct_star_opt EndIfStmt 
+IfConstruct -> IfThenStmt ExecutionPartConstruct_star ElseIfStmt_ExecutionPartConstruct_star_star ElseStmt_ExecutionPartConstruct_star_opt EndIfStmt 
 ElseIfStmt_ExecutionPartConstruct_star_star -> ElseIfStmt ExecutionPartConstruct_star ElseIfStmt_ExecutionPartConstruct_star_star | E
 ExecutionPartConstruct_star -> ExecutionPartConstruct ExecutionPartConstruct_star | E
 ElseStmt_ExecutionPartConstruct_star_opt -> ElseStmt ExecutionPartConstruct_star | E
@@ -132,7 +132,7 @@ AddOperand -> AddOperand_MultOp_opt MultOperand
 AddOperand_MultOp_opt -> AddOperand MultOp | E
 
 MultOperand -> Level1Expr PowerOp_MultOperand_opt 
-PowerOp_MultOperand_opt -> PowerOp MultOperand| E
+PowerOp_MultOperand_opt -> PowerOp MultOperand | E
 
 
 Level1Expr -> Primary
