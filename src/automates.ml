@@ -1,7 +1,6 @@
 open Regex
 open Tokens
 
-
 module IntSet = Set.Make(struct
   type t = int
   let compare = compare
@@ -10,21 +9,21 @@ end)
 type automate = {
   nodes : int list;
   debut_l : int list;
-  fin : (int * token) list;
+  fin : (int * token_reg) list;
   transitions : (char option*int) list array; 
 }
 
 type automate_sans_eps = {
   nodes : int list;
   debut_l : int list;
-  fin : (int * token) list;
+  fin : (int * token_reg) list;
   transitions_sans_eps : (char*int) list array;
 }
 
 type automate_det = {
   mutable nodes : int list;
   debut : int;
-  mutable fin : token option array;
+  mutable fin : token_reg option array;
   mutable transitions : (int array) Vector.t; (* arr.(i).(j), i le sommet de départ, j l'entier du caractère *)
 }
 
@@ -38,7 +37,7 @@ let range_list (n : int) : int list =
   !l
 ;;
 
-let automate_gen (reg : regex) (t : token):  automate =
+let automate_gen (reg : regex) (t : token_reg):  automate =
   let dico = Hashtbl.create 0 in
   let a = ref {
     nodes = [];
@@ -144,6 +143,16 @@ let ou_automates (l_a : automate list) : automate =
   }
 ;;
 
+
+let remove_duplicates (l : 'a list) : 'a list =
+  let tbl = Hashtbl.create 0 in
+  let rec aux (l : 'a list) (out : 'a list): 'a list =
+    match l with
+    | [] -> out
+    | x::q -> if Hashtbl.mem tbl x then aux q out else (Hashtbl.add tbl x 0; aux q (x::out))
+  in aux l []
+;;
+
 (*
   Enlever les epsilon-transitions:
   - On prend un sommet
@@ -165,15 +174,6 @@ let enleve_epsilon_trans (a : automate) : automate_sans_eps =
 
   (* degré entrant de chaque sommet *)
   let degres = Array.make len 0 in
-
-  let remove_duplicates (l : 'a list) : 'a list =
-    let tbl = Hashtbl.create 0 in
-    let rec aux (l : 'a list) (out : 'a list): 'a list =
-      match l with
-      | [] -> out
-      | x::q -> if Hashtbl.mem tbl x then aux q out else (Hashtbl.add tbl x 0; aux q (x::out))
-    in aux l []
-  in
 
   let trans_temp = ref a.transitions in
   let fin_temp = ref a.fin in
@@ -311,22 +311,20 @@ let determinise (a : automate_sans_eps) : automate_det =
   (* teste si le sommet elem linéarisé contient des éléments finaux et l'ajoute aux finaux si c'est le cas *)
   let ajouter_fin (elem : int) : unit =
     
-    let res = IntSet.to_list (IntSet.inter fin (delin elem delin_tbl)) in
+    let res = remove_duplicates (List.map (fun e -> List.assoc e a.fin) (IntSet.to_list (IntSet.inter fin (delin elem delin_tbl)))) in
       match res with
       | [] -> ()
-      | [e] -> a_det.fin.(elem) <- Some (List.assoc e a.fin)
-      | [e1; e2] -> 
-        let token1 = List.assoc e1 a.fin in
-        let token2 = List.assoc e2 a.fin in
-        begin
-          match token1, token2 with
-          (*| token1, token2 ->
-            if token1 = safe_token || *)
-          | Name _, token | token, Name _ ->
-            (* L'un des deux est une variable, elle peut être vue autrement donc elle est ignorée *)
-            a_det.fin.(elem) <- Some token
-          | _ -> failwith "A syntax can't have more than one output" (* il a plus d'un élément final *)
-        end
+      | [e] -> a_det.fin.(elem) <- Some e
+      | [e1; e2] ->
+        (* L'un des deux est une variable, elle peut être vue autrement donc elle est ignorée *)
+        if e1 = safe_token then
+          a_det.fin.(elem) <- Some e2
+        else
+          if e2 = safe_token then
+            a_det.fin.(elem) <- Some e1
+          else
+            (print_char '"'; print_string (assoc_tok e1); print_string "\" \""; print_string (assoc_tok e2); print_char '"'; print_newline();
+            failwith "A syntax can't have more than one output2" (* il a plus d'un élément final *))
       | _ -> failwith "A syntax can't have more than one output"
   in
 
@@ -398,29 +396,21 @@ let execution_mot (a : automate_det) (texte : char list) : int * char list * cha
   !last_found, !text_as_last, !last_read
 ;;
 
-let rec exec (a : automate_det) (texte : char list) (out : token list): token list =
-  match texte with
-  | [] -> List.rev out
-  | _ -> 
-    match execution_mot a texte with
-    | (-1, _, s) -> print_string "Le lexème '"; print_string (String.of_seq(List.to_seq (List.rev s))); print_string "' n'est pas un lexème reconnu"; failwith ""
-    | (x, q, s) ->
-      let s = (String.of_seq(List.to_seq (List.rev s))) in 
-      match a.fin.(x) with
-      | None -> print_string "Le lexème '"; print_string s; print_string "' n'est pas un lexème reconnu"; failwith ""
-      | Some (Name _) -> exec a q (Name s::out) 
-      | Some (Integer _) -> exec a q (Integer s::out)
-      | Some (Floating _) -> exec a q (Floating s::out)
-      | Some (Chaine _) -> exec a q (Chaine s::out)
-      | Some (Commentaire _ ) -> exec a q (Commentaire s::out)
-      | Some t -> exec a q (t::out)
+let exec (a : automate_det) (txt : string) : (token_reg * string) list =
+  let rec exec_aux (a : automate_det) (texte : char list) (out : (token_reg * string) list) : (token_reg * string) list =
+    match texte with
+    | [] -> List.rev out
+    | _ -> 
+      match execution_mot a texte with
+      | (-1, _, s) -> print_string "Le lexème '"; print_string (String.of_seq(List.to_seq (List.rev s))); print_string "' n'est pas un lexème reconnu"; failwith ""
+      | (x, q, s) ->
+        let s = (String.of_seq(List.to_seq (List.rev s))) in 
+        match a.fin.(x) with
+        | None -> print_string "Le lexème '"; print_string s; print_string "' n'est pas un lexème reconnu"; failwith ""
+        | Some t -> exec_aux a q ((t, s)::out) 
+  in
+  let res = exec_aux a (List.of_seq (String.to_seq txt)) [] in
+  let tbl = Hashtbl.create (List.length unparsed_tokens) in
+  List.iter (fun x -> Hashtbl.add tbl x ()) unparsed_tokens;
+  List.filter (fun (x, _) -> not (Hashtbl.mem tbl x)) res
 ;;
-
-let (a2_2 : automate) = {
-  nodes = [0; 1; 2];
-  debut_l = [0];
-  fin = [(2, NewLine)];
-  transitions = [|[(Some 'a', 1)]; [(Some 'a', 1); (Some 'a', 2)]; []|]; 
-}
-
-let (a2_2se : automate_sans_eps) = enleve_epsilon_trans a2_2;;
