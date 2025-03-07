@@ -153,7 +153,7 @@ DummyArgName -> Ident
 FunctionName -> Ident
 ImpliedDoVariable -> Ident
 ProgramName -> Ident
-SubroutineName-> Ident
+SubroutineName -> Ident
 SubroutineNameUse -> Ident
 VariableName -> Ident
 ObjectName -> Ident
@@ -167,7 +167,7 @@ Sign -> Plus | Minus
 
 
 ConcatOp -> '//'
-RelOp -> Equal | NotEqual | StrictLess | LessEqual | StrictGreater | GreaterEqual
+RelOp -> IsEqual | NotEqual | StrictLess | LessEqual | StrictGreater | GreaterEqual
 
 NotOp -> '\.not\.'
 AndOp -> '\.and\.'
@@ -184,7 +184,7 @@ SconDouble -> r'["](~["]|"")*["]'
 Scon -> SconSingle | SconDouble
 
 
-Ident -> r'[A-Za-z][A-Za-z0-9_]*'
+Ident -> s'[A-Za-z][A-Za-z0-9_]*'
 
 EOS -> r'((!~[\n]*)?\n[ ]*)+'
 
@@ -217,11 +217,12 @@ Then -> 'then'
 Divise -> '/'
 Plus -> '\+'
 Minus -> '-'
-Equal -> '(==)|(\.eq\.)'
+IsEqual -> '(==)|(\.eq\.)'
 NotEqual -> '(/=)|(\.ne\.)'
 StrictLess -> '(<)|(\.lt\.)'
-LessEqual -> '(<=)|(\.le\.)'
+LessEqual -> '(<=)|(\.le\.)' 
 StrictGreater -> '(>)|(\.gt\.)'
-GreaterEqual -> '(>=)|(\.ge\.)'
-Equivalent -> '\.eqv\.'
+GreaterEqual -> '(>=)|(\.ge\.)' 
+Equivalent -> '\.eqv\.' 
 NotEquivalent -> '\.neqv\.'
+Space -> _' '

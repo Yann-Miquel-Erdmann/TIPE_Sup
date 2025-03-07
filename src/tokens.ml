@@ -11,7 +11,9 @@ type token_reg =
   | Ident
   | EOSr
   | Program
-  | End
+  | EndProgram
+  | EndDo
+  | EndIf
   | Colon
   | Comma
   | Equal
@@ -75,6 +77,7 @@ type token =
   | ActionStmt
   | AssignmentStmt
   | CallStmt
+  | Parenthesis_Actual_Comma_star_or_epsilon
   | ActualArg_Comma_star
   | ActualArg
   | Expr_Or_Asterisk
@@ -82,8 +85,9 @@ type token =
   | PrintStmt
   | Comma_OutputItemList_opt
   | FormatIdentifier
-  | OutputItem
   | OutputItemList
+  | Comma_OutputItem_star
+  | OutputItem
   | DoConstruct
   | BlockDoConstruct
   | LoopControl_opt
@@ -104,27 +108,28 @@ type token =
   | ScalarLogicalExpr
   | Expr
   | Level5Expr
-  | Level5Expr_EquivOp_opt
+  | EquivOp_EquivOperand_star
   | EquivOperand
-  | EquivOperand_OrOp_opt
+  | OrOp_OrOperand_star
   | OrOperand
-  | OrOperand_AndOp_opt
+  | AndOp_AndOperand_star
   | AndOperand
   | NotOp_opt
   | Level4Expr
-  | Level3Expr_RelOp_opt
+  | RelOp_Level3Expr_star
   | Level3Expr
-  | Level3Expr_ConcatOp_opt
+  | ConcatOp_Level2Expr_star
   | Level2Expr
-  | Level2Expr_AddOp_opt
+  | AddOp_Sign_opt_AddOperand_star
+  | Sign_opt_AddOperand
+  | Sign_opt
   | AddOperand
-  | AddOperand_MultOp_opt
+  | MultOp_MultOperand_star
   | MultOperand
-  | PowerOp_MultOperand_opt
+  | PowerOp_Level1Expr_star
   | Level1Expr
   | Primary
-  | UnsignedArithmeticConstant
-  | ComplexConst
+  | Comma_Expr_opt
   | Name
   | ArrayName
   | ComponentName
@@ -167,7 +172,9 @@ let assoc_tok (t : token_reg) : string =
   | Ident -> "[A-Za-z][A-Za-z0-9_]*"
   | EOSr -> "((!~[\\n]*)?\\n[ ]*)+"
   | Program -> "program"
-  | End -> "end"
+  | EndProgram -> "end program"
+  | EndDo -> "end do"
+  | EndIf -> "end if"
   | Colon -> ":"
   | Comma -> ","
   | Equal -> "="
