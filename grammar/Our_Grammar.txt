@@ -141,7 +141,8 @@ PowerOp_Level1Expr_star -> PowerOp Level1Expr PowerOp_Level1Expr_star | E
 
 Level1Expr -> Primary
 
-Primary -> Icon | Rcon | Name | RParenthesis Expr Comma_Expr_opt LParenthesis | Scon
+Primary -> Icon | Rcon | Name | RParenthesis Expr Comma_Expr_opt LParenthesis | Scon | LogicalConstant
+
 Comma_Expr_opt -> Comma Expr | E
 
 
@@ -158,6 +159,7 @@ SubroutineNameUse -> Ident
 VariableName -> Ident
 ObjectName -> Ident
 
+LogicalConstant -> True | False
 
 PowerOp -> '\*\*'
 MultOp -> Asterisk | Divise
@@ -188,6 +190,8 @@ Ident -> r'[A-Za-z][A-Za-z0-9_]*'
 
 EOS -> r'((!~[\n]*)?\n[ ]*)+'
 
+True -> '\.true\.'
+False -> '\.false\.'
 Program -> 'program'
 EndProgram -> 'end program'
 EndDo -> 'end do'
