@@ -27,7 +27,16 @@ type automate_det = {
   mutable transitions : (int array) Vector.t; (* arr.(i).(j), i le sommet de départ, j l'entier du caractère *)
 }
 
-
+(** Returns the list of all the lines in the file named [file_name]. *)
+let read_file (file_name: string) : string list = 
+  let rec lire file liste = 
+    let line = input_line file in
+      ();
+    try lire file (line::liste) with End_of_file->
+      close_in file;
+      line::liste
+  in List.rev (lire (open_in file_name) [])
+;;
 
 let range_list (n : int) : int list =
   let l = ref [] in
@@ -413,4 +422,8 @@ let exec (a : automate_det) (txt : string) : (token_reg * string) list =
   let tbl = Hashtbl.create (List.length unparsed_tokens) in
   List.iter (fun x -> Hashtbl.add tbl x ()) unparsed_tokens;
   List.filter (fun (x, _) -> not (Hashtbl.mem tbl x)) res
+;;
+
+let exec_file (a : automate_det) (file : string) : (token_reg * string) list =
+  exec a (List.fold_left (fun acc x -> acc^"\n"^x) "" (read_file file))
 ;;

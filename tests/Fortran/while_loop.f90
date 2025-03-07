@@ -1,17 +1,17 @@
 program factorial  
-   implicit none  
+   implicit none
 
    ! define variables
    integer :: nfact
-   integer :: n 
-   n = 1 
-   nfact = 1 
+   integer :: n
+   n = 1
+   nfact = 1
    
    ! compute factorials   
-   do while (n <= 10)       
-      nfact = nfact * n 
+   do while (n <= 10)
+      nfact = nfact * n
       n = n + 1
-      print*,  n, " ", nfact   
+      print*,  n, " ", nfact
    end do
 
 
