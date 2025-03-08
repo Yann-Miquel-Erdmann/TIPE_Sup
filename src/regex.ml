@@ -1,4 +1,4 @@
-open Tokens
+open Symbols
 
 (* 
   syntaxe actuelle:
@@ -31,7 +31,7 @@ type regex =
 | Vide
 | Facultatif of regex
 | AllBut of bool array
-;;
+
 
 let print_reg_list (c: regex list) : unit =
   let rec print_list_aux (r:regex list) : unit =
@@ -69,33 +69,36 @@ let print_reg_list (c: regex list) : unit =
 
     | [AllBut _] -> print_string "~(..."; print_string ")";
     | (AllBut _)::q -> print_string "~(..."; print_string ")"; print_char ' '; print_list_aux q
-  in if List.length c = 0 then print_string "[]" else print_list_aux c;
-;;
+  in if List.length c = 0 then print_string "[]" else print_list_aux c
 
-(* convertit la chaine de cacatère s à partir de l'index index et l'ajoute à la liste c *)
+
+(* convertit la chaîne de caractères s à partir de l'index index et l'ajoute à la liste c *)
 let rec string_to_char_2 (s:string) (c : char list) (index: int): char list =
   if index = String.length s then
     List.rev c
-  else
+  else(
     string_to_char_2 s (s.[index]::c) (index + 1)
-;;
+  )
 
-exception Invalid_syntax;;
-exception Empty_pile;;
+
+
+exception Invalid_syntax
+exception Empty_pile
 
 let is_empty(l : 'a list ref) : bool =
-  List.length !l = 0
-;;
+  List.length !l == 0
+
 
 let pop (l : 'a list ref) : 'a =
   match !l with
   | [] -> raise Empty_pile
   | x::q -> l := q; x
-;;
+
 
 let bool_of_int (n: int) : bool =
-  n <> 0
-;;
+  if n == 0 then false
+  else true
+
 
 (* renvoie le ou de toutes les expressions régulières dans l *)
 let or_reg (l : regex list) : regex =
@@ -106,7 +109,7 @@ let or_reg (l : regex list) : regex =
   | x::q, _ -> or_reg_aux q (Ou(x, out))
   in
   or_reg_aux l Epsilon
-;;
+
 
 (* renvoie la concaténation de toutes les expressions régulières de l*)
 let concat_reg (l : regex list) : regex =
@@ -117,7 +120,7 @@ let concat_reg (l : regex list) : regex =
   | x::q, _ -> concat_reg_aux q (Concat(x, out))
   in
   concat_reg_aux l Epsilon
-;;
+
 
 (* fonction qui transforme, si c'est possible, la chaine de caractères s en une expression régulière (regex) *)
 let rec gen_regex (s : string) : regex =
@@ -275,16 +278,16 @@ let rec gen_regex (s : string) : regex =
       end
     | _ -> gen_regex_2 (Caractere c::pile) false
   in let reg = gen_regex_2 [] false in if not (is_empty caracters) then raise Invalid_syntax else reg 
-;;
 
-let r1 = gen_regex "[a-zA-Z0-9]+";;
-let r2 = gen_regex "[0-9]+\\.[0-9]+";;
-let r3 = gen_regex "\".*\"";;
-let r4 = gen_regex "'.*'";;
-let r5 = gen_regex "[0-9]+";;
-let r6 = gen_regex "!.*\n";;
-let r7 = gen_regex "\".*\"";;
-let r8 = gen_regex "abc";;
+
+let r1 = gen_regex "[a-zA-Z0-9]+"
+let r2 = gen_regex "[0-9]+\\.[0-9]+"
+let r3 = gen_regex "\".*\""
+let r4 = gen_regex "'.*'"
+let r5 = gen_regex "[0-9]+"
+let r6 = gen_regex "!.*\n"
+let r7 = gen_regex "\".*\""
+let r8 = gen_regex "abc"
 
 (*
 let num = match_regex (C(num_reg, -2, Integer [], 0, false, [])) (0, false) '"'

@@ -1,9 +1,9 @@
 *.out
-src/*.cmi
-src/*.cmo
-src/*.o
-src/*.cma
 
+src/*.o
+src/*.cm[aio]
+src/preprocessing/*.o
+src/preprocessing/*.cm[aio]
 .*
 !.gitignore
 _build

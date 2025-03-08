@@ -6,7 +6,7 @@ type data_type =
   | Booleen of bool
   | Caractere of string
   | Commentaire of string
-;;
+
 
 type operateur = 
   | Plus
@@ -15,7 +15,7 @@ type operateur =
   | Division
   | Puissance
   | Assignation
-;;
+
 
 type comparateur =  
   | PlusPetit
@@ -24,7 +24,7 @@ type comparateur =
   | StrictPlusGrand
   | Egal
   | NonEgal
-;;
+
 
 type operateur_logique = 
   | Et
@@ -32,7 +32,7 @@ type operateur_logique =
   | Non
   | Equivalent
   | NonEquivalent
-;;
+
 
 type syntax = 
   | End
@@ -406,7 +406,7 @@ type intrinsic_function =
   | Unpack
   | Verify
   | Xor
-;;
+
 
 type token = 
   | DataType of data_type
@@ -428,5 +428,5 @@ type token =
   | Parentheseouvrante
   | Parenthesefermante
   | PointVirgule
-;;
+
 

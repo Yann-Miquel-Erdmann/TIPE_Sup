@@ -1,5 +1,6 @@
 open Regex
-open Tokens
+open Symbols
+open Vector
 
 module IntSet = Set.Make(struct
   type t = int
@@ -9,21 +10,21 @@ end)
 type automate = {
   nodes : int list;
   debut_l : int list;
-  fin : (int * token_reg) list;
+  fin : (int * terminal) list;
   transitions : (char option*int) list array; 
 }
 
 type automate_sans_eps = {
   nodes : int list;
   debut_l : int list;
-  fin : (int * token_reg) list;
+  fin : (int * terminal) list;
   transitions_sans_eps : (char*int) list array;
 }
 
 type automate_det = {
   mutable nodes : int list;
   debut : int;
-  mutable fin : token_reg option array;
+  mutable fin : terminal option array;
   mutable transitions : (int array) Vector.t; (* arr.(i).(j), i le sommet de départ, j l'entier du caractère *)
 }
 
@@ -44,9 +45,9 @@ let range_list (n : int) : int list =
     l := i::!l
   done;
   !l
-;;
 
-let automate_gen (reg : regex) (t : token_reg):  automate =
+
+let automate_gen (reg : regex) (t : terminal):  automate =
   let dico = Hashtbl.create 0 in
   let a = ref {
     nodes = [];
@@ -102,7 +103,7 @@ let automate_gen (reg : regex) (t : token_reg):  automate =
     fin = !a.fin;
     transitions = arr
   }
-;;
+
 
 let ou_automates (l_a : automate list) : automate =
   let rec ou_automate_aux (l : automate list) (out : automate) (depht : int) =
@@ -150,7 +151,7 @@ let ou_automates (l_a : automate list) : automate =
     fin           = a.fin;
     transitions  = ajouter_debut a.debut_l a.transitions;
   }
-;;
+
 
 
 let remove_duplicates (l : 'a list) : 'a list =
@@ -160,14 +161,14 @@ let remove_duplicates (l : 'a list) : 'a list =
     | [] -> out
     | x::q -> if Hashtbl.mem tbl x then aux q out else (Hashtbl.add tbl x 0; aux q (x::out))
   in aux l []
-;;
+
 
 (*
   Enlever les epsilon-transitions:
   - On prend un sommet
   - On regarde toutes les epsilon-transitions sortantes (pas les boucles)
   - On regarde tous les transitions entrantes
-  - On ajoute des nouvelles transions des entrantes vers les sortantes
+  - On ajoute des nouvelles transitons des entrantes vers les sortantes
   - On supprime l'epsilon-transition
 
   Requis:
@@ -205,7 +206,7 @@ let enleve_epsilon_trans (a : automate) : automate_sans_eps =
   (* ajouter un de degré entrant pour chaque entrée *)
   List.iter (fun x -> degres.(x) <- degres.(x) + 1) a.debut_l;
   
-  (* applique l'algorithme de supression des epsilon transitions sur chaqun des sommets *)
+  (* applique l'algorithme de suppression des epsilon transitions sur chacun des sommets *)
   List.iter (fun node_i ->
     (* récupération les transitions entrantes avec epsilon transitions qui ne sont pas des boucles + enlever du degré entrant pour chaque epsilon transition *)
     let res = remove_duplicates(List.fold_left (
@@ -257,7 +258,7 @@ let enleve_epsilon_trans (a : automate) : automate_sans_eps =
     transitions_sans_eps = Array.map (fun x -> List.map (fun (c, n) -> match c with | None -> failwith "pas correct" | Some c1 -> (c1, n)) (List.filter (fun (_, n) -> degres.(n) > 0) x)) !trans_temp;
     (*transitions_sans_eps_ = List.map (fun (n1, c) -> match c with | None -> failwith "pas correct" | Some c1 -> (lin n1, c1, lin n2)) (List.filter (fun (_, _, x) -> degres.(x) > 0) !trans_temp);*)
   } 
-;;
+
 
 
 let lin (elem : IntSet.t) (lin_tbl : (IntSet.t, int) Hashtbl.t) (delin_tbl : IntSet.t Vector.t) : int=
@@ -272,7 +273,7 @@ let lin (elem : IntSet.t) (lin_tbl : (IntSet.t, int) Hashtbl.t) (delin_tbl : Int
     Hashtbl.replace lin_tbl IntSet.empty (Hashtbl.find lin_tbl IntSet.empty + 1);
     Vector.push delin_tbl elem);
   Hashtbl.find lin_tbl elem
-;;
+
 
 let delin (elem : int) (delin_tbl : IntSet.t Vector.t) : IntSet.t =
   if elem = -1 then
@@ -281,7 +282,7 @@ let delin (elem : int) (delin_tbl : IntSet.t Vector.t) : IntSet.t =
     failwith "Element was not found in the table"
   else
     Vector.get delin_tbl elem
-;;
+
 let determinise (a : automate_sans_eps) : automate_det =
   let lin_tbl = Hashtbl.create (List.length a.nodes) in
   let delin_tbl = Vector.create ~dummy:IntSet.empty in
@@ -332,7 +333,7 @@ let determinise (a : automate_sans_eps) : automate_det =
           if e2 = safe_token then
             a_det.fin.(elem) <- Some e1
           else
-            (print_char '"'; print_string (assoc_tok e1); print_string "\" \""; print_string (assoc_tok e2); print_char '"'; print_newline();
+            (print_char '"'; print_string (string_of_terminal e1); print_string "\" \""; print_string (string_of_terminal e2); print_char '"'; print_newline();
             failwith "A syntax can't have more than one output2" (* il a plus d'un élément final *))
       | _ -> failwith "A syntax can't have more than one output"
   in
@@ -372,11 +373,11 @@ let determinise (a : automate_sans_eps) : automate_det =
   a_det.fin <- Array.make (List.length a_det.nodes) None;
   List.iter ajouter_fin a_det.nodes;
   a_det
-;;
+
 
 let exec_char (a : automate_det) (node : int) (c : char) : int =
   (Vector.get a.transitions node).(int_of_char c)
-;;
+
 
 let execution_mot (a : automate_det) (texte : char list) : int * char list * char list =
   let node = ref a.debut in
@@ -403,11 +404,10 @@ let execution_mot (a : automate_det) (texte : char list) : int * char list * cha
       end;
   done;
   !last_found, !text_as_last, !last_read
-;;
 
-let exec (a : automate_det) (txt : string) : (token_reg * string) list =
-  let rec exec_aux (a : automate_det) (texte : char list) (out : (token_reg * string) list) : (token_reg * string) list =
-    (*print_endline ("matching substring '"^(String.of_seq (List.to_seq texte))^"'");*)
+
+let exec (a : automate_det) (txt : string) : (terminal * string) list =
+  let rec exec_aux (a : automate_det) (texte : char list) (out : (terminal * string) list) : (terminal * string) list =
     match texte with
     | [] -> List.rev out
     | _ -> 
@@ -423,8 +423,3 @@ let exec (a : automate_det) (txt : string) : (token_reg * string) list =
   let tbl = Hashtbl.create (List.length unparsed_tokens) in
   List.iter (fun x -> Hashtbl.add tbl x ()) unparsed_tokens;
   List.filter (fun (x, _) -> not (Hashtbl.mem tbl x)) res
-;;
-
-let exec_file (a : automate_det) (file : string) : (token_reg * string) list =
-  exec a (List.fold_left (fun acc x -> acc^"\n"^x) "" (read_file file))
-;;
