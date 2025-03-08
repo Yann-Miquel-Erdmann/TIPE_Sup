@@ -1,0 +1,11 @@
+Eone -> Te Eprime
+Eprime -> Plus Te Eprime | E
+Te -> Fe Tprime
+Tprime -> Star Fe Tprime | E
+Fe -> Id | Lp Eone Rp
+
+Id -> "id"
+Plus -> "+"
+Star -> "*"
+Lp -> "("
+Rp -> ")"
