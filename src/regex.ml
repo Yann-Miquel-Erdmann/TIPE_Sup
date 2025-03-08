@@ -67,14 +67,14 @@ let print_reg_list (c: regex list) : unit =
     | [Facultatif e] -> print_char '('; print_list_aux [e]; print_string ")?";
     | (Facultatif e)::q -> print_char '('; print_list_aux [e]; print_string ")?"; print_char ' '; print_list_aux q
 
-    | [AllBut c] -> print_string "~(..."; print_string ")";
-    | (AllBut c)::q -> print_string "~(..."; print_string ")"; print_char ' '; print_list_aux q
-  in if List.length c == 0 then print_string "[]" else print_list_aux c;
+    | [AllBut _] -> print_string "~(..."; print_string ")";
+    | (AllBut _)::q -> print_string "~(..."; print_string ")"; print_char ' '; print_list_aux q
+  in if List.length c = 0 then print_string "[]" else print_list_aux c;
 ;;
 
-(* converti la chaine de cacatère s à partir de l'index index et l'ajoute à la liste c *)
+(* convertit la chaine de cacatère s à partir de l'index index et l'ajoute à la liste c *)
 let rec string_to_char_2 (s:string) (c : char list) (index: int): char list =
-  if index == String.length s then
+  if index = String.length s then
     List.rev c
   else
     string_to_char_2 s (s.[index]::c) (index + 1)
@@ -84,7 +84,7 @@ exception Invalid_syntax;;
 exception Empty_pile;;
 
 let is_empty(l : 'a list ref) : bool =
-  List.length !l == 0
+  List.length !l = 0
 ;;
 
 let pop (l : 'a list ref) : 'a =
@@ -94,8 +94,7 @@ let pop (l : 'a list ref) : 'a =
 ;;
 
 let bool_of_int (n: int) : bool =
-  if n == 0 then false
-  else true
+  n <> 0
 ;;
 
 (* renvoie le ou de toutes les expressions régulières dans l *)
@@ -131,14 +130,14 @@ let rec gen_regex (s : string) : regex =
       let count = ref 0 in
       let c = ref (pop(caracters)) in
       let i = ref false in
-      while not (!c == ')' && !count == 0 && not !i) do
+      while not (!c = ')' && !count = 0 && not !i) do
         if not !i then
           begin
-            if !c == '\\' then
-              i := true;
-            if !c == '(' then
-              count := !count + 1;
-            if !c == ')' then 
+            if !c = '\\' then
+              i := true
+            else if !c = '(' then
+              count := !count + 1
+            else if !c = ')' then 
               count := !count -1;
           end
         else 
@@ -158,27 +157,20 @@ let rec gen_regex (s : string) : regex =
       let c = ref (pop(caracters)) in
       let i = ref 0 in
       let pile1 = ref [] in
-      while not (!c == ']' && not (bool_of_int !i)) do
-        if not (bool_of_int !i) && !c == '\\' then
+      while not (!c = ']' && not (bool_of_int !i)) do
+        if not (bool_of_int !i) && !c = '\\' then
           i := 2;
         if !i <> 2 then 
-          match !pile1 with
-          | [] -> pile1 := [Caractere !c]
-
-          | [Caractere '-'; Caractere x] -> pile1 := [Range(x, !c)]
-          | Caractere '-'::Caractere x::q -> pile1 := Range(x, !c)::q
-
-          | Caractere x::q -> pile1 := Caractere !c::!pile1
-          | Range (x, y)::q -> pile1 := Caractere !c::!pile1
-          
-          | _ -> failwith "impossible";
-        ;
-        if !i <> 2 then
           begin
-            l := !c::!l;
+            match !pile1 with
+            | [Caractere '-'; Caractere x] -> pile1 := [Range(x, !c)]
+            | Caractere '-'::Caractere x::q -> pile1 := Range(x, !c)::q
+
+            | _ ->if !i = 1 && !c = 'n' then pile1 := Caractere '\n'::!pile1 else pile1 := Caractere !c::!pile1;
+            l := !c::!l
           end;
         c := pop(caracters);
-        if !i > 0 then i := !i-1;
+        if !i > 0 then i := !i-1
       done;
       or_reg !pile1
     with Empty_pile -> raise Invalid_syntax
@@ -191,7 +183,7 @@ let rec gen_regex (s : string) : regex =
       concat_reg pile
     else
     let c = pop(caracters) in
-    if ignore then gen_regex_2 (Caractere c::pile) false
+    if ignore then if c = 'n' then gen_regex_2 (Caractere '\n'::pile) false else gen_regex_2 (Caractere c::pile) false
     else
     match c with
     | '\\' -> gen_regex_2 pile true
@@ -209,8 +201,8 @@ let rec gen_regex (s : string) : regex =
         | [Caractere c], AllChars | [AllChars], Caractere c -> if c = '\n' then gen_regex_2 [Ou(Caractere c, AllChars)] false else gen_regex_2 [AllChars] false
         | Caractere c::q, AllChars | AllChars::q, Caractere c -> if c = '\n' then gen_regex_2 (Ou(Caractere c, AllChars)::q) false else gen_regex_2 (AllChars::q) false
         
-        | [Range (d, f)], AllChars | [AllChars], Range (d, f)  -> if d < '\n' || f < '\n' then gen_regex_2 [Ou(Range (d, f), AllChars)] false else gen_regex_2 [AllChars] false
-        | Range (d, f)::q, AllChars | AllChars::q, Range (d, f)-> if d < '\n' || f < '\n' then gen_regex_2 (Ou(Range (d, f), AllChars)::q) false else gen_regex_2 (AllChars::q) false
+        | [Range (d, f)], AllChars | [AllChars], Range (d, f)  -> if int_of_char d < 32 || int_of_char f < 32 then gen_regex_2 [Ou(Range (d, f), AllChars)] false else gen_regex_2 [AllChars] false
+        | Range (d, f)::q, AllChars | AllChars::q, Range (d, f)-> if int_of_char d < 32 || int_of_char f < 32 then gen_regex_2 (Ou(Range (d, f), AllChars)::q) false else gen_regex_2 (AllChars::q) false
 
         | [x], _ -> gen_regex_2 [Ou(x, left)] false
         | x::q, _  -> gen_regex_2 (Ou(x, left)::q) false
@@ -226,7 +218,7 @@ let rec gen_regex (s : string) : regex =
       begin
         match pile with
         | [] -> raise Invalid_syntax;
-        | Epsilon::q ->  gen_regex_2 pile false
+        | Epsilon::q -> gen_regex_2 pile false
         | [x] -> gen_regex_2 [UnPlus x] false
         | x::q -> gen_regex_2 (UnPlus x::q) false
       end
@@ -234,7 +226,7 @@ let rec gen_regex (s : string) : regex =
       begin
         match pile with
         | [] -> raise Invalid_syntax;
-        | Epsilon::q ->  gen_regex_2 pile false
+        | Epsilon::q -> gen_regex_2 pile false
         | [x] -> gen_regex_2 [ZeroPlus x] false
         | x::q -> gen_regex_2 (ZeroPlus x::q) false
       end
@@ -269,6 +261,7 @@ let rec gen_regex (s : string) : regex =
             match e with
             | Caractere c -> gen_regex_2 (AllBut (Array.init 128 ((<>) (int_of_char c)))::pile) false
             | Range (b1, b2) -> gen_regex_2 (AllBut (Array.init 128 (fun i -> i < int_of_char b1 || i > int_of_char b2))::pile) false
+            | AllChars -> gen_regex_2 (AllBut (Array.init 128 ((<) 32))::pile) false
             | Ou (e1, e2) ->
               (match recon_parntethis e1, recon_parntethis e2 with
               | AllBut l1, AllBut l2 -> gen_regex_2 (AllBut (Array.map2 (&&) l1 l2)::pile) false

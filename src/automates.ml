@@ -407,15 +407,16 @@ let execution_mot (a : automate_det) (texte : char list) : int * char list * cha
 
 let exec (a : automate_det) (txt : string) : (token_reg * string) list =
   let rec exec_aux (a : automate_det) (texte : char list) (out : (token_reg * string) list) : (token_reg * string) list =
+    (*print_endline ("matching substring '"^(String.of_seq (List.to_seq texte))^"'");*)
     match texte with
     | [] -> List.rev out
     | _ -> 
       match execution_mot a texte with
-      | (-1, _, s) -> print_string "Le lexème '"; print_string (String.of_seq(List.to_seq (List.rev s))); print_string "' n'est pas un lexème reconnu"; failwith ""
+      | (-1, _, s) -> print_string "Le lexème '"; print_string (String.of_seq(List.to_seq (List.rev s))); print_string "' n'est pas un lexème reconnu\n"; failwith ""
       | (x, q, s) ->
         let s = (String.of_seq(List.to_seq (List.rev s))) in 
         match a.fin.(x) with
-        | None -> print_string "Le lexème '"; print_string s; print_string "' n'est pas un lexème reconnu"; failwith ""
+        | None -> print_string "Le lexème '"; print_string s; print_string "' n'est pas un lexème reconnu\n"; failwith ""
         | Some t -> exec_aux a q ((t, s)::out) 
   in
   let res = exec_aux a (List.of_seq (String.to_seq txt)) [] in

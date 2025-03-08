@@ -1,0 +1,153 @@
+ExecutableProgram ->
+ProgramUnit_star ->
+StartCommentBlock ->
+ProgramUnit ->
+MainProgram ->
+MainRange ->
+BodyConstruct_star ->
+ProgramStmt ->
+EndProgramStmt ->
+EndName_opt ->
+BodyConstruct ->
+SpecificationPartConstruct ->
+DeclarationConstruct ->
+TypeDeclarationStmt ->
+Colon_Colon_opt ->
+EntityDecl_Comma_star ->
+EntityDecl ->
+Equal_Expr_opt ->
+Asterisk_CharLength_opt ->
+CharLength ->
+TypeParamValue ->
+TypeSpec ->
+KindSelector ->
+ExecutableConstruct ->
+ActionStmt ->
+AssignmentStmt ->
+CallStmt ->
+Parenthesis_Actual_Comma_star_or_epsilon ->
+ActualArg_Comma_star ->
+ActualArg ->
+Expr_Or_Asterisk ->
+ContinueStmt ->
+PrintStmt ->
+Comma_OutputItemList_opt ->
+FormatIdentifier ->
+OutputItemList ->
+Comma_OutputItem_star ->
+OutputItem ->
+DoConstruct ->
+BlockDoConstruct ->
+LoopControl_opt ->
+EndDoStmt ->
+Name_opt ->
+LoopControl ->
+Comma_IntRealDpExpression_opt ->
+IntRealDpExpression ->
+IfConstruct ->
+ElseIfStmt_ExecutionPartConstruct_star_star ->
+ExecutionPartConstruct_star ->
+ElseStmt_ExecutionPartConstruct_star_opt ->
+IfThenStmt ->
+ElseIfStmt ->
+ElseStmt ->
+EndIfStmt ->
+ExecutionPartConstruct ->
+ScalarLogicalExpr ->
+Expr ->
+Level5Expr ->
+EquivOp_EquivOperand_star ->
+EquivOperand ->
+OrOp_OrOperand_star ->
+OrOperand ->
+AndOp_AndOperand_star ->
+AndOperand ->
+NotOp_opt ->
+Level4Expr ->
+RelOp_Level3Expr_star ->
+Level3Expr ->
+ConcatOp_Level2Expr_star ->
+Level2Expr ->
+AddOp_Sign_opt_AddOperand_star ->
+Sign_opt_AddOperand ->
+Sign_opt ->
+AddOperand ->
+MultOp_MultOperand_star ->
+MultOperand ->
+PowerOp_Level1Expr_star ->
+Level1Expr ->
+Primary ->
+Comma_Expr_opt ->
+Name ->
+ArrayName ->
+ComponentName ->
+EndName ->
+DummyArgName ->
+FunctionName ->
+ImpliedDoVariable ->
+ProgramName ->
+SubroutineName ->
+SubroutineNameUse ->
+VariableName ->
+ObjectName ->
+LogicalConstant ->
+PowerOp ->
+MultOp ->
+AddOp ->
+Sign ->
+RelOp ->
+EquivOp ->
+ScalarIntLiteralConstant ->
+Scon ->
+
+
+ConcatOp ->
+NotOp ->
+AndOp ->
+OrOp ->
+Rcon ->
+Icon ->
+SconSingle ->
+SconDouble ->
+Ident ->
+EOS ->
+True ->
+False ->
+Program ->
+EndProgram ->
+EndDo ->
+Colon ->
+Comma ->
+Equal ->
+Asterisk ->
+RParenthesis ->
+LParenthesis ->
+Integer ->
+Real ->
+Double ->
+Complex ->
+Character ->
+Logical ->
+Kind ->
+Len ->
+Call ->
+Print -> Syntax
+Do -> Syntax
+While -> Syntax
+If -> Syntax If
+Then -> Syntax Then
+Else -> Syntax Else
+EndIf -> Syntax End_if
+
+Divise -> Operateur Division
+Plus -> Operateur Plus
+Minus -> Operateur Moins
+
+IsEqual -> Comparateur Egal
+NotEqual -> Comparateur NonEgal
+StrictLess -> Comparateur StrictPlusPetit
+LessEqual -> Comparateur PlusPetit
+StrictGreater -> Comparateur StrictPlusGrand
+GreaterEqual -> Comparateur PlusGrand
+Equivalent ->
+NotEquivalent ->

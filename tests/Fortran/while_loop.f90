@@ -14,7 +14,4 @@ program factorial
       print*,  n, " ", nfact
    end do
 
-
-   test % test
-
 end program factorial
