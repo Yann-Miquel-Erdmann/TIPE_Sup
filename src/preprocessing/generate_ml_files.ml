@@ -75,7 +75,7 @@ let generate_file_lexer (g: grammar): unit =
 
 let generate_file_symbols (g: grammar): unit =  
 
-  let t = ("EOF", [["'End of File'"]])::("E", [["'Epsilon'"]]):: (terminals g) in
+  let t = ("EOF", [["'End of file'"]])::("E", [["'Epsilon'"]]):: (terminals g) in
   let nt = non_terminals g in
   
   print_endline "Generating the symbols.ml file...";
