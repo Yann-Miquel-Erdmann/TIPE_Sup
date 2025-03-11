@@ -118,22 +118,22 @@ EndProgram ->
 EndDo ->
 Colon ->
 Comma ->
-Equal ->
+Equal -> 
 Asterisk ->
-RParenthesis ->
-LParenthesis ->
-Integer ->
-Real ->
-Double ->
-Complex ->
-Character ->
-Logical ->
-Kind ->
-Len ->
-Call ->
-Print -> Syntax
-Do -> Syntax
-While -> Syntax
+RParenthesis -> Parenthesefermante
+LParenthesis -> Parentheseouvrante
+Integer -> Syntax Integer
+Real -> Syntax Real
+Double -> Syntax Double_precision
+Complex -> Syntax Complex
+Character -> Syntax Character
+Logical -> Syntax Logical
+Kind -> Syntax Kind
+Len -> Syntax Len
+Call -> Syntax Call
+Print -> Syntax Print
+Do -> Syntax Do
+While -> Syntax While
 If -> Syntax If
 Then -> Syntax Then
 Else -> Syntax Else
@@ -149,5 +149,5 @@ StrictLess -> Comparateur StrictPlusPetit
 LessEqual -> Comparateur PlusPetit
 StrictGreater -> Comparateur StrictPlusGrand
 GreaterEqual -> Comparateur PlusGrand
-Equivalent ->
-NotEquivalent ->
+Equivalent -> Comparateur Equivalent
+NotEquivalent -> Comparateur NonEquivalent
