@@ -1,5 +1,4 @@
 program factorial  
-   implicit none
 
    ! define variables
    integer :: nfact

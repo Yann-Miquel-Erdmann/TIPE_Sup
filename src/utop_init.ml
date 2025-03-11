@@ -1,6 +1,6 @@
-#load "vector.cma" ;;
-#load "tokens.cmo" ;;
-#load "regex.cmo";;
+#load "vector.cma" 
+#load "tokens.cmo" 
+#load "regex.cmo"
 #load "automates.cmo"
 #use "lexer.ml";;
 (*#load "dictionnaire.cmo"

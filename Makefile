@@ -4,6 +4,7 @@ OCAMLDEP = ocamldep
 
 # dossiers
 SRC_DIR = src
+PREPROCESSING_DIR = src/preprocessing
 BUILD_DIR = _build
 FORTRAN_TEST_DIR = tests/Fortran
 C_TEST_DIR = tests/C
@@ -11,42 +12,44 @@ C_OUTPUT_DIR = tests/Output
 
 # fichiers
 EXECUTABLE = $(BUILD_DIR)/transpileur
-LEXER_EXECUTABLE = $(BUILD_DIR)/lexer
-BLACK_LIST = $(SRC_DIR)/utop_init.ml $(SRC_DIR)/tokens2.ml
-DEPENDENCIES = $(BUILD_DIR)/.dependencies
-LEXER_FILES = $(SRC_DIR)/grammar.ml $(SRC_DIR)/generate_tokens.ml
+PREPROCESSING_EXECUTABLE = $(BUILD_DIR)/preprocessing
+BLACK_LIST = $(SRC_DIR)/utop_init.ml $(SRC_DIR)/tokens2.ml $(SRC_DIR)/create_ast.ml $(SRC_DIR)/generateC.ml $(SRC_DIR)/transpiler.ml $(SRC_DIR)/main.ml
+
+
+PREPROCESSING_FILES = $(wildcard $(PREPROCESSING_DIR)/*.ml)
+ORDERED_PREPROCESSING_FILES = $(shell $(OCAMLDEP) -sort -I $(PREPROCESSING_DIR) $(PREPROCESSING_FILES))
 
 # trouve les ml
-ML_FILES = $(filter-out $(BLACK_LIST) $(LEXER_FILES), $(wildcard $(SRC_DIR)/*.ml))
+ML_FILES = $(filter-out $(BLACK_LIST), $(wildcard $(SRC_DIR)/*.ml))
 # fichiers ml ordonnés pour la compilation de l'exécutable
-ORDERED_FILES = $(shell $(OCAMLDEP) -sort -I $(SRC_DIR) $(ML_FILES))
+ORDERED_ML_FILES = $(shell $(OCAMLDEP) -sort -I $(SRC_DIR) $(ML_FILES))
 
 
 FORTRAN_TEST_FILES = $(notdir  $(wildcard $(FORTRAN_TEST_DIR)/*.f90))
 C_OUTPUT_FILES = $(addprefix $(C_OUTPUT_DIR)/, $(patsubst %.f90, %.c, $(FORTRAN_TEST_FILES)))
 C_TEST_FILES = $(addprefix $(C_TEST_DIR)/, $(patsubst %.f90, %.c, $(FORTRAN_TEST_FILES)))
 
-$(info $(FORTRAN_TEST_FILES))
-$(info $(C_OUTPUT_FILES))
+$(info $(ML_FILES))
+$(info $(ORDERED_ML_FILES))
 
+default: build
 # signale que ce ne sont pas de fichiers mais des "commandes"
-.PHONY: build clean test_suite build_lexer generate_automate
+.PHONY: build clean test_suite preprocessing
+
+preprocessing: $(PREPROCESSING_EXECUTABLE)
+	./$(PREPROCESSING_EXECUTABLE)
+
+# Compile le préprocesseur
+$(PREPROCESSING_EXECUTABLE) : $(BUILD_DIR)
+	$(OCAMLC) -I $(PREPROCESSING_DIR) -o $@ $(PREPROCESSING_FILES)
+
+
+
 build: $(EXECUTABLE)
-
-# Compile le lexer
-$(LEXER_EXECUTABLE) : $(BUILD_DIR)
-	$(OCAMLC) -I src -o $@ $(LEXER_FILES)
-
-build_lexer: $(LEXER_EXECUTABLE)
-
-generate_automate:
-	rm -f $(LEXER_EXECUTABLE)
-	@$(MAKE) build_lexer
-	./$(LEXER_EXECUTABLE)
 
 # Compile l'exécutable
 $(EXECUTABLE): $(BUILD_DIR) $(SRC_DIR)/vector.cma $(SRC_DIR)/vector.cmi
-	$(OCAMLC) -I src -o $@ $(SRC_DIR)/vector.cma $(ORDERED_FILES)
+	$(OCAMLC) -I $(SRC_DIR) -o $@ $(SRC_DIR)/vector.cma $(ORDERED_ML_FILES)
 
 
 $(SRC_DIR)/vector.cma:
@@ -71,5 +74,6 @@ clean:
 	rm -f $(LEXER_EXECUTABLE)
 	rm -f $(EXECUTABLE)
 	rm -f $(SRC_DIR)/*.cm[ioa]
+	rm -f $(PREPROCESSING_DIR)/*.cm[ioa]
 	rm -f $(C_OUTPUT_DIR)/*.c
 

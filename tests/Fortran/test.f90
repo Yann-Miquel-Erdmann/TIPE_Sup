@@ -1,5 +1,5 @@
 real function func(arg1, arg2) 
-    implicit none
+
     real :: arg1
     real :: arg2
     func = arg1+arg2*3
@@ -11,7 +11,7 @@ end function func
 
 program addNumbers
     ! ceci est un commentaire
-    implicit none
+    
     real :: a, b, res
     real :: func
     integer :: n 

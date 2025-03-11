@@ -4,8 +4,7 @@
     "nasc-touchbar.addCursorBelow": false,
     "nasc-touchbar.gitSync": true,
     "ocaml.sandbox": {
-        "kind": "opam",
-        "switch": "default"
+        "kind": "global"
     },
     "files.exclude": {
         "**/.git": true,

@@ -1,103 +1,102 @@
-type derivation = string list
-type rule = string*(derivation list)
-type grammar = rule list 
-type hashed_grammar = (string ,(derivation list)) Hashtbl.t 
-
-
-let alphanumerical_maj (c:char) = 41 <= Char.code c && Char.code c <= 90  
-let alphanumerical_min (c:char) = 97 <= Char.code c && Char.code c <= 122  
-
-(** Returns the list of all the lines in the file named [file_name]. *)
-let read_file (file_name: string) : string list = 
-  let rec lire file liste = 
-    let line = input_line file in
-      ();
-    try lire file (line::liste) with End_of_file->
-      close_in file;
-      line::liste
-  in List.rev (lire (open_in file_name) [])
-
-
-
-(* returns the name of the rule and the remaining chars on the line *)
-let get_rule_name (s: char list): string*(char list) = 
-  let rec get_rule_name_aux (s: char list) (revname: char list): string*(char list) = 
-    match s with
-    | [] -> failwith "no rule name one the line"
-    | ' '::q -> String.of_seq (List.to_seq (List.rev revname)),q
-    | c::q -> get_rule_name_aux q (c::revname)
-  in
-  get_rule_name_aux s []
-
-
-(* removes \s*->\s* from the string*)
-let rec remove_arrow (s: char list): char list = 
-  match s with
-  | [] -> failwith "there is no arrow in the rule"
-  | ' '::q -> remove_arrow q 
-  | '-'::'>'::q -> remove_arrow q
-  | _ -> s
-
-
-
-
-(* splits the derivation into a list of list of strings   *)
-let get_derivations (s: char list): derivation list =
-  (* splits one derivation on [a-z]\s[A-Z]  *)
-  let split_derivation (s: char list): derivation = 
-    let rec split_derivation_aux (s: char list) (rev_rule_name: char list): derivation = 
-      match s with
-      | [] -> [String.of_seq (List.to_seq (List.rev (rev_rule_name)))]
-      | c1::' '::c2::q when (alphanumerical_min c1) && ( alphanumerical_maj c2) -> (String.of_seq (List.to_seq (List.rev (c1::rev_rule_name)))) :: split_derivation_aux (c2::q) []  
-      | c:: q -> split_derivation_aux q (c::rev_rule_name) 
-
-    in split_derivation_aux s []
-  in
-  (* splits the derivations on \s|\s  *)
-  let rec split_derivations (s: char list) (rev_derivation: char list): derivation list = 
-    match s with
-    | [] -> [split_derivation (List.rev rev_derivation) ]
-    | ' '::'|'::' ' :: q -> (split_derivation (List.rev rev_derivation) )::(split_derivations q []) 
-    | c:: q -> split_derivations q (c::rev_derivation) 
-  in
-  split_derivations s []  
-
-
-
-(** Returns all the token names in [s] if they respect the regex rule [[A-Za-z0-9]]. Then it is stored in [out].
-    [in_string] helps knowing if it is in string to not match there. *)
-let get_rule (line : string): rule =
-  let s = List.init (String.length line) (String.get line) in
-  
-  let rule_name,s1 = get_rule_name s in
-  let derivations = get_derivations (remove_arrow s1) in
-  rule_name,derivations
-
-let get_grammar (file_name: string): grammar = 
-  let lines = read_file file_name in
-  let not_empty_lines = List.filter (fun l -> l <> "") lines in 
-  List.map get_rule not_empty_lines
-
-
-let print_derivations (derivations: derivation list): unit = 
-  List.iter (fun derivation -> (List.iter (fun s -> print_string (s ^ " ")) derivation ); print_newline()) derivations
-
-let print_grammar (g: grammar): unit = 
-  List.iter (fun (name, derivations) -> print_string (name ^ " -> \n"); print_derivations derivations; print_newline ();) g
-  
-  
-let is_terminal (_,derivations: rule): bool = 
-  match derivations with
-  | [[s]] -> not (alphanumerical_maj (String.get s 0))
-  | _ -> false
-
-let is_non_terminal (_,derivations: rule): bool = 
-  match derivations with 
-  | [[s]] -> (alphanumerical_maj (String.get s 0))  
-  | _ -> true
-
-
-(* returns the list of the terminal symbols *)
-let terminals (g: grammar): grammar = List.filter is_terminal g
-let non_terminals (g: grammar): grammar = List.filter is_non_terminal  g
-
+open Grammar_functions
+open Symbols
+let g = [(NonTerminal ExecutableProgram,[[NonTerminal ProgramUnit;NonTerminal ProgramUnit_star;];[NonTerminal StartCommentBlock;NonTerminal ProgramUnit;NonTerminal ProgramUnit_star;];]);
+(NonTerminal ProgramUnit_star,[[NonTerminal ProgramUnit;NonTerminal ProgramUnit_star;];[Terminal E;];]);
+(NonTerminal StartCommentBlock,[[Terminal EOS;];]);
+(NonTerminal ProgramUnit,[[NonTerminal MainProgram;];]);
+(NonTerminal MainProgram,[[NonTerminal ProgramStmt;NonTerminal MainRange;];]);
+(NonTerminal MainRange,[[NonTerminal BodyConstruct;NonTerminal BodyConstruct_star;NonTerminal EndProgramStmt;];[NonTerminal EndProgramStmt;];]);
+(NonTerminal BodyConstruct_star,[[NonTerminal BodyConstruct;NonTerminal BodyConstruct_star;];[Terminal E;];]);
+(NonTerminal ProgramStmt,[[Terminal Program;NonTerminal ProgramName;Terminal EOS;];]);
+(NonTerminal EndProgramStmt,[[Terminal EndProgram;NonTerminal EndName_opt;Terminal EOS;];]);
+(NonTerminal EndName_opt,[[NonTerminal EndName;];[Terminal E;];]);
+(NonTerminal BodyConstruct,[[NonTerminal SpecificationPartConstruct;];[NonTerminal ExecutableConstruct;];]);
+(NonTerminal SpecificationPartConstruct,[[NonTerminal DeclarationConstruct;];]);
+(NonTerminal DeclarationConstruct,[[NonTerminal TypeDeclarationStmt;];]);
+(NonTerminal TypeDeclarationStmt,[[NonTerminal TypeSpec;NonTerminal Colon_Colon_opt;NonTerminal EntityDecl;NonTerminal EntityDecl_Comma_star;Terminal EOS;];]);
+(NonTerminal Colon_Colon_opt,[[Terminal Colon;Terminal Colon;];[Terminal E;];]);
+(NonTerminal EntityDecl_Comma_star,[[NonTerminal EntityDecl;NonTerminal EntityDecl_Comma_star;];[Terminal E;];]);
+(NonTerminal EntityDecl,[[NonTerminal ObjectName;NonTerminal Asterisk_CharLength_opt;NonTerminal Equal_Expr_opt;];]);
+(NonTerminal Equal_Expr_opt,[[Terminal Equal;NonTerminal Expr;];[Terminal E;];]);
+(NonTerminal Asterisk_CharLength_opt,[[Terminal Asterisk;NonTerminal CharLength;];[Terminal E;];]);
+(NonTerminal CharLength,[[Terminal RParenthesis;NonTerminal TypeParamValue;Terminal LParenthesis;];[NonTerminal ScalarIntLiteralConstant;];]);
+(NonTerminal TypeParamValue,[[NonTerminal Expr_Or_Asterisk;];]);
+(NonTerminal TypeSpec,[[Terminal Integer;NonTerminal KindSelector;];[Terminal Double;];[Terminal Complex;NonTerminal KindSelector;];[Terminal Logical;NonTerminal KindSelector;];]);
+(NonTerminal KindSelector,[[Terminal RParenthesis;NonTerminal Expr;Terminal LParenthesis;];]);
+(NonTerminal ExecutableConstruct,[[NonTerminal ActionStmt;];[NonTerminal DoConstruct;];[NonTerminal IfConstruct;];[NonTerminal EndDoStmt;];]);
+(NonTerminal ActionStmt,[[NonTerminal AssignmentStmt;];[NonTerminal CallStmt;];[NonTerminal PrintStmt;];]);
+(NonTerminal AssignmentStmt,[[NonTerminal Name;Terminal Equal;NonTerminal Expr;Terminal EOS;];]);
+(NonTerminal CallStmt,[[Terminal Call;NonTerminal SubroutineNameUse;NonTerminal Parenthesis_Actual_Comma_star_or_epsilon;Terminal EOS;];]);
+(NonTerminal Parenthesis_Actual_Comma_star_or_epsilon,[[Terminal RParenthesis;NonTerminal ActualArg_Comma_star;Terminal LParenthesis;];[Terminal E;];]);
+(NonTerminal ActualArg_Comma_star,[[Terminal Comma;NonTerminal ActualArg;NonTerminal ActualArg_Comma_star;];[Terminal E;];]);
+(NonTerminal ActualArg,[[NonTerminal Expr_Or_Asterisk;];[NonTerminal Name;Terminal Equal;NonTerminal Expr_Or_Asterisk;];]);
+(NonTerminal Expr_Or_Asterisk,[[NonTerminal Expr;];[Terminal Asterisk;];]);
+(NonTerminal PrintStmt,[[Terminal Print;NonTerminal FormatIdentifier;NonTerminal Comma_OutputItemList_opt;Terminal EOS;];]);
+(NonTerminal Comma_OutputItemList_opt,[[Terminal Comma;NonTerminal OutputItemList;];[Terminal E;];]);
+(NonTerminal FormatIdentifier,[[Terminal Asterisk;];]);
+(NonTerminal OutputItemList,[[NonTerminal OutputItem;NonTerminal Comma_OutputItem_star;];]);
+(NonTerminal Comma_OutputItem_star,[[Terminal Comma;NonTerminal OutputItem;NonTerminal Comma_OutputItem_star;];[Terminal E;];]);
+(NonTerminal OutputItem,[[NonTerminal Expr;];]);
+(NonTerminal DoConstruct,[[NonTerminal BlockDoConstruct;];]);
+(NonTerminal BlockDoConstruct,[[Terminal Do;NonTerminal LoopControl_opt;Terminal EOS;];]);
+(NonTerminal LoopControl_opt,[[NonTerminal LoopControl;];[Terminal E;];]);
+(NonTerminal EndDoStmt,[[Terminal EndDo;NonTerminal Name_opt;Terminal EOS;];]);
+(NonTerminal Name_opt,[[NonTerminal Name;];[Terminal E;];]);
+(NonTerminal LoopControl,[[Terminal While;Terminal RParenthesis;NonTerminal Expr;Terminal LParenthesis;];[NonTerminal VariableName;Terminal Equal;NonTerminal IntRealDpExpression;Terminal Comma;NonTerminal IntRealDpExpression;NonTerminal Comma_IntRealDpExpression_opt;];]);
+(NonTerminal Comma_IntRealDpExpression_opt,[[Terminal Comma;NonTerminal IntRealDpExpression;];[Terminal E;];]);
+(NonTerminal IntRealDpExpression,[[NonTerminal Expr;];]);
+(NonTerminal IfConstruct,[[NonTerminal IfThenStmt;NonTerminal ExecutionPartConstruct_star;NonTerminal ElseIfStmt_ExecutionPartConstruct_star_star;NonTerminal ElseStmt_ExecutionPartConstruct_star_opt;NonTerminal EndIfStmt;];]);
+(NonTerminal ElseIfStmt_ExecutionPartConstruct_star_star,[[NonTerminal ElseIfStmt;NonTerminal ExecutionPartConstruct_star;NonTerminal ElseIfStmt_ExecutionPartConstruct_star_star;];[Terminal E;];]);
+(NonTerminal ExecutionPartConstruct_star,[[NonTerminal ExecutionPartConstruct;NonTerminal ExecutionPartConstruct_star;];[Terminal E;];]);
+(NonTerminal ElseStmt_ExecutionPartConstruct_star_opt,[[NonTerminal ElseStmt;NonTerminal ExecutionPartConstruct_star;];[Terminal E;];]);
+(NonTerminal IfThenStmt,[[Terminal If;Terminal RParenthesis;NonTerminal ScalarLogicalExpr;Terminal LParenthesis;Terminal Then;Terminal EOS;];]);
+(NonTerminal ElseIfStmt,[[Terminal Else;Terminal If;Terminal RParenthesis;NonTerminal ScalarLogicalExpr;Terminal LParenthesis;Terminal Then;Terminal EOS;];]);
+(NonTerminal ElseStmt,[[Terminal Else;Terminal EOS;];]);
+(NonTerminal EndIfStmt,[[Terminal EndIf;Terminal EOS;];]);
+(NonTerminal ExecutionPartConstruct,[[NonTerminal ExecutableConstruct;];]);
+(NonTerminal ScalarLogicalExpr,[[NonTerminal Expr;];]);
+(NonTerminal Expr,[[NonTerminal Level5Expr;];]);
+(NonTerminal Level5Expr,[[NonTerminal EquivOperand;NonTerminal EquivOp_EquivOperand_star;];]);
+(NonTerminal EquivOp_EquivOperand_star,[[NonTerminal EquivOp;NonTerminal EquivOperand;NonTerminal EquivOp_EquivOperand_star;];[Terminal E;];]);
+(NonTerminal EquivOperand,[[NonTerminal OrOperand;NonTerminal OrOp_OrOperand_star;];]);
+(NonTerminal OrOp_OrOperand_star,[[Terminal OrOp;NonTerminal OrOperand;NonTerminal OrOp_OrOperand_star;];[Terminal E;];]);
+(NonTerminal OrOperand,[[NonTerminal AndOperand;NonTerminal AndOp_AndOperand_star;];]);
+(NonTerminal AndOp_AndOperand_star,[[Terminal AndOp;NonTerminal AndOperand;NonTerminal AndOp_AndOperand_star;];[Terminal E;];]);
+(NonTerminal AndOperand,[[NonTerminal NotOp_opt;NonTerminal Level4Expr;];]);
+(NonTerminal NotOp_opt,[[Terminal NotOp;];[Terminal E;];]);
+(NonTerminal Level4Expr,[[NonTerminal Level3Expr;NonTerminal RelOp_Level3Expr_star;];]);
+(NonTerminal RelOp_Level3Expr_star,[[NonTerminal RelOp;NonTerminal Level3Expr;NonTerminal RelOp_Level3Expr_star;];[Terminal E;];]);
+(NonTerminal Level3Expr,[[NonTerminal Level2Expr;NonTerminal ConcatOp_Level2Expr_star;];]);
+(NonTerminal ConcatOp_Level2Expr_star,[[Terminal ConcatOp;NonTerminal Level2Expr;NonTerminal ConcatOp_Level2Expr_star;];[Terminal E;];]);
+(NonTerminal Level2Expr,[[NonTerminal Sign_opt_AddOperand;NonTerminal AddOp_Sign_opt_AddOperand_star;];]);
+(NonTerminal AddOp_Sign_opt_AddOperand_star,[[NonTerminal AddOp;NonTerminal Sign_opt_AddOperand;NonTerminal AddOp_Sign_opt_AddOperand_star;];[Terminal E;];]);
+(NonTerminal Sign_opt_AddOperand,[[NonTerminal Sign_opt;NonTerminal AddOperand;];]);
+(NonTerminal Sign_opt,[[NonTerminal Sign;];[Terminal E;];]);
+(NonTerminal AddOperand,[[NonTerminal MultOperand;NonTerminal MultOp_MultOperand_star;];]);
+(NonTerminal MultOp_MultOperand_star,[[NonTerminal MultOp;NonTerminal MultOperand;NonTerminal MultOp_MultOperand_star;];[Terminal E;];]);
+(NonTerminal MultOperand,[[NonTerminal Level1Expr;NonTerminal PowerOp_Level1Expr_star;];]);
+(NonTerminal PowerOp_Level1Expr_star,[[Terminal PowerOp;NonTerminal Level1Expr;NonTerminal PowerOp_Level1Expr_star;];[Terminal E;];]);
+(NonTerminal Level1Expr,[[NonTerminal Primary;];]);
+(NonTerminal Primary,[[Terminal Icon;];[Terminal Rcon;];[NonTerminal Name;];[Terminal RParenthesis;NonTerminal Expr;NonTerminal Comma_Expr_opt;Terminal LParenthesis;];[NonTerminal Scon;];[NonTerminal LogicalConstant;];]);
+(NonTerminal Comma_Expr_opt,[[Terminal Comma;NonTerminal Expr;];[Terminal E;];]);
+(NonTerminal Name,[[Terminal Ident;];]);
+(NonTerminal ArrayName,[[Terminal Ident;];]);
+(NonTerminal ComponentName,[[Terminal Ident;];]);
+(NonTerminal EndName,[[Terminal Ident;];]);
+(NonTerminal DummyArgName,[[Terminal Ident;];]);
+(NonTerminal FunctionName,[[Terminal Ident;];]);
+(NonTerminal ImpliedDoVariable,[[Terminal Ident;];]);
+(NonTerminal ProgramName,[[Terminal Ident;];]);
+(NonTerminal SubroutineName,[[Terminal Ident;];]);
+(NonTerminal SubroutineNameUse,[[Terminal Ident;];]);
+(NonTerminal VariableName,[[Terminal Ident;];]);
+(NonTerminal ObjectName,[[Terminal Ident;];]);
+(NonTerminal LogicalConstant,[[Terminal True;];[Terminal False;];]);
+(NonTerminal MultOp,[[Terminal Asterisk;];[Terminal Divise;];]);
+(NonTerminal AddOp,[[NonTerminal Sign;];]);
+(NonTerminal Sign,[[Terminal Plus;];[Terminal Minus;];]);
+(NonTerminal RelOp,[[Terminal IsEqual;];[Terminal NotEqual;];[Terminal StrictLess;];[Terminal LessEqual;];[Terminal StrictGreater;];[Terminal GreaterEqual;];]);
+(NonTerminal EquivOp,[[Terminal Equivalent;];[Terminal NotEquivalent;];]);
+(NonTerminal ScalarIntLiteralConstant,[[Terminal Icon;];]);
+(NonTerminal Scon,[[Terminal SconSingle;];[Terminal SconDouble;];]);
+]
