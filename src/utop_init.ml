@@ -1,8 +1,7 @@
-#load "vector.cma" 
-#load "tokens.cmo" 
-#load "regex.cmo"
-#load "automates.cmo"
-#use "lexer.ml";;
+#load "vector.cma"
+#load "symbols.cmo" 
+#load "grammar.cmo" 
+#load "grammar_functions.cmo" 
 (*#load "dictionnaire.cmo"
 #load "environnement.cmo";;
 #load "bibliotheques.cmo"

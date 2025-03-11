@@ -11,12 +11,14 @@ type symbol_SS_Htbl = (symbol,SymbolSet.t) Hashtbl.t
 
 
 let print_SymbolSet (ss: SymbolSet.t): unit = 
-  print_endline "SymbolSet(\n" ;
+  print_endline "SymbolSet(" ;
   SymbolSet.iter (fun s -> print_symbol s; print_newline ()) ss;
   print_endline ")\n"
 
 let print_SymbolSet_Hastable (h: symbol_SS_Htbl): unit =
   Hashtbl.iter (fun s ss -> print_string (string_of_symbol s ^ " -> "); print_SymbolSet ss; print_newline ()) h
+
+
 
 
 (* returns a hashtable containing the first set of every non terminal *)
@@ -42,17 +44,24 @@ let first (g: grammar): symbol_SS_Htbl =
 
     match d with
     | [] -> failwith "empty pattern"
-    | first_string::q -> (
-        if first_string = (Terminal E) then
-          SymbolSet.singleton (Terminal E)
-        else
-          (first_of_rule (first_string,(Hashtbl.find h_grammar first_string)); Hashtbl.find first_h first_string )
-      )
+    | Terminal t::q -> SymbolSet.singleton (Terminal t)
+    | fst_symbol::q -> (
+      first_of_rule (fst_symbol,(Hashtbl.find h_grammar fst_symbol)); 
+      Hashtbl.find first_h fst_symbol 
+    )
     
   in 
   (List.iter (fun (name, pattern) -> first_of_rule (name, pattern)) g);
   first_h
 
+
+let first_of_pattern (fst_ss_htbl: symbol_SS_Htbl) (p: pattern): SymbolSet.t = 
+  print_endline ("first_of_pattern "); print_patterns [p];print_newline();
+  match p with
+  | [] -> failwith "empty pattern in first_of_pattern"
+  | NonTerminal nt::_ -> Hashtbl.find fst_ss_htbl (NonTerminal nt) 
+  | Terminal t::_ -> SymbolSet.singleton (Terminal t)
+  
 
 
 (* returns a hashtable containing the follow set of every non terminal (all the terminals that can occur after a rule) *)
@@ -66,10 +75,11 @@ let follow (g:grammar):  symbol_SS_Htbl  =
   (* fills the follow_non_terminal and parent_on_end *)
   let rec pattern_follow (s: symbol) (d: pattern) : unit = 
     (match d with
-    | name1::name2::q -> Hashtbl.replace follow_non_terminal name1 (SymbolSet.add name2 (Hashtbl.find follow_non_terminal name1)) ; pattern_follow s (name2::q)
-    | name1::[] ->
-      if (name1 <> s) && (name1 <> (Terminal E)) then  
-        Hashtbl.replace parent_on_end name1 (SymbolSet.add s (Hashtbl.find parent_on_end name1)) 
+    | (NonTerminal s1)::s2::q -> Hashtbl.replace follow_non_terminal (NonTerminal s1) (SymbolSet.add s2 (Hashtbl.find follow_non_terminal (NonTerminal s1))) ; pattern_follow s (s2::q)
+    | (Terminal s1)::q -> pattern_follow s (q)
+    | NonTerminal s1::[] -> 
+      if ((NonTerminal s1) <> s) && ((NonTerminal s1) <> (Terminal E)) then  
+        Hashtbl.replace parent_on_end (NonTerminal s1) (SymbolSet.add s (Hashtbl.find parent_on_end (NonTerminal s1))) 
       else ()
     | [] -> ())
     ;
@@ -80,33 +90,29 @@ let follow (g:grammar):  symbol_SS_Htbl  =
   in
   List.iter patterns_follow (non_terminals g);
 
-
-
   let first_h = first g in 
   (* contains the terminals that can appear after a key in the grammar*)
   let follow_h =  Hashtbl.create (Hashtbl.length first_h) in
-  
 
   let rec union_and_next_on_epsilon (next_hashtable: symbol_SS_Htbl) (s: symbol)  (acc:SymbolSet.t) : SymbolSet.t = 
-    
-
-    if SymbolSet.mem (Terminal E) (Hashtbl.find next_hashtable s ) then(
-      follow_of_rule (s,[]);
-      SymbolSet.remove (Terminal E) (SymbolSet.union acc (SymbolSet.union (Hashtbl.find follow_h s) (Hashtbl.find next_hashtable s)))
-    ) else (
-      SymbolSet.union acc (Hashtbl.find next_hashtable s)
-    )
-    
+    if is_non_terminal_symbol s then 
+      if SymbolSet.mem (Terminal E) (Hashtbl.find next_hashtable s ) then(
+        follow_of_rule (s,[]);
+        SymbolSet.remove (Terminal E) (SymbolSet.union acc (SymbolSet.union (Hashtbl.find follow_h s) (Hashtbl.find next_hashtable s)))
+      ) else (
+        SymbolSet.union acc (Hashtbl.find next_hashtable s)
+      )
+    else 
+      SymbolSet.singleton s
 
   and
 
   follow_of_rule (s,_: rule): unit =
-
+    
     (* checking if already computed *)
     if not (Hashtbl.mem follow_h s) then (
       
-      let follow_non_terminal_set = SymbolSet.fold (union_and_next_on_epsilon first_h)  (Hashtbl.find follow_non_terminal s) (SymbolSet.singleton (Terminal EOF)) in
-      
+      let follow_non_terminal_set = SymbolSet.fold (union_and_next_on_epsilon first_h) (Hashtbl.find follow_non_terminal s) (SymbolSet.singleton (Terminal EOF)) in
       let follow_parent_on_end_set = SymbolSet.fold (fun rn -> follow_of_rule (rn,[]); union_and_next_on_epsilon follow_h rn) (Hashtbl.find parent_on_end s) (SymbolSet.singleton (Terminal EOF)) in
       
       Hashtbl.replace follow_h s (SymbolSet.union follow_non_terminal_set follow_parent_on_end_set)
@@ -121,16 +127,55 @@ let follow (g:grammar):  symbol_SS_Htbl  =
 
 
 
+
 (* arbre de syntaxe (non abstraite) *)
 type at = Noeud of symbol * (at list)
 
-(* let analyse_LL1 (g: grammar) (texte: token list): at = 
+let analyse_LL1_of_symbol (g: grammar) (text: symbol list) (s: symbol): at*(symbol list) = 
+  let follow_sshtbl = follow g in
+  let first_sshtbl = first g in
+
   let hg = hashed_grammar_of_grammar g in
-  let analyse_LL1_aux (texte: token list) (rule_name: string): at*(token list) = 
-    if is_terminal (rule_of_rulename  rule_name) then(
-      match texte with
+  let rec analyse_LL1_of_pattern (text: symbol list) (s: symbol) (p: pattern): at*(symbol list) = 
+    print_endline "analyse_LL1_of_pattern";
+    if p = [Terminal E] then ( 
+      Noeud (s, [Noeud ((Terminal E), [])]), text
+    ) else (
+      let txt = ref text in
+      let t = Noeud (s, List.map (fun (s_p:symbol) -> let tree, txt' = analyse_LL1_of_symbol_aux (!txt) s_p in txt := txt'; tree ) p) in
+      t, !txt
+    )
+  and 
+  analyse_LL1_of_symbol_aux (text: symbol list) (s: symbol): at*(symbol list) = 
+    print_endline ("analyse_LL1_of_symbol_aux "^string_of_symbol s);
+    print_patterns [text];
+    if is_terminal (s, []) then(
+      print_endline "is terminal";
+      match text with
       | [] -> failwith "no text to match in analyse_LL1, text is empty"
-      | t1::q ->if t1 = rule_name Noeud (t1, []), q
+      | t1::q ->if t1 = s then (print_endline ("found "^string_of_symbol s);Noeud (t1, []), q )else failwith "the expected terminal does not match the text"
     )else(
-      failwith "the expected terminal does not match the text"
-    ) *)
+      print_endline "is non_terminal";
+      if text = [Terminal E] then (
+        if (SymbolSet.mem (Terminal E) (Hashtbl.find first_sshtbl s)) && (SymbolSet.mem (Terminal EOF) (Hashtbl.find follow_sshtbl s)) then (
+          let p = List.nth (List.filter (fun p -> SymbolSet.mem (Terminal E) (first_of_pattern first_sshtbl p)) (Hashtbl.find hg s)) 0 in
+          analyse_LL1_of_pattern text s p
+        ) else (failwith "text is epsilon but more symbols are expected")
+      ) else (
+        print_SymbolSet (Hashtbl.find first_sshtbl s);
+        print_SymbolSet (Hashtbl.find follow_sshtbl s);
+        if (SymbolSet.mem (Terminal E) (Hashtbl.find first_sshtbl s)) && (SymbolSet.mem (List.nth text 1) (Hashtbl.find follow_sshtbl s)) then (
+          let p = List.nth (List.filter (fun p -> SymbolSet.mem (Terminal E) (first_of_pattern first_sshtbl p)) (Hashtbl.find hg s)) 0 in
+          
+          analyse_LL1_of_pattern text s p
+        ) else (
+          let p = List.nth (List.filter (fun p -> SymbolSet.mem (List.nth text 0) (first_of_pattern first_sshtbl p)) (Hashtbl.find hg s)) 0 in
+          analyse_LL1_of_pattern text s p
+        )
+      )
+    )
+  in analyse_LL1_of_symbol_aux text s
+
+let analyse_LL1 (g: grammar) (text: symbol list): at = fst (analyse_LL1_of_symbol g text (NonTerminal ExecutableProgram))
+
+

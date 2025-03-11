@@ -20,10 +20,14 @@ let print_grammar (g: grammar): unit =
   List.iter (fun (s, patterns) -> print_string (string_of_symbol s ^ " -> \n"); print_patterns patterns; print_newline ();) g
   
   
-let is_terminal (s,_: rule): bool = 
-  match s with 
+let is_terminal_symbol (s: symbol): bool = 
+  match s with
   | Terminal _ -> true
   | NonTerminal _ -> false
+
+let is_non_terminal_symbol (s: symbol): bool = not (is_terminal_symbol s)
+
+let is_terminal (s,_: rule): bool = is_terminal_symbol s
 
 let is_non_terminal (r: rule): bool = not (is_terminal r)
 

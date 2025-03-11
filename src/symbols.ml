@@ -157,8 +157,8 @@ let unparsed_tokens = [Space; ]
 
 let string_of_terminal (t : terminal) : string =
   match t with
-  | EOF -> "d of fil"
-  | E -> "silo"
+  | EOF -> "End of File"
+  | E -> "Epsilon"
   | PowerOp -> "\\*\\*"
   | ConcatOp -> "//"
   | NotOp -> "\\.not\\."

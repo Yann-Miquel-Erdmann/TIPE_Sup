@@ -75,7 +75,7 @@ let generate_file_lexer (g: grammar): unit =
 
 let generate_file_symbols (g: grammar): unit =  
 
-  let t = ("EOF", [["End of file"]])::("E", [["Epsilon"]]):: (terminals g) in
+  let t = ("EOF", [["'End of File'"]])::("E", [["'Epsilon'"]]):: (terminals g) in
   let nt = non_terminals g in
   
   print_endline "Generating the symbols.ml file...";
@@ -89,7 +89,9 @@ let generate_file_symbols (g: grammar): unit =
 
   output_string output_file ("type symbol = | Terminal of terminal | NonTerminal of non_terminal");
 
+  print_endline "get_safe_symbol";
   output_string output_file ("\nlet safe_token = "^get_safe_symbol t^"\n");
+  print_endline "got_safe_symbol";
 
   output_string output_file "let unparsed_tokens = [";
   List.iter (fun x -> output_string output_file (x^"; ")) (get_unparsed_symbol t);
@@ -126,8 +128,9 @@ let generate_file_grammar (g: grammar) : unit =
 
 let generate_files (g_path: string): unit = 
   let g = get_grammar g_path in
+  Printf.printf "Grammar length %d\n" (List.length g);
   generate_file_symbols g;
-  generate_file_lexer g;
+  (* generate_file_lexer g; *)
   generate_file_grammar g
 
 let _ = (
