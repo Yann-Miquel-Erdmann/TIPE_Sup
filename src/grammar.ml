@@ -1,6 +1,7 @@
 open Grammar_functions
 open Symbols
-let g = [(NonTerminal ExecutableProgram,[[NonTerminal ProgramUnit;NonTerminal ProgramUnit_star;];[NonTerminal StartCommentBlock;NonTerminal ProgramUnit;NonTerminal ProgramUnit_star;];]);
+let g = { start_symbol = NonTerminal ExecutableProgram;
+rules_htbl = Hashtbl.of_seq (List.to_seq [(NonTerminal ExecutableProgram,[[NonTerminal ProgramUnit;NonTerminal ProgramUnit_star;];[NonTerminal StartCommentBlock;NonTerminal ProgramUnit;NonTerminal ProgramUnit_star;];]);
 (NonTerminal ProgramUnit_star,[[NonTerminal ProgramUnit;NonTerminal ProgramUnit_star;];[Terminal E;];]);
 (NonTerminal StartCommentBlock,[[Terminal EOS;];]);
 (NonTerminal ProgramUnit,[[NonTerminal MainProgram;];]);
@@ -95,4 +96,4 @@ let g = [(NonTerminal ExecutableProgram,[[NonTerminal ProgramUnit;NonTerminal Pr
 (NonTerminal EquivOp,[[Terminal Equivalent;];[Terminal NotEquivalent;];]);
 (NonTerminal ScalarIntLiteralConstant,[[Terminal Icon;];]);
 (NonTerminal Scon,[[Terminal SconSingle;];[Terminal SconDouble;];]);
-]
+])}

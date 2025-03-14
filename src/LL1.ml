@@ -25,8 +25,7 @@ let print_SymbolSet_Hastable (h: symbol_SS_Htbl): unit =
 let first (g: grammar): symbol_SS_Htbl = 
   
   (* prog dyn, filling first_h *)
-  let first_h = Hashtbl.create (List.length g) in
-  let h_grammar = hashed_grammar_of_grammar g in
+  let first_h = Hashtbl.create (Hashtbl.length g.rules_htbl) in
 
 
   let rec first_of_rule (s,patterns: rule): unit =
@@ -46,7 +45,7 @@ let first (g: grammar): symbol_SS_Htbl =
     | [] -> failwith "empty pattern"
     | Terminal t::q -> SymbolSet.singleton (Terminal t)
     | fst_symbol::q -> (
-      first_of_rule (fst_symbol,(Hashtbl.find h_grammar fst_symbol)); 
+      first_of_rule (fst_symbol,(Hashtbl.find g.rules_htbl fst_symbol)); 
       if SymbolSet.mem (Terminal E) (Hashtbl.find first_h fst_symbol) && (q <> []) then 
         SymbolSet.union (first_of_pattern s q) (Hashtbl.find first_h fst_symbol) 
       else(
@@ -55,7 +54,7 @@ let first (g: grammar): symbol_SS_Htbl =
     )
     
   in 
-  (List.iter (fun (name, pattern) -> first_of_rule (name, pattern)) g);
+  (Hashtbl.iter (fun name pattern-> first_of_rule (name, pattern)) g.rules_htbl);
   first_h
 
 
@@ -79,9 +78,11 @@ let rec first_of_pattern (fst_ss_htbl: symbol_SS_Htbl) (p: pattern): SymbolSet.t
 let follow (g:grammar):  symbol_SS_Htbl  = 
 
   (* contains the terminals following the key in the hashtable *)
-  let follow_non_terminal =  Hashtbl.of_seq (Seq.map (fun (name, pattern) -> (name, SymbolSet.empty )) (List.to_seq g)) in
+  let follow_non_terminal =  Hashtbl.of_seq (Seq.map (fun (name, pattern) -> (name, SymbolSet.empty)) (Hashtbl.to_seq g.rules_htbl)) in
+    
+
   (* contains the rule names in which the key appears in at the end *)
-  let parent_on_end =  Hashtbl.of_seq (Seq.map (fun (name, pattern) -> (name, SymbolSet.empty)) (List.to_seq g)) in
+  let parent_on_end =  Hashtbl.of_seq (Seq.map (fun (name, pattern) -> (name, SymbolSet.empty)) (Hashtbl.to_seq g.rules_htbl)) in
 
   (* fills the follow_non_terminal and parent_on_end *)
   let rec pattern_follow (s: symbol) (d: pattern) : unit = 
@@ -96,10 +97,10 @@ let follow (g:grammar):  symbol_SS_Htbl  =
     ;
   in 
 
-  let patterns_follow (s,patterns: rule): unit = 
+  let patterns_follow (s: symbol) (patterns: pattern list): unit = 
     List.iter (pattern_follow s) patterns 
   in
-  List.iter patterns_follow (non_terminals g);
+  Hashtbl.iter patterns_follow g.rules_htbl;
 
   let first_h = first g in 
   (* contains the terminals that can appear after a key in the grammar*)
@@ -108,7 +109,7 @@ let follow (g:grammar):  symbol_SS_Htbl  =
   let rec union_and_next_on_epsilon (next_hashtable: symbol_SS_Htbl) (s: symbol)  (acc:SymbolSet.t) : SymbolSet.t = 
     if is_non_terminal_symbol s then 
       if SymbolSet.mem (Terminal E) (Hashtbl.find next_hashtable s ) then(
-        follow_of_rule (s,[]);
+        follow_of_symbol s;
         SymbolSet.remove (Terminal E) (SymbolSet.union acc (SymbolSet.union (Hashtbl.find follow_h s) (Hashtbl.find next_hashtable s)))
       ) else (
         SymbolSet.union acc (Hashtbl.find next_hashtable s)
@@ -118,13 +119,13 @@ let follow (g:grammar):  symbol_SS_Htbl  =
 
   and
 
-  follow_of_rule (s,_: rule): unit =
+  follow_of_symbol (s: symbol): unit =
     
     (* checking if already computed *)
     if not (Hashtbl.mem follow_h s) then (
       
       let follow_non_terminal_set = SymbolSet.fold (union_and_next_on_epsilon first_h) (Hashtbl.find follow_non_terminal s) (SymbolSet.singleton (Terminal EOF)) in
-      let follow_parent_on_end_set = SymbolSet.fold (fun rn -> follow_of_rule (rn,[]); union_and_next_on_epsilon follow_h rn) (Hashtbl.find parent_on_end s) (SymbolSet.singleton (Terminal EOF)) in
+      let follow_parent_on_end_set = SymbolSet.fold (fun s -> follow_of_symbol s; union_and_next_on_epsilon follow_h s) (Hashtbl.find parent_on_end s) (SymbolSet.singleton (Terminal EOF)) in
       
       Hashtbl.replace follow_h s (SymbolSet.union follow_non_terminal_set follow_parent_on_end_set)
 
@@ -133,7 +134,7 @@ let follow (g:grammar):  symbol_SS_Htbl  =
     );
 
   in 
-  List.iter follow_of_rule g;
+  Hashtbl.iter (fun s _ -> follow_of_symbol s) g.rules_htbl;
   follow_h
 
 
@@ -146,7 +147,6 @@ let analyse_LL1_of_symbol (g: grammar) (text: (symbol * string) list) (s: symbol
   let follow_sshtbl = follow g in
   let first_sshtbl = first g in
 
-  let hg = hashed_grammar_of_grammar g in
   let rec analyse_LL1_of_pattern (text: (symbol*string) list) (s: symbol) (p: pattern): at*((symbol*string) list) = 
     (* print_endline "analyse_LL1_of_pattern"; *)
     if p = [Terminal E] then ( 
@@ -171,7 +171,7 @@ let analyse_LL1_of_symbol (g: grammar) (text: (symbol * string) list) (s: symbol
       | [Terminal E, _] -> (
         (* print_endline "Terminal E"; *)
         if (SymbolSet.mem (Terminal E) (Hashtbl.find first_sshtbl s)) && (SymbolSet.mem (Terminal EOF) (Hashtbl.find follow_sshtbl s)) then (
-          let p = List.nth (List.filter (fun p -> SymbolSet.mem (Terminal E) (first_of_pattern first_sshtbl p)) (Hashtbl.find hg s)) 0 in
+          let p = List.nth (List.filter (fun p -> SymbolSet.mem (Terminal E) (first_of_pattern first_sshtbl p)) (Hashtbl.find g.rules_htbl s)) 0 in
           analyse_LL1_of_pattern text s p
         ) else (failwith "text is epsilon but more symbols are expected")
       ) 
@@ -180,13 +180,13 @@ let analyse_LL1_of_symbol (g: grammar) (text: (symbol * string) list) (s: symbol
         (* print_SymbolSet (Hashtbl.find follow_sshtbl s); *)
         if (SymbolSet.mem (Terminal E) (Hashtbl.find first_sshtbl s)) && (SymbolSet.mem (fst (List.nth text 0)) (Hashtbl.find follow_sshtbl s)) then (
           
-          let p = List.nth (List.filter (fun p -> SymbolSet.mem (Terminal E) (first_of_pattern first_sshtbl p)) (Hashtbl.find hg s)) 0 in
+          let p = List.nth (List.filter (fun p -> SymbolSet.mem (Terminal E) (first_of_pattern first_sshtbl p)) (Hashtbl.find g.rules_htbl s)) 0 in
           analyse_LL1_of_pattern text s p
         ) else (
           (* print_endline "cas 2";
           print_symbol (fst(List.nth text 0));
           print_newline (); *)
-          let p = List.nth (List.filter (fun p -> SymbolSet.mem (fst(List.nth text 0)) (first_of_pattern first_sshtbl p)) (Hashtbl.find hg s)) 0 in
+          let p = List.nth (List.filter (fun p -> SymbolSet.mem (fst(List.nth text 0)) (first_of_pattern first_sshtbl p)) (Hashtbl.find g.rules_htbl s)) 0 in
           analyse_LL1_of_pattern text s p
         )
       )
