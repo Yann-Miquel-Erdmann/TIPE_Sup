@@ -1,12 +1,9 @@
-Eone -> Te Eprime
-Eprime -> Plus Te Eprime | E
-Te -> Fe Tprime
-Tprime -> Star Fe Tprime | E
-Fe -> Id | Lp Eone Rp
-
-Id -> 'id'
-Plus -> '+'
-Star -> '*'
-Lp -> '('
-Rp -> ')'
-Safe -> s'll'
+Xe -> Ae Be Ce
+Ae -> A_e | E
+Be -> B_e | E
+Ce -> C_e | D_e
+Ie -> s'd'
+A_e -> 'a'
+B_e -> 'b'
+C_e -> 'c'
+D_e -> 'd'

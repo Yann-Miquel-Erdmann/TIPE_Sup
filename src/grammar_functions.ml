@@ -45,5 +45,3 @@ let rule_of_symbol (hg: hashed_grammar) (s: symbol): rule =
     failwith ("the hashed grammar hg does not contain " ^ string_of_symbol s ^" as a key\n")
   ) 
 
-
-

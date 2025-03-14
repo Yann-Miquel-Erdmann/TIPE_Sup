@@ -24,12 +24,8 @@ let g = [(NonTerminal ExecutableProgram,[[NonTerminal ProgramUnit;NonTerminal Pr
 (NonTerminal TypeSpec,[[Terminal Integer;NonTerminal KindSelector;];[Terminal Double;];[Terminal Complex;NonTerminal KindSelector;];[Terminal Logical;NonTerminal KindSelector;];]);
 (NonTerminal KindSelector,[[Terminal RParenthesis;NonTerminal Expr;Terminal LParenthesis;];]);
 (NonTerminal ExecutableConstruct,[[NonTerminal ActionStmt;];[NonTerminal DoConstruct;];[NonTerminal IfConstruct;];[NonTerminal EndDoStmt;];]);
-(NonTerminal ActionStmt,[[NonTerminal AssignmentStmt;];[NonTerminal CallStmt;];[NonTerminal PrintStmt;];]);
+(NonTerminal ActionStmt,[[NonTerminal AssignmentStmt;];[NonTerminal PrintStmt;];]);
 (NonTerminal AssignmentStmt,[[NonTerminal Name;Terminal Equal;NonTerminal Expr;Terminal EOS;];]);
-(NonTerminal CallStmt,[[Terminal Call;NonTerminal SubroutineNameUse;NonTerminal Parenthesis_Actual_Comma_star_or_epsilon;Terminal EOS;];]);
-(NonTerminal Parenthesis_Actual_Comma_star_or_epsilon,[[Terminal RParenthesis;NonTerminal ActualArg_Comma_star;Terminal LParenthesis;];[Terminal E;];]);
-(NonTerminal ActualArg_Comma_star,[[Terminal Comma;NonTerminal ActualArg;NonTerminal ActualArg_Comma_star;];[Terminal E;];]);
-(NonTerminal ActualArg,[[NonTerminal Expr_Or_Asterisk;];[NonTerminal Name;Terminal Equal;NonTerminal Expr_Or_Asterisk;];]);
 (NonTerminal Expr_Or_Asterisk,[[NonTerminal Expr;];[Terminal Asterisk;];]);
 (NonTerminal PrintStmt,[[Terminal Print;NonTerminal FormatIdentifier;NonTerminal Comma_OutputItemList_opt;Terminal EOS;];]);
 (NonTerminal Comma_OutputItemList_opt,[[Terminal Comma;NonTerminal OutputItemList;];[Terminal E;];]);

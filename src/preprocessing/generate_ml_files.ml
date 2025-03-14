@@ -62,10 +62,10 @@ let printable_string_of_terminal (r: rule): string =
 let get_safe_symbol (term: rule list): string = fst (List.nth (List.filter (fun (r : rule) -> (string_of_terminal (r)).[0] = 's') term) 0)
 let get_unparsed_symbol (term: rule list): string list = List.map fst (List.filter (fun (r : rule) -> (string_of_terminal (r)).[0] = '_') term)
 
-let generate_file_lexer (g: grammar): unit = 
-  let file = open_out "lexer.ml" in
+let generate_file_lexer (g: grammar) (f_name: string): unit = 
+  let file = open_out f_name in
   let t = terminals g in 
-  print_endline "Generating the lexer.ml file...";
+  print_endline ("Generating the "^f_name^" file...");
   output_string file "open Regex\nopen Automates\n";
   output_string file "\nlet syntax_automate_det = determinise (enleve_epsilon_trans (ou_automates (List.map (fun (s, t) -> automate_gen (gen_regex s) t) [";
   List.iter (fun (s, p) -> output_string file ("(\""^String.escaped (printable_string_of_terminal (s,p))^"\", "^s^"); ")) t;
@@ -73,13 +73,13 @@ let generate_file_lexer (g: grammar): unit =
   flush file;
   close_out file
 
-let generate_file_symbols (g: grammar): unit =  
+let generate_file_symbols (g: grammar) (f_name: string): unit =  
 
   let t = ("EOF", [["'End of file'"]])::("E", [["'Epsilon'"]]):: (terminals g) in
   let nt = non_terminals g in
   
-  print_endline "Generating the symbols.ml file...";
-  let output_file = open_out "symbols.ml" in
+  print_endline ("Generating the "^f_name^" file...");
+  let output_file = open_out f_name in
   output_string output_file "type terminal =\n";
   List.iter (fun (symbol,_) -> output_string output_file ("  | "^symbol^"\n")) t;
 
@@ -89,9 +89,7 @@ let generate_file_symbols (g: grammar): unit =
 
   output_string output_file ("type symbol = | Terminal of terminal | NonTerminal of non_terminal");
 
-  print_endline "get_safe_symbol";
   output_string output_file ("\nlet safe_token = "^get_safe_symbol t^"\n");
-  print_endline "got_safe_symbol";
 
   output_string output_file "let unparsed_tokens = [";
   List.iter (fun x -> output_string output_file (x^"; ")) (get_unparsed_symbol t);
@@ -106,13 +104,13 @@ let generate_file_symbols (g: grammar): unit =
   flush output_file;
   close_out output_file
 
-let generate_file_grammar (g: grammar) : unit = 
+let generate_file_grammar (g: grammar) (f_name: string): unit = 
   let nt = non_terminals g in
   let non_terminals_set = StringSet.of_list (List.map fst nt) in 
   let type_string_of_symbol (s: string): string = if StringSet.mem s non_terminals_set  then "NonTerminal" else "Terminal" in 
   
-  print_endline "Generating the grammar.ml file...";
-  let output_file = open_out "grammar.ml" in
+  print_endline ("Generating the "^f_name^" file...");
+  let output_file = open_out f_name in
   output_string output_file "open Grammar_functions\nopen Symbols\n";
 
 
@@ -129,9 +127,9 @@ let generate_file_grammar (g: grammar) : unit =
 let generate_files (g_path: string): unit = 
   let g = get_grammar g_path in
   Printf.printf "Grammar length %d\n" (List.length g);
-  generate_file_symbols g;
-  (* generate_file_lexer g; *)
-  generate_file_grammar g
+  generate_file_symbols g "symbols.ml";
+  generate_file_lexer g "det_automaton.ml";
+  generate_file_grammar g "grammar.ml"
 
 let _ = (
   Sys.chdir "src/";

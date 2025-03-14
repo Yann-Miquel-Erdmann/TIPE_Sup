@@ -8,9 +8,8 @@ let read_file (file_name: string):string list =
   let rec lire file liste = 
     let line = input_line file in
       ();
-    try lire file (line::liste) with End_of_file->
-      close_in file;
-      line::liste
+    try lire file (line::liste) with End_of_file-> close_in file;
+    line::liste
   in List.rev (lire (open_in file_name) [])
 
 let write_to_file (filename:string) (content: string) =

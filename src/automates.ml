@@ -406,7 +406,7 @@ let execution_mot (a : automate_det) (texte : char list) : int * char list * cha
   !last_found, !text_as_last, !last_read
 
 
-let exec (a : automate_det) (txt : string) : (terminal * string) list =
+let exec (a : automate_det) (txt : string) : (symbol * string) list =
   let rec exec_aux (a : automate_det) (texte : char list) (out : (terminal * string) list) : (terminal * string) list =
     match texte with
     | [] -> List.rev out
@@ -422,4 +422,8 @@ let exec (a : automate_det) (txt : string) : (terminal * string) list =
   let res = exec_aux a (List.of_seq (String.to_seq txt)) [] in
   let tbl = Hashtbl.create (List.length unparsed_tokens) in
   List.iter (fun x -> Hashtbl.add tbl x ()) unparsed_tokens;
-  List.filter (fun (x, _) -> not (Hashtbl.mem tbl x)) res
+  List.map (fun (t,s) -> Terminal t, s) (List.filter (fun (x, _) -> not (Hashtbl.mem tbl x)) res)
+
+
+let exec_of_file (a: automate_det) (f_name:string): (symbol*string) list = 
+  exec a (List.fold_left (fun acc line -> acc ^ line ^ "\n" ) "" (read_file f_name))

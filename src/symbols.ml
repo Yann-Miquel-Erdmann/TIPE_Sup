@@ -78,10 +78,6 @@ type non_terminal =
   | ExecutableConstruct
   | ActionStmt
   | AssignmentStmt
-  | CallStmt
-  | Parenthesis_Actual_Comma_star_or_epsilon
-  | ActualArg_Comma_star
-  | ActualArg
   | Expr_Or_Asterisk
   | PrintStmt
   | Comma_OutputItemList_opt
@@ -157,7 +153,7 @@ let unparsed_tokens = [Space; ]
 
 let string_of_terminal (t : terminal) : string =
   match t with
-  | EOF -> "End of File"
+  | EOF -> "End of file"
   | E -> "Epsilon"
   | PowerOp -> "\\*\\*"
   | ConcatOp -> "//"
@@ -236,10 +232,6 @@ let string_of_non_terminal (nt : non_terminal) : string =
   | ExecutableConstruct -> "ExecutableConstruct"
   | ActionStmt -> "ActionStmt"
   | AssignmentStmt -> "AssignmentStmt"
-  | CallStmt -> "CallStmt"
-  | Parenthesis_Actual_Comma_star_or_epsilon -> "Parenthesis_Actual_Comma_star_or_epsilon"
-  | ActualArg_Comma_star -> "ActualArg_Comma_star"
-  | ActualArg -> "ActualArg"
   | Expr_Or_Asterisk -> "Expr_Or_Asterisk"
   | PrintStmt -> "PrintStmt"
   | Comma_OutputItemList_opt -> "Comma_OutputItemList_opt"

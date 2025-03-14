@@ -46,16 +46,10 @@ KindSelector -> RParenthesis Expr LParenthesis
 ExecutableConstruct -> ActionStmt | DoConstruct | IfConstruct | EndDoStmt
 
 
-ActionStmt -> AssignmentStmt | CallStmt | PrintStmt
+ActionStmt -> AssignmentStmt | PrintStmt
 
 AssignmentStmt -> Name Equal Expr EOS
 
-CallStmt -> Call SubroutineNameUse Parenthesis_Actual_Comma_star_or_epsilon EOS
-
-Parenthesis_Actual_Comma_star_or_epsilon -> RParenthesis ActualArg_Comma_star LParenthesis | E
-ActualArg_Comma_star -> Comma ActualArg ActualArg_Comma_star | E
-
-ActualArg -> Expr_Or_Asterisk | Name Equal Expr_Or_Asterisk
 
 Expr_Or_Asterisk -> Expr | Asterisk
 
