@@ -16,6 +16,8 @@ type terminal =
   | False
   | Program
   | EndProgram
+  | EndFunction
+  | EndSubroutine
   | EndDo
   | EndIf
   | Colon
@@ -50,6 +52,9 @@ type terminal =
   | Equivalent
   | NotEquivalent
   | Space
+  | Function
+  | Subroutine
+  | Recursive
 
 type non_terminal =
   | ExecutableProgram
@@ -57,11 +62,29 @@ type non_terminal =
   | StartCommentBlock
   | ProgramUnit
   | MainProgram
-  | MainRange
-  | BodyConstruct_star
   | ProgramStmt
+  | MainRange
   | EndProgramStmt
+  | FunctionSubprogram
+  | FunctionPrefix
+  | TypeSpec_opt
+  | FunctionRange
+  | FunctionParList
+  | FunctionPar_Comma_FunctionPar_star_opt
+  | Comma_FunctionPar_star
+  | FunctionPar
+  | EndFunctionStmt
+  | SubroutineSubprogram
+  | Recursive_opt
+  | SubroutineRange
+  | SubroutineParList_opt
+  | SubroutinePar_Comma_SubroutinePar_star_opt
+  | Comma_SubroutinePar_star
+  | SubroutinePar
+  | Body_opt
+  | EndSubroutineStmt
   | EndName_opt
+  | BodyConstruct_star
   | BodyConstruct
   | SpecificationPartConstruct
   | DeclarationConstruct
@@ -170,6 +193,8 @@ let string_of_terminal (t : terminal) : string =
   | False -> "\\.false\\."
   | Program -> "program"
   | EndProgram -> "end program"
+  | EndFunction -> "end function"
+  | EndSubroutine -> "end subroutine"
   | EndDo -> "end do"
   | EndIf -> "end if"
   | Colon -> ":"
@@ -204,6 +229,9 @@ let string_of_terminal (t : terminal) : string =
   | Equivalent -> "\\.eqv\\."
   | NotEquivalent -> "\\.neqv\\."
   | Space -> " "
+  | Function -> "function"
+  | Subroutine -> "subroutine"
+  | Recursive -> "recursive"
 let string_of_non_terminal (nt : non_terminal) : string =
   match nt with
   | ExecutableProgram -> "ExecutableProgram"
@@ -211,11 +239,29 @@ let string_of_non_terminal (nt : non_terminal) : string =
   | StartCommentBlock -> "StartCommentBlock"
   | ProgramUnit -> "ProgramUnit"
   | MainProgram -> "MainProgram"
-  | MainRange -> "MainRange"
-  | BodyConstruct_star -> "BodyConstruct_star"
   | ProgramStmt -> "ProgramStmt"
+  | MainRange -> "MainRange"
   | EndProgramStmt -> "EndProgramStmt"
+  | FunctionSubprogram -> "FunctionSubprogram"
+  | FunctionPrefix -> "FunctionPrefix"
+  | TypeSpec_opt -> "TypeSpec_opt"
+  | FunctionRange -> "FunctionRange"
+  | FunctionParList -> "FunctionParList"
+  | FunctionPar_Comma_FunctionPar_star_opt -> "FunctionPar_Comma_FunctionPar_star_opt"
+  | Comma_FunctionPar_star -> "Comma_FunctionPar_star"
+  | FunctionPar -> "FunctionPar"
+  | EndFunctionStmt -> "EndFunctionStmt"
+  | SubroutineSubprogram -> "SubroutineSubprogram"
+  | Recursive_opt -> "Recursive_opt"
+  | SubroutineRange -> "SubroutineRange"
+  | SubroutineParList_opt -> "SubroutineParList_opt"
+  | SubroutinePar_Comma_SubroutinePar_star_opt -> "SubroutinePar_Comma_SubroutinePar_star_opt"
+  | Comma_SubroutinePar_star -> "Comma_SubroutinePar_star"
+  | SubroutinePar -> "SubroutinePar"
+  | Body_opt -> "Body_opt"
+  | EndSubroutineStmt -> "EndSubroutineStmt"
   | EndName_opt -> "EndName_opt"
+  | BodyConstruct_star -> "BodyConstruct_star"
   | BodyConstruct -> "BodyConstruct"
   | SpecificationPartConstruct -> "SpecificationPartConstruct"
   | DeclarationConstruct -> "DeclarationConstruct"
