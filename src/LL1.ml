@@ -158,8 +158,10 @@ let analyse_LL1_of_symbol (g: grammar) (text: (symbol * string) list) (s: symbol
     )
   and 
   analyse_LL1_of_symbol_aux (text: (symbol*string) list) (s: symbol): at*((symbol*string) list) = 
-    (* print_endline ("analyse_LL1_of_symbol_aux "^string_of_symbol s);
-    print_patterns [List.map fst text]; *)
+    
+    print_endline ("analyse_LL1_of_symbol_aux "^string_of_symbol s);
+    print_patterns [List.map fst text];
+
     if is_terminal (s, []) then(
       (* print_endline "is terminal"; *)
       match text with
@@ -168,26 +170,28 @@ let analyse_LL1_of_symbol (g: grammar) (text: (symbol * string) list) (s: symbol
     )else(
       (* print_endline "is non_terminal"; *)
       match text with
-      | [Terminal E, _] -> (
+      | [] -> (
         (* print_endline "Terminal E"; *)
         if (SymbolSet.mem (Terminal E) (Hashtbl.find first_sshtbl s)) && (SymbolSet.mem (Terminal EOF) (Hashtbl.find follow_sshtbl s)) then (
-          let p = List.nth (List.filter (fun p -> SymbolSet.mem (Terminal E) (first_of_pattern first_sshtbl p)) (Hashtbl.find g.rules_htbl s)) 0 in
-          analyse_LL1_of_pattern text s p
+          let l = List.filter (fun p -> SymbolSet.mem (Terminal E) (first_of_pattern first_sshtbl p)) (Hashtbl.find g.rules_htbl s) in 
+          if l = [] then (failwith ("expected "^(string_of_symbol (Terminal E))^"in first of patterns")) else ();
+          analyse_LL1_of_pattern text s (List.nth l 0)
         ) else (failwith "text is epsilon but more symbols are expected")
       ) 
       | _ -> (
         (* print_SymbolSet (Hashtbl.find first_sshtbl s); *)
         (* print_SymbolSet (Hashtbl.find follow_sshtbl s); *)
         if (SymbolSet.mem (Terminal E) (Hashtbl.find first_sshtbl s)) && (SymbolSet.mem (fst (List.nth text 0)) (Hashtbl.find follow_sshtbl s)) then (
-          
-          let p = List.nth (List.filter (fun p -> SymbolSet.mem (Terminal E) (first_of_pattern first_sshtbl p)) (Hashtbl.find g.rules_htbl s)) 0 in
-          analyse_LL1_of_pattern text s p
+          let l = List.filter (fun p -> SymbolSet.mem (Terminal E) (first_of_pattern first_sshtbl p)) (Hashtbl.find g.rules_htbl s) in
+          if l = [] then (failwith ("expected "^(string_of_symbol (Terminal E))^"in first of patterns")) else ();
+          analyse_LL1_of_pattern text s (List.nth l 0)
         ) else (
           (* print_endline "cas 2";
           print_symbol (fst(List.nth text 0));
           print_newline (); *)
-          let p = List.nth (List.filter (fun p -> SymbolSet.mem (fst(List.nth text 0)) (first_of_pattern first_sshtbl p)) (Hashtbl.find g.rules_htbl s)) 0 in
-          analyse_LL1_of_pattern text s p
+          let l = List.filter (fun p -> SymbolSet.mem (fst(List.nth text 0)) (first_of_pattern first_sshtbl p)) (Hashtbl.find g.rules_htbl s) in
+          if l = [] then (failwith ("expected "^(string_of_symbol (fst(List.nth text 0)))^"in first of patterns")) else ();
+          analyse_LL1_of_pattern text s (List.nth (l) 0)
         )
       )
     )
