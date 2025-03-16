@@ -193,6 +193,6 @@ let analyse_LL1_of_symbol (g: grammar) (text: (symbol * string) list) (s: symbol
     )
   in analyse_LL1_of_symbol_aux text s
 
-let analyse_LL1 (g: grammar) (text: (symbol*string) list): at = fst (analyse_LL1_of_symbol g (text@[Terminal EOF,""]) (NonTerminal ExecutableProgram))
+let analyse_LL1 (g: grammar) (text: (symbol*string) list): at = fst (analyse_LL1_of_symbol g (text@[Terminal EOF,""]) (g.start_symbol))
 
 
