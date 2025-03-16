@@ -22,10 +22,13 @@ BodyConstruct -> SpecificationPartConstruct | ExecutableConstruct
 SpecificationPartConstruct -> DeclarationConstruct
 DeclarationConstruct -> TypeDeclarationStmt
 
-TypeDeclarationStmt -> TypeSpec Colon_Colon_opt EntityDecl EntityDecl_Comma_star EOS
-Colon_Colon_opt -> Colon Colon | E
-EntityDecl_Comma_star -> EntityDecl EntityDecl_Comma_star | E
+TypeDeclarationStmt -> TypeSpec TypeDecl_Assignment EOS
 
+TypeDecl_Assignment -> Colon Colon EntityDecl Comma_EntityDecl_star | ObjectName Comma_ObjectName_star
+
+Comma_ObjectName_star -> Comma ObjectName Comma_EntityDecl_star | E
+
+Comma_EntityDecl_star -> Comma EntityDecl Comma_EntityDecl_star | E
 
 EntityDecl -> ObjectName Asterisk_CharLength_opt Equal_Expr_opt
 Equal_Expr_opt -> Equal Expr | E

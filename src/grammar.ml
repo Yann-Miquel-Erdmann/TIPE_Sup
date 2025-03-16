@@ -14,9 +14,10 @@ rules_htbl = Hashtbl.of_seq (List.to_seq [(NonTerminal ExecutableProgram,[[NonTe
 (NonTerminal BodyConstruct,[[NonTerminal SpecificationPartConstruct;];[NonTerminal ExecutableConstruct;];]);
 (NonTerminal SpecificationPartConstruct,[[NonTerminal DeclarationConstruct;];]);
 (NonTerminal DeclarationConstruct,[[NonTerminal TypeDeclarationStmt;];]);
-(NonTerminal TypeDeclarationStmt,[[NonTerminal TypeSpec;NonTerminal Colon_Colon_opt;NonTerminal EntityDecl;NonTerminal EntityDecl_Comma_star;Terminal EOS;];]);
-(NonTerminal Colon_Colon_opt,[[Terminal Colon;Terminal Colon;];[Terminal E;];]);
-(NonTerminal EntityDecl_Comma_star,[[NonTerminal EntityDecl;NonTerminal EntityDecl_Comma_star;];[Terminal E;];]);
+(NonTerminal TypeDeclarationStmt,[[NonTerminal TypeSpec;NonTerminal TypeDecl_Assignment;Terminal EOS;];]);
+(NonTerminal TypeDecl_Assignment,[[Terminal Colon;Terminal Colon;NonTerminal EntityDecl;NonTerminal Comma_EntityDecl_star;];[NonTerminal ObjectName;NonTerminal Comma_ObjectName_star;];]);
+(NonTerminal Comma_ObjectName_star,[[Terminal Comma;NonTerminal ObjectName;NonTerminal Comma_EntityDecl_star;];[Terminal E;];]);
+(NonTerminal Comma_EntityDecl_star,[[Terminal Comma;NonTerminal EntityDecl;NonTerminal Comma_EntityDecl_star;];[Terminal E;];]);
 (NonTerminal EntityDecl,[[NonTerminal ObjectName;NonTerminal Asterisk_CharLength_opt;NonTerminal Equal_Expr_opt;];]);
 (NonTerminal Equal_Expr_opt,[[Terminal Equal;NonTerminal Expr;];[Terminal E;];]);
 (NonTerminal Asterisk_CharLength_opt,[[Terminal Asterisk;NonTerminal CharLength;];[Terminal E;];]);

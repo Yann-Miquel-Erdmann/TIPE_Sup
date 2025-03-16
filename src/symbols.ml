@@ -66,8 +66,9 @@ type non_terminal =
   | SpecificationPartConstruct
   | DeclarationConstruct
   | TypeDeclarationStmt
-  | Colon_Colon_opt
-  | EntityDecl_Comma_star
+  | TypeDecl_Assignment
+  | Comma_ObjectName_star
+  | Comma_EntityDecl_star
   | EntityDecl
   | Equal_Expr_opt
   | Asterisk_CharLength_opt
@@ -220,8 +221,9 @@ let string_of_non_terminal (nt : non_terminal) : string =
   | SpecificationPartConstruct -> "SpecificationPartConstruct"
   | DeclarationConstruct -> "DeclarationConstruct"
   | TypeDeclarationStmt -> "TypeDeclarationStmt"
-  | Colon_Colon_opt -> "Colon_Colon_opt"
-  | EntityDecl_Comma_star -> "EntityDecl_Comma_star"
+  | TypeDecl_Assignment -> "TypeDecl_Assignment"
+  | Comma_ObjectName_star -> "Comma_ObjectName_star"
+  | Comma_EntityDecl_star -> "Comma_EntityDecl_star"
   | EntityDecl -> "EntityDecl"
   | Equal_Expr_opt -> "Equal_Expr_opt"
   | Asterisk_CharLength_opt -> "Asterisk_CharLength_opt"
