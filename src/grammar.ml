@@ -36,7 +36,7 @@ rules_htbl = Hashtbl.of_seq (List.to_seq [(NonTerminal ExecutableProgram,[[NonTe
 (NonTerminal Comma_OutputItem_star,[[Terminal Comma;NonTerminal OutputItem;NonTerminal Comma_OutputItem_star;];[Terminal E;];]);
 (NonTerminal OutputItem,[[NonTerminal Expr;];]);
 (NonTerminal DoConstruct,[[NonTerminal BlockDoConstruct;];]);
-(NonTerminal BlockDoConstruct,[[Terminal Do;NonTerminal LoopControl_opt;NonTerminal ExecutionPartConstruct;NonTerminal EndDoStmt;];]);
+(NonTerminal BlockDoConstruct,[[Terminal Do;NonTerminal LoopControl_opt;NonTerminal ExecutionPartConstruct_star;NonTerminal EndDoStmt;];]);
 (NonTerminal LoopControl_opt,[[NonTerminal LoopControl;Terminal EOS;];[Terminal EOS;];]);
 (NonTerminal EndDoStmt,[[Terminal EndDo;NonTerminal Name_opt;Terminal EOS;];]);
 (NonTerminal Name_opt,[[NonTerminal Name;];[Terminal E;];]);

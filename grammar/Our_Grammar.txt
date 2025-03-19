@@ -68,7 +68,7 @@ Comma_OutputItem_star -> Comma OutputItem Comma_OutputItem_star | E
 OutputItem -> Expr
 
 DoConstruct -> BlockDoConstruct
-BlockDoConstruct -> Do LoopControl_opt ExecutionPartConstruct EndDoStmt
+BlockDoConstruct -> Do LoopControl_opt ExecutionPartConstruct_star EndDoStmt
 
 LoopControl_opt -> LoopControl EOS | EOS
 
