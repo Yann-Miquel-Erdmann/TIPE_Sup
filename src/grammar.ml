@@ -25,7 +25,7 @@ rules_htbl = Hashtbl.of_seq (List.to_seq [(NonTerminal ExecutableProgram,[[NonTe
 (NonTerminal TypeParamValue,[[NonTerminal Expr_Or_Asterisk;];]);
 (NonTerminal TypeSpec,[[Terminal Integer;NonTerminal KindSelector;];[Terminal Double;];[Terminal Complex;NonTerminal KindSelector;];[Terminal Logical;NonTerminal KindSelector;];]);
 (NonTerminal KindSelector,[[Terminal RParenthesis;NonTerminal Expr;Terminal LParenthesis;];]);
-(NonTerminal ExecutableConstruct,[[NonTerminal ActionStmt;];[NonTerminal DoConstruct;];[NonTerminal IfConstruct;];[NonTerminal EndDoStmt;];]);
+(NonTerminal ExecutableConstruct,[[NonTerminal ActionStmt;];[NonTerminal DoConstruct;];[NonTerminal IfConstruct;];]);
 (NonTerminal ActionStmt,[[NonTerminal AssignmentStmt;];[NonTerminal PrintStmt;];]);
 (NonTerminal AssignmentStmt,[[NonTerminal Name;Terminal Equal;NonTerminal Expr;Terminal EOS;];]);
 (NonTerminal Expr_Or_Asterisk,[[NonTerminal Expr;];[Terminal Asterisk;];]);
@@ -36,8 +36,8 @@ rules_htbl = Hashtbl.of_seq (List.to_seq [(NonTerminal ExecutableProgram,[[NonTe
 (NonTerminal Comma_OutputItem_star,[[Terminal Comma;NonTerminal OutputItem;NonTerminal Comma_OutputItem_star;];[Terminal E;];]);
 (NonTerminal OutputItem,[[NonTerminal Expr;];]);
 (NonTerminal DoConstruct,[[NonTerminal BlockDoConstruct;];]);
-(NonTerminal BlockDoConstruct,[[Terminal Do;NonTerminal LoopControl_opt;Terminal EOS;];]);
-(NonTerminal LoopControl_opt,[[NonTerminal LoopControl;];[Terminal E;];]);
+(NonTerminal BlockDoConstruct,[[Terminal Do;NonTerminal LoopControl_opt;NonTerminal ExecutionPartConstruct;NonTerminal EndDoStmt;];]);
+(NonTerminal LoopControl_opt,[[NonTerminal LoopControl;Terminal EOS;];[Terminal EOS;];]);
 (NonTerminal EndDoStmt,[[Terminal EndDo;NonTerminal Name_opt;Terminal EOS;];]);
 (NonTerminal Name_opt,[[NonTerminal Name;];[Terminal E;];]);
 (NonTerminal LoopControl,[[Terminal While;Terminal RParenthesis;NonTerminal Expr;Terminal LParenthesis;];[NonTerminal VariableName;Terminal Equal;NonTerminal IntRealDpExpression;Terminal Comma;NonTerminal IntRealDpExpression;NonTerminal Comma_IntRealDpExpression_opt;];]);

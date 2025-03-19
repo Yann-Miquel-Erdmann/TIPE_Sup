@@ -46,7 +46,7 @@ KindSelector -> RParenthesis Expr LParenthesis
 
 
 
-ExecutableConstruct -> ActionStmt | DoConstruct | IfConstruct | EndDoStmt
+ExecutableConstruct -> ActionStmt | DoConstruct | IfConstruct 
 
 
 ActionStmt -> AssignmentStmt | PrintStmt
@@ -68,9 +68,9 @@ Comma_OutputItem_star -> Comma OutputItem Comma_OutputItem_star | E
 OutputItem -> Expr
 
 DoConstruct -> BlockDoConstruct
-BlockDoConstruct -> Do LoopControl_opt EOS
+BlockDoConstruct -> Do LoopControl_opt ExecutionPartConstruct EndDoStmt
 
-LoopControl_opt -> LoopControl | E
+LoopControl_opt -> LoopControl EOS | EOS
 
 EndDoStmt -> EndDo Name_opt EOS
 Name_opt -> Name | E
