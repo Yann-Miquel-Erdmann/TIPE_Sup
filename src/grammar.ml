@@ -23,8 +23,8 @@ rules_htbl = Hashtbl.of_seq (List.to_seq [(NonTerminal ExecutableProgram,[[NonTe
 (NonTerminal Asterisk_CharLength_opt,[[Terminal Asterisk;NonTerminal CharLength;];[Terminal E;];]);
 (NonTerminal CharLength,[[Terminal RParenthesis;NonTerminal TypeParamValue;Terminal LParenthesis;];[NonTerminal ScalarIntLiteralConstant;];]);
 (NonTerminal TypeParamValue,[[NonTerminal Expr_Or_Asterisk;];]);
-(NonTerminal TypeSpec,[[Terminal Integer;NonTerminal KindSelector;];[Terminal Double;];[Terminal Complex;NonTerminal KindSelector;];[Terminal Logical;NonTerminal KindSelector;];]);
-(NonTerminal KindSelector,[[Terminal RParenthesis;NonTerminal Expr;Terminal LParenthesis;];]);
+(NonTerminal TypeSpec,[[Terminal Integer;NonTerminal KindSelector_opt;];[Terminal Double;];[Terminal Complex;NonTerminal KindSelector_opt;];[Terminal Logical;NonTerminal KindSelector_opt;];]);
+(NonTerminal KindSelector_opt,[[Terminal RParenthesis;NonTerminal Expr;Terminal LParenthesis;];[Terminal E;];]);
 (NonTerminal ExecutableConstruct,[[NonTerminal ActionStmt;];[NonTerminal DoConstruct;];[NonTerminal IfConstruct;];]);
 (NonTerminal ActionStmt,[[NonTerminal AssignmentStmt;];[NonTerminal PrintStmt;];]);
 (NonTerminal AssignmentStmt,[[NonTerminal Name;Terminal Equal;NonTerminal Expr;Terminal EOS;];]);

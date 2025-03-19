@@ -75,7 +75,7 @@ type non_terminal =
   | CharLength
   | TypeParamValue
   | TypeSpec
-  | KindSelector
+  | KindSelector_opt
   | ExecutableConstruct
   | ActionStmt
   | AssignmentStmt
@@ -230,7 +230,7 @@ let string_of_non_terminal (nt : non_terminal) : string =
   | CharLength -> "CharLength"
   | TypeParamValue -> "TypeParamValue"
   | TypeSpec -> "TypeSpec"
-  | KindSelector -> "KindSelector"
+  | KindSelector_opt -> "KindSelector_opt"
   | ExecutableConstruct -> "ExecutableConstruct"
   | ActionStmt -> "ActionStmt"
   | AssignmentStmt -> "AssignmentStmt"
