@@ -1,53 +1,5 @@
 open Generate_grammar
 
-(** [define_lexemes file] returns the list of the tokens using regex found in the file [file]
-and the safe token, i.e. the one used for names that can be overwritten by regular tokens
-and the unparsed token, which are used by the automaton but is useless during syntax analysis *)
-let define_lexemes (file : string) : (string * string) list * string * string list=
-  let safe_token = ref "" in
-  let get_safe = ref false in
-  let unparsable  = ref false in 
-  let unparsed_tokens = ref [] in 
-
-  let valid_char(c : char) : bool =
-    let x = int_of_char c in
-    (x >= 65 && x <= 90) || (x >= 48 && x <= 57) || (x >= 97 && x <= 122)
-  in
-
-  let rec get_regex (s : char list) (started : bool) (out : string * string) : string * string =
-    match s, out with
-    | [], _ -> out
-    | '\\'::'\''::q, (s, t) -> get_regex q started (s^(String.make 1 '\''), t)
-    | 's'::'\''::q, (s, t) -> if started then (s^(String.make 1 's'), t) else (get_safe := true; get_regex q true out)
-    | '_'::'\''::q, (s, t) -> if started then (s^(String.make 1 '_'), t) else (unparsable := true; get_regex q true out)
-    | '\''::q, (_, t) -> if started then (if !get_safe then safe_token := t; if !unparsable then (unparsable := false; unparsed_tokens := t::!unparsed_tokens); get_safe := false; out) else get_regex q true out
-    | x::q, (s, t) -> if started then get_regex q started (s^(String.make 1 x), t) else if valid_char x then get_regex q started (s, t^(String.make 1 x)) else get_regex q started out
-  in
-
-  let lines = read_file file in
-  let reg_l = List.filter (fun (x, t) -> x <> "") (List.map (fun x -> get_regex (List.of_seq (String.to_seq x)) false ("", "")) lines) in
-
-  reg_l, !safe_token, !unparsed_tokens
-
-
-(** [generate_tokens_from_lists tok reg] generates the [tokens2.ml] file with the list [tok] of the tokens and the list [reg]
-of regex expressions and the deterministic automata from [reg]. *)
-let generate_tokens_from_lists (tok : string list) (reg : (string * string) list) (safe_token : string) (unparsed_tokens : string list) : unit =
-  let file = open_out "lexer.ml" in
-  output_string file "open Regex\nopen Automates\n";
-  output_string file "\nlet syntax_automate_det = determinise (enleve_epsilon_trans (ou_automates (List.map (fun (s, t) -> automate_gen (gen_regex s) t) [";
-  List.iter (fun (s, t) -> output_string file ("(\""^(String.escaped s)^"\", "^t^"); ")) reg;
-  output_string file "])))";
-  flush file;
-  close_out file
-
-
-let generate_tokens (file : string) : unit =
-  let g = get_grammar file in
-  let l, safe_token, unparsed_tokens = define_lexemes file in
-  generate_tokens_from_lists (List.map (fun (s, _) -> s) g) l safe_token unparsed_tokens
-
-
 let string_of_terminal (_,p: rule): string = (List.nth (List.nth p 0) 0)
 
 (* removes the leading chars up to ' and the last ' *)

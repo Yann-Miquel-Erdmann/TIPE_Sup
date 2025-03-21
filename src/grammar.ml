@@ -1,8 +1,7 @@
 open Grammar_functions
 open Symbols
 let g = { start_symbol = NonTerminal ExecutableProgram;
-rules_htbl = Hashtbl.of_seq (List.to_seq [(NonTerminal ExecutableProgram,[[NonTerminal ProgramUnit;NonTerminal ProgramUnit_star;];[NonTerminal StartCommentBlock;NonTerminal ProgramUnit;NonTerminal ProgramUnit_star;];]);
-(NonTerminal ProgramUnit_star,[[NonTerminal ProgramUnit;NonTerminal ProgramUnit_star;];[Terminal E;];]);
+rules_htbl = Hashtbl.of_seq (List.to_seq [(NonTerminal ExecutableProgram,[[NonTerminal ProgramUnit;];[NonTerminal StartCommentBlock;NonTerminal ProgramUnit;];]);
 (NonTerminal StartCommentBlock,[[Terminal EOS;];]);
 (NonTerminal ProgramUnit,[[NonTerminal MainProgram;];]);
 (NonTerminal MainProgram,[[NonTerminal ProgramStmt;NonTerminal MainRange;];]);
@@ -16,19 +15,19 @@ rules_htbl = Hashtbl.of_seq (List.to_seq [(NonTerminal ExecutableProgram,[[NonTe
 (NonTerminal DeclarationConstruct,[[NonTerminal TypeDeclarationStmt;];]);
 (NonTerminal TypeDeclarationStmt,[[NonTerminal TypeSpec;NonTerminal TypeDecl_Assignment;Terminal EOS;];]);
 (NonTerminal TypeDecl_Assignment,[[Terminal Colon;Terminal Colon;NonTerminal EntityDecl;NonTerminal Comma_EntityDecl_star;];[NonTerminal ObjectName;NonTerminal Comma_ObjectName_star;];]);
-(NonTerminal Comma_ObjectName_star,[[Terminal Comma;NonTerminal ObjectName;NonTerminal Comma_EntityDecl_star;];[Terminal E;];]);
+(NonTerminal Comma_ObjectName_star,[[Terminal Comma;NonTerminal ObjectName;NonTerminal Comma_ObjectName_star;];[Terminal E;];]);
 (NonTerminal Comma_EntityDecl_star,[[Terminal Comma;NonTerminal EntityDecl;NonTerminal Comma_EntityDecl_star;];[Terminal E;];]);
 (NonTerminal EntityDecl,[[NonTerminal ObjectName;NonTerminal Asterisk_CharLength_opt;NonTerminal Equal_Expr_opt;];]);
 (NonTerminal Equal_Expr_opt,[[Terminal Equal;NonTerminal Expr;];[Terminal E;];]);
 (NonTerminal Asterisk_CharLength_opt,[[Terminal Asterisk;NonTerminal CharLength;];[Terminal E;];]);
-(NonTerminal CharLength,[[Terminal RParenthesis;NonTerminal TypeParamValue;Terminal LParenthesis;];[NonTerminal ScalarIntLiteralConstant;];]);
+(NonTerminal CharLength,[[Terminal LParenthesis;NonTerminal TypeParamValue;Terminal RParenthesis;];[NonTerminal ScalarIntLiteralConstant;];]);
 (NonTerminal TypeParamValue,[[NonTerminal Expr_Or_Asterisk;];]);
+(NonTerminal Expr_Or_Asterisk,[[NonTerminal Expr;];[Terminal Asterisk;];]);
 (NonTerminal TypeSpec,[[Terminal Integer;NonTerminal KindSelector_opt;];[Terminal Double;];[Terminal Complex;NonTerminal KindSelector_opt;];[Terminal Logical;NonTerminal KindSelector_opt;];]);
-(NonTerminal KindSelector_opt,[[Terminal RParenthesis;NonTerminal Expr;Terminal LParenthesis;];[Terminal E;];]);
+(NonTerminal KindSelector_opt,[[Terminal LParenthesis;NonTerminal Expr;Terminal RParenthesis;];[Terminal E;];]);
 (NonTerminal ExecutableConstruct,[[NonTerminal ActionStmt;];[NonTerminal DoConstruct;];[NonTerminal IfConstruct;];]);
 (NonTerminal ActionStmt,[[NonTerminal AssignmentStmt;];[NonTerminal PrintStmt;];]);
 (NonTerminal AssignmentStmt,[[NonTerminal Name;Terminal Equal;NonTerminal Expr;Terminal EOS;];]);
-(NonTerminal Expr_Or_Asterisk,[[NonTerminal Expr;];[Terminal Asterisk;];]);
 (NonTerminal PrintStmt,[[Terminal Print;NonTerminal FormatIdentifier;NonTerminal Comma_OutputItemList_opt;Terminal EOS;];]);
 (NonTerminal Comma_OutputItemList_opt,[[Terminal Comma;NonTerminal OutputItemList;];[Terminal E;];]);
 (NonTerminal FormatIdentifier,[[Terminal Asterisk;];]);
@@ -40,15 +39,15 @@ rules_htbl = Hashtbl.of_seq (List.to_seq [(NonTerminal ExecutableProgram,[[NonTe
 (NonTerminal LoopControl_opt,[[NonTerminal LoopControl;Terminal EOS;];[Terminal EOS;];]);
 (NonTerminal EndDoStmt,[[Terminal EndDo;NonTerminal Name_opt;Terminal EOS;];]);
 (NonTerminal Name_opt,[[NonTerminal Name;];[Terminal E;];]);
-(NonTerminal LoopControl,[[Terminal While;Terminal RParenthesis;NonTerminal Expr;Terminal LParenthesis;];[NonTerminal VariableName;Terminal Equal;NonTerminal IntRealDpExpression;Terminal Comma;NonTerminal IntRealDpExpression;NonTerminal Comma_IntRealDpExpression_opt;];]);
+(NonTerminal LoopControl,[[Terminal While;Terminal LParenthesis;NonTerminal Expr;Terminal RParenthesis;];[NonTerminal VariableName;Terminal Equal;NonTerminal IntRealDpExpression;Terminal Comma;NonTerminal IntRealDpExpression;NonTerminal Comma_IntRealDpExpression_opt;];]);
 (NonTerminal Comma_IntRealDpExpression_opt,[[Terminal Comma;NonTerminal IntRealDpExpression;];[Terminal E;];]);
 (NonTerminal IntRealDpExpression,[[NonTerminal Expr;];]);
 (NonTerminal IfConstruct,[[NonTerminal IfThenStmt;NonTerminal ExecutionPartConstruct_star;NonTerminal ElseIfStmt_ExecutionPartConstruct_star_star;NonTerminal ElseStmt_ExecutionPartConstruct_star_opt;NonTerminal EndIfStmt;];]);
 (NonTerminal ElseIfStmt_ExecutionPartConstruct_star_star,[[NonTerminal ElseIfStmt;NonTerminal ExecutionPartConstruct_star;NonTerminal ElseIfStmt_ExecutionPartConstruct_star_star;];[Terminal E;];]);
 (NonTerminal ExecutionPartConstruct_star,[[NonTerminal ExecutionPartConstruct;NonTerminal ExecutionPartConstruct_star;];[Terminal E;];]);
 (NonTerminal ElseStmt_ExecutionPartConstruct_star_opt,[[NonTerminal ElseStmt;NonTerminal ExecutionPartConstruct_star;];[Terminal E;];]);
-(NonTerminal IfThenStmt,[[Terminal If;Terminal RParenthesis;NonTerminal ScalarLogicalExpr;Terminal LParenthesis;Terminal Then;Terminal EOS;];]);
-(NonTerminal ElseIfStmt,[[Terminal Else;Terminal If;Terminal RParenthesis;NonTerminal ScalarLogicalExpr;Terminal LParenthesis;Terminal Then;Terminal EOS;];]);
+(NonTerminal IfThenStmt,[[Terminal If;Terminal LParenthesis;NonTerminal ScalarLogicalExpr;Terminal RParenthesis;Terminal Then;Terminal EOS;];]);
+(NonTerminal ElseIfStmt,[[Terminal Else;Terminal If;Terminal LParenthesis;NonTerminal ScalarLogicalExpr;Terminal RParenthesis;Terminal Then;Terminal EOS;];]);
 (NonTerminal ElseStmt,[[Terminal Else;Terminal EOS;];]);
 (NonTerminal EndIfStmt,[[Terminal EndIf;Terminal EOS;];]);
 (NonTerminal ExecutionPartConstruct,[[NonTerminal ExecutableConstruct;];]);
@@ -64,8 +63,7 @@ rules_htbl = Hashtbl.of_seq (List.to_seq [(NonTerminal ExecutableProgram,[[NonTe
 (NonTerminal NotOp_opt,[[Terminal NotOp;];[Terminal E;];]);
 (NonTerminal Level4Expr,[[NonTerminal Level3Expr;NonTerminal RelOp_Level3Expr_star;];]);
 (NonTerminal RelOp_Level3Expr_star,[[NonTerminal RelOp;NonTerminal Level3Expr;NonTerminal RelOp_Level3Expr_star;];[Terminal E;];]);
-(NonTerminal Level3Expr,[[NonTerminal Level2Expr;NonTerminal ConcatOp_Level2Expr_star;];]);
-(NonTerminal ConcatOp_Level2Expr_star,[[Terminal ConcatOp;NonTerminal Level2Expr;NonTerminal ConcatOp_Level2Expr_star;];[Terminal E;];]);
+(NonTerminal Level3Expr,[[NonTerminal Level2Expr;];]);
 (NonTerminal Level2Expr,[[NonTerminal Sign_opt_AddOperand;NonTerminal AddOp_Sign_opt_AddOperand_star;];]);
 (NonTerminal AddOp_Sign_opt_AddOperand_star,[[NonTerminal AddOp;NonTerminal Sign_opt_AddOperand;NonTerminal AddOp_Sign_opt_AddOperand_star;];[Terminal E;];]);
 (NonTerminal Sign_opt_AddOperand,[[NonTerminal Sign_opt;NonTerminal AddOperand;];]);
@@ -75,8 +73,7 @@ rules_htbl = Hashtbl.of_seq (List.to_seq [(NonTerminal ExecutableProgram,[[NonTe
 (NonTerminal MultOperand,[[NonTerminal Level1Expr;NonTerminal PowerOp_Level1Expr_star;];]);
 (NonTerminal PowerOp_Level1Expr_star,[[Terminal PowerOp;NonTerminal Level1Expr;NonTerminal PowerOp_Level1Expr_star;];[Terminal E;];]);
 (NonTerminal Level1Expr,[[NonTerminal Primary;];]);
-(NonTerminal Primary,[[Terminal Icon;];[Terminal Rcon;];[NonTerminal Name;];[Terminal RParenthesis;NonTerminal Expr;NonTerminal Comma_Expr_opt;Terminal LParenthesis;];[NonTerminal Scon;];[NonTerminal LogicalConstant;];]);
-(NonTerminal Comma_Expr_opt,[[Terminal Comma;NonTerminal Expr;];[Terminal E;];]);
+(NonTerminal Primary,[[Terminal Icon;];[Terminal Rcon;];[NonTerminal Name;];[NonTerminal Scon;];[NonTerminal LogicalConstant;];]);
 (NonTerminal Name,[[Terminal Ident;];]);
 (NonTerminal ArrayName,[[Terminal Ident;];]);
 (NonTerminal ComponentName,[[Terminal Ident;];]);

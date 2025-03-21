@@ -2,7 +2,6 @@ type terminal =
   | EOF
   | E
   | PowerOp
-  | ConcatOp
   | NotOp
   | AndOp
   | OrOp
@@ -22,8 +21,8 @@ type terminal =
   | Comma
   | Equal
   | Asterisk
-  | RParenthesis
   | LParenthesis
+  | RParenthesis
   | Integer
   | Real
   | Double
@@ -53,7 +52,6 @@ type terminal =
 
 type non_terminal =
   | ExecutableProgram
-  | ProgramUnit_star
   | StartCommentBlock
   | ProgramUnit
   | MainProgram
@@ -74,12 +72,12 @@ type non_terminal =
   | Asterisk_CharLength_opt
   | CharLength
   | TypeParamValue
+  | Expr_Or_Asterisk
   | TypeSpec
   | KindSelector_opt
   | ExecutableConstruct
   | ActionStmt
   | AssignmentStmt
-  | Expr_Or_Asterisk
   | PrintStmt
   | Comma_OutputItemList_opt
   | FormatIdentifier
@@ -116,7 +114,6 @@ type non_terminal =
   | Level4Expr
   | RelOp_Level3Expr_star
   | Level3Expr
-  | ConcatOp_Level2Expr_star
   | Level2Expr
   | AddOp_Sign_opt_AddOperand_star
   | Sign_opt_AddOperand
@@ -127,7 +124,6 @@ type non_terminal =
   | PowerOp_Level1Expr_star
   | Level1Expr
   | Primary
-  | Comma_Expr_opt
   | Name
   | ArrayName
   | ComponentName
@@ -157,7 +153,6 @@ let string_of_terminal (t : terminal) : string =
   | EOF -> "End of file"
   | E -> "Epsilon"
   | PowerOp -> "\\*\\*"
-  | ConcatOp -> "//"
   | NotOp -> "\\.not\\."
   | AndOp -> "\\.and\\."
   | OrOp -> "\\.or\\."
@@ -177,8 +172,8 @@ let string_of_terminal (t : terminal) : string =
   | Comma -> ","
   | Equal -> "="
   | Asterisk -> "\\*"
-  | RParenthesis -> "\\("
-  | LParenthesis -> "\\)"
+  | LParenthesis -> "\\("
+  | RParenthesis -> "\\)"
   | Integer -> "integer"
   | Real -> "real"
   | Double -> "double precision"
@@ -208,7 +203,6 @@ let string_of_terminal (t : terminal) : string =
 let string_of_non_terminal (nt : non_terminal) : string =
   match nt with
   | ExecutableProgram -> "ExecutableProgram"
-  | ProgramUnit_star -> "ProgramUnit_star"
   | StartCommentBlock -> "StartCommentBlock"
   | ProgramUnit -> "ProgramUnit"
   | MainProgram -> "MainProgram"
@@ -229,12 +223,12 @@ let string_of_non_terminal (nt : non_terminal) : string =
   | Asterisk_CharLength_opt -> "Asterisk_CharLength_opt"
   | CharLength -> "CharLength"
   | TypeParamValue -> "TypeParamValue"
+  | Expr_Or_Asterisk -> "Expr_Or_Asterisk"
   | TypeSpec -> "TypeSpec"
   | KindSelector_opt -> "KindSelector_opt"
   | ExecutableConstruct -> "ExecutableConstruct"
   | ActionStmt -> "ActionStmt"
   | AssignmentStmt -> "AssignmentStmt"
-  | Expr_Or_Asterisk -> "Expr_Or_Asterisk"
   | PrintStmt -> "PrintStmt"
   | Comma_OutputItemList_opt -> "Comma_OutputItemList_opt"
   | FormatIdentifier -> "FormatIdentifier"
@@ -271,7 +265,6 @@ let string_of_non_terminal (nt : non_terminal) : string =
   | Level4Expr -> "Level4Expr"
   | RelOp_Level3Expr_star -> "RelOp_Level3Expr_star"
   | Level3Expr -> "Level3Expr"
-  | ConcatOp_Level2Expr_star -> "ConcatOp_Level2Expr_star"
   | Level2Expr -> "Level2Expr"
   | AddOp_Sign_opt_AddOperand_star -> "AddOp_Sign_opt_AddOperand_star"
   | Sign_opt_AddOperand -> "Sign_opt_AddOperand"
@@ -282,7 +275,6 @@ let string_of_non_terminal (nt : non_terminal) : string =
   | PowerOp_Level1Expr_star -> "PowerOp_Level1Expr_star"
   | Level1Expr -> "Level1Expr"
   | Primary -> "Primary"
-  | Comma_Expr_opt -> "Comma_Expr_opt"
   | Name -> "Name"
   | ArrayName -> "ArrayName"
   | ComponentName -> "ComponentName"

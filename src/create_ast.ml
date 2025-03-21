@@ -2,7 +2,7 @@ open Abstract_tokens
 open Environnement
 
 
-type ast = Noeud of Abstract_tokens.token * (ast list) * (ast list)
+type ast = Noeud of token * (ast list) * (ast list)
 
 (* enlève les définitions des types des paramètres de la fonction et remplace les nom_de_fct = par des returns
 let format_function_instructions (nom: string) (params: ast list) (l: ast  list): ast list =
@@ -14,7 +14,7 @@ let format_function_instructions (nom: string) (params: ast list) (l: ast  list)
 
 
 (* met les syntaxes en plusieurs mots en un seul (ex: End Program -> End_program) *)
-let rec merge_syntax (l:Abstract_tokens.token list):Abstract_tokens.token list=
+let rec merge_syntax (l:token list):token list=
   match l with
   | [] -> []
   | (Syntax End)::Space::(Syntax Do)::q -> Syntax End_do::merge_syntax q
@@ -35,21 +35,21 @@ let rec merge_syntax (l:Abstract_tokens.token list):Abstract_tokens.token list=
   | x::q -> x::merge_syntax q
 
 
-let rec is_in_list(l:Abstract_tokens.token list) (t:Abstract_tokens.token): bool =
+let rec is_in_list(l:token list) (t:token): bool =
   match l with
   | [] -> false
   | x::q -> if x == t then true else is_in_list q t
 
-(* prend tous les tokens jusqu'a unAbstract_tokens.token  *)
-let get_up_to (l:Abstract_tokens.token list) (stop_token:Abstract_tokens.token list):Abstract_tokens.token list*Abstract_tokens.token list = 
-  let rec aux (l1:Abstract_tokens.token list)  (l2:Abstract_tokens.token list):Abstract_tokens.token list*Abstract_tokens.token list = 
+(* prend tous les tokens jusqu'a untoken  *)
+let get_up_to (l:token list) (stop_token:token list):token list*token list = 
+  let rec aux (l1:token list)  (l2:token list):token list*token list = 
     match l1 with
     | [] -> (List.rev l2, l1)
     | x::q -> if (is_in_list stop_token x) then (List.rev l2, l1) else aux q (x::l2)
   in aux l []
 
 let rec compact_ast_list (l:ast list): ast list=
-  let rec compact_on_token (l1:ast list) (t:Abstract_tokens.token) : ast list =
+  let rec compact_on_token (l1:ast list) (t:token) : ast list =
     match l1 with
     | [] -> [] 
     | Noeud(x1,x2,x3)::Noeud(y1,[],[])::Noeud(z1,z2,z3)::q when y1 = t-> 
@@ -61,7 +61,7 @@ let rec compact_ast_list (l:ast list): ast list=
 
 
 
-let rec create_ast (l:Abstract_tokens.token list): (ast list) * (Abstract_tokens.token list) = 
+let rec create_ast (l:token list): (ast list) * (token list) = 
   match l with
   | [] -> [], []
 
@@ -90,7 +90,7 @@ let rec create_ast (l:Abstract_tokens.token list): (ast list) * (Abstract_tokens
   | Operateur(x)::q1 -> let a2, q2 = create_ast q1 in Noeud(Operateur(x), [], []) :: a2, q2
   | OperateurLogique(x)::q1 ->let a2, q2 = create_ast q1 in Noeud(OperateurLogique(x), [], []) :: a2, q2
   | Comparateur(x)::q1 ->let a2, q2 = create_ast q1 in Noeud(Comparateur(x), [], []) :: a2,q2
-  | (Syntax x)::q when x =Abstract_tokens.Real || x =Abstract_tokens.Integer || x =Abstract_tokens.Logical || x =Abstract_tokens.Character  ->
+  | (Syntax x)::q when x =Real || x =Integer || x =Logical || x =Character  ->
       let l2,q2 = get_up_to q [NewLine; PointVirgule] in
       let a3, q3 = create_ast l2 in
       let a4, q4 = create_ast q2 in
@@ -141,9 +141,9 @@ let rec create_ast (l:Abstract_tokens.token list): (ast list) * (Abstract_tokens
                        let a4,a5 = (fun a ->
                           match a with
                           (* cas avec début, fin, pas *)
-                          | debut::Noeud(Abstract_tokens.Virgule, [], [])::fin::Noeud(Abstract_tokens.Virgule, [], [])::pas::q -> [debut;fin;pas] ,q
+                          | debut::Noeud(Virgule, [], [])::fin::Noeud(Virgule, [], [])::pas::q -> [debut;fin;pas] ,q
                           (* cas avec début, fin *)
-                          | debut::Noeud(Abstract_tokens.Virgule, [], [])::fin::q -> [debut;fin] ,q
+                          | debut::Noeud(Virgule, [], [])::fin::q -> [debut;fin] ,q
                           | _ -> failwith "il n'y a pas de paramètres dans pour la boucle"
                         ) a2 in
                           
@@ -170,20 +170,20 @@ let rec create_ast (l:Abstract_tokens.token list): (ast list) * (Abstract_tokens
 
   | c::q1 -> let a2, q2 = create_ast q1 in  Noeud(c, [],[])::a2, q2 
 
-let rec set_variable_list_to_env (var_list: ast list) (env: Environnement.environnement) (t:Abstract_tokens.syntax): Environnement.environnement = 
+let rec set_variable_list_to_env (var_list: ast list) (env: environnement) (t:token): environnement = 
   match var_list with
   | [] -> env
-  | Noeud(Identificateur(nom),[],[])::q -> let env2 = Environnement.set_type env nom t in 
+  | Noeud(Identificateur(nom),[],[])::q -> let env2 = set_type env nom t in 
                                           set_variable_list_to_env q env2 t
   | _::q -> set_variable_list_to_env q env t
 
 
 (* crée l'environnement de l'ast*)
-let env_of_ast (ast1:ast list): Environnement.environnement = 
-  let rec env_of_ast_inner (ast2: ast list) (env: Environnement.environnement): Environnement.environnement =
+let env_of_ast (ast1:ast list): environnement = 
+  let rec env_of_ast_inner (ast2: ast list) (env: environnement): environnement =
     match ast2 with
     | [] -> env
-    | Noeud(Syntax x,[],l2)::q when x =Abstract_tokens.Real || x =Abstract_tokens.Integer || x =Abstract_tokens.Logical || x =Abstract_tokens.Character -> 
+    | Noeud(Syntax x,[],l2)::q when x =Real || x =Integer || x =Logical || x =Character -> 
         let env2 = set_variable_list_to_env l2 env x in env_of_ast_inner q env2
 
     | Noeud(_,l1,l2)::q ->

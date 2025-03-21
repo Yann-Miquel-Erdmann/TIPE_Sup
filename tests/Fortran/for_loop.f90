@@ -7,7 +7,7 @@ program printNum
       n = 7
    end if
 
-   if (.true.) print *, "Hello"
+   ! if (.true.) print *, "Hello"
 
    do n = 11, 20
       ! printing the value of n 

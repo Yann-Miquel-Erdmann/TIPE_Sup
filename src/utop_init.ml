@@ -4,8 +4,10 @@
 #load "grammar_functions.cmo"
 #load "regex.cmo"
 #load "automates.cmo" 
-#load "det_automaton.cmo"
 #load "LL1.cmo"
+#use "LL1.ml"
+#use "det_automaton.ml"
+#use "convert_to_abstract.ml"
 (* #load "dictionnaire.cmo"
 #load "environnement.cmo";;
 #load "bibliotheques.cmo"

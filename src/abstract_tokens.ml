@@ -135,6 +135,8 @@ type syntax =
   | Wait
   | Write
   | Select
+  | For
+  | Step
 
 
 type intrinsic_function =
@@ -421,12 +423,14 @@ type token =
   | Name of string
   | Integer of string
   | Floating of string
-  | Virgule
-  | QuatrePoints
   | Chaine of string
   | Commentaire of string
+  | Virgule
+  | QuatrePoints
   | Parentheseouvrante
   | Parenthesefermante
   | PointVirgule
+  | ProgramRoot
+  | ToFlatten
 
 
