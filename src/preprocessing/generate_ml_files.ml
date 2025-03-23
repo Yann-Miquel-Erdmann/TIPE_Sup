@@ -11,8 +11,13 @@ let printable_string_of_terminal (r: rule): string =
     String.sub s 2 ((String.length s) - 3)
 
 
+let case_arr = Array.init 26 (fun i -> "("^(String.make 1 (char_of_int (97+i)))^"|"^(String.make 1 (char_of_int (65+i)))^")")
+
+let char_list_of_string (s : string) : char list = List.of_seq(String.to_seq s)
+
 let get_safe_symbol (term: rule list): string = fst (List.nth (List.filter (fun (r : rule) -> (string_of_terminal (r)).[0] = 's') term) 0)
 let get_unparsed_symbol (term: rule list): string list = List.map fst (List.filter (fun (r : rule) -> (string_of_terminal (r)).[0] = '_') term)
+let make_non_case_sentive (s :string) : string = List.fold_left (fun acc x -> if alphanumerical_min x then acc^case_arr.(int_of_char x - 97) else acc^(String.make 1 x)) "" (char_list_of_string s)
 
 let generate_file_lexer (g: grammar) (f_name: string): unit = 
   let file = open_out f_name in
@@ -20,7 +25,7 @@ let generate_file_lexer (g: grammar) (f_name: string): unit =
   print_endline ("Generating the "^f_name^" file...");
   output_string file "open Regex\nopen Automates\n";
   output_string file "\nlet syntax_automate_det = determinise (enleve_epsilon_trans (ou_automates (List.map (fun (s, t) -> automate_gen (gen_regex s) t) [";
-  List.iter (fun (s, p) -> output_string file ("(\""^String.escaped (printable_string_of_terminal (s,p))^"\", "^s^"); ")) t;
+  List.iter (fun (s, p) -> output_string file ("(\""^String.escaped (let s = (printable_string_of_terminal (s,p)) in if (string_of_terminal (s, p)).[0] = '\'' then make_non_case_sentive s else s)^"\", "^s^"); ")) t;
   output_string file "])))";
   flush file;
   close_out file

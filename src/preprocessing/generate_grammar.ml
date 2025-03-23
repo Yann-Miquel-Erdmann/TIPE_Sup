@@ -3,8 +3,8 @@ type rule = string*(pattern list)
 type grammar = rule list
 
 
-let alphanumerical_maj (c:char) = 41 <= Char.code c && Char.code c <= 90  
-let alphanumerical_min (c:char) = 97 <= Char.code c && Char.code c <= 122  
+let alphanumerical_maj (c:char) : bool = 65 <= Char.code c && Char.code c <= 90  
+let alphanumerical_min (c:char) : bool = 97 <= Char.code c && Char.code c <= 122  
 
 (** Returns the list of all the lines in the file named [file_name]. *)
 let read_file (file_name: string) : string list = 
