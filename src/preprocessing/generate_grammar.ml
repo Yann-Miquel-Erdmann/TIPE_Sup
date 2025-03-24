@@ -59,6 +59,10 @@ let get_derivations (s: char list): pattern list =
   in
   split_derivations s []  
 
+(* filters out the empty lines and the lines with a "//" comment *)
+let rule_filter (l: string): bool = 
+  if String.length l < 2 then false else l.[0] <> '/' && l.[1] <> '/'
+
 let get_rule (line : string): rule =
   let s = List.init (String.length line) (String.get line) in
   
@@ -68,7 +72,7 @@ let get_rule (line : string): rule =
 
 let get_grammar (file_name: string): grammar = 
   let lines = read_file file_name in
-  let not_empty_lines = List.filter (fun l -> l <> "") lines in 
+  let not_empty_lines = List.filter rule_filter lines in 
   List.map get_rule not_empty_lines
 
 
