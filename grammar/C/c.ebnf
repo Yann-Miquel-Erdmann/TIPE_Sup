@@ -1,0 +1,367 @@
+https://gist.github.com/Chubek/52884d1fa766fa16ae8d8f226ba105ad
+
+Grammar::Syntactic::ANSIC
+
++Syntax::TopLevel
+
+TopLevel	::= { TopLevelElem | Comment }
+
+TopLevelElem	::= DeclStmt | FnDefinition
+
++Syntax::Functions
+
+FunDefinition	::= FunSignature CompoundStatement
+
+FunSignature	::= [ KwStatic ] [ KwInline ] TyyDecl Identifier '(' TyyidPairList ')'
+
++Syntax::Statements
+
+LabeledStmt	::= Identifier ':' StatementList
+
+StatementList  ::= { Statement }
+
+Statement	::= DeclStmt
+		| ForStmt
+		| BreakStmt
+		| NullStmt
+		| ReturnStmt
+		| CompoundStmt
+		| ContinueStmt
+		| IfStmt
+		| WhileStmt
+		| DoWhileStmt
+		| LabeledStmt
+		| GotoStmt
+
+CompoundStmt	::= '{' StatementList '}'
+
+GotoStmt	::= KwGoto Identifier ';'
+
+NullStmt	::= ';'
+
+ReturnStmt	::= KwReturn Expression ';'
+
+ContinueStmt	::= KwContinue ';'
+
+BreakStmt	::= KwBreak ';'
+
+IfStmt		::= KwIf '(' ExprList ')' CompoundStmt { KwElse [ '(' ExprList ')' ] CompoundStmt }
+
+WhileStmt	::= KwWhile '(' ExprList ')' CompoundStmt
+
+DoWhileStmt	::= KwDo CompoundStmt KwWhile '(' ExprList ')'
+
+ForStmt	::= KwFor '(' AssignList ';' ExprList ';' ExprList ')' CompoundStmt
+
+DeclStmt	::= AssignList ';'
+		| TyyDef ';'
+		| FunSignature ';'
+
++Syntax::AssignStatement
+
+AssignList 	::= AssignStmt { ',' AssignStmt }
+
+AssignStmt		::= DynInit
+		| ConstInit
+		| CompLiteral
+
+CompInit	::= [ TyyDecl ] LhsId [ '=' [ TyyCase ] CompLiteral ]
+
+DynInit	::= [ TyyDecl ] LhsId [ '=' [ TyyCast ] Expression ]
+
+ConstInit	::= [ TyyDecl ] LhsId [ '=' [ TyyCast ] ConstLiteral ]
+
+LhsId		::= [ KwConst ] [ '*' ] ( LongIndexOpt | IndexOpt )
+
++Syntax::Expression
+
+ExprList	::= Expression { ',' Expression }
+
+Expression	::= Primary
+	        | Unary
+		| Binary
+		| Ternary
+		| Inplace
+		| Synthesized
+
+Synthesized	::= '(' AssignList ')'
+
+Inplace		::= LongIndexOpt ( "+="    | "=" 
+				    | "*="  | "/=" 
+				    | "%="  | "<<=" 
+				    | ">>=" | "&=" 
+				    | "|="  | "^=" ) Expression
+
+Ternary		::= Binary '?' Binary ':' Binary 
+
++Syntax::BinaryExpression
+
+Binary		::= LogorExpr
+
+LogorExpr	::= LogandExpr "||" LogorExpr
+
+LogandExpr	::= BitorExpr "&&" LogandExpr
+
+BitorExpr	::= BitxorExpr '|' BitorExpr
+
+BitxorExpr	::= BitandExpr '^' BitxorExpr
+
+BitandExpr	::= EqopExpr '&' BitandExpr
+
+EqopExpr	::= RelopExpr "==" EqopExpr
+		| RelopExpr "!=" EqopExpr
+
+RelopExpr	::= ShiftExpr '<' RelopExpr
+		| ShiftExpr '>' RelopExpr
+		| ShiftExpr "<=" RelopExpr
+		| ShiftExpr ">=" RelopExpr
+
+ShiftExpr	::= AddExpr ">>" ShiftExpr
+		| AddExpr "<<" ShiftExpr
+
+AddExpr	::= MultExpr '+' AddExpr
+		| MultExpr '' AddExpr
+
+MultExpr	::= Unary '*' MultiExpr
+		| Unary '/' MultiExpr
+		| Unary '%' MutliExpr
+
++Syntax::UnaryExpression
+
+Unary		::= UnaryPlus
+		| UnaryMinus
+		| Unary1Scomp
+		| Unary2Scomp
+		| UnaryLnot
+		| UnaryRef
+        | UnaryDeref
+		| UnaryPreinc
+		| UnaryPredec
+		| UnaryPostinc
+		| UnaryPostdec
+        | UnaryOffsetof
+		| UnarySizeof
+
+UnaryOffsetof	::= "Offsetof" Primary
+
+UnarySizeof	::= "Sizeof" Primary
+
+UnaryPostdec	::= Primary "--"
+
+UnaryPostinc	::= Primary "++"
+
+UnaryPredec	::= "--" Primary
+
+UnaryPreinc	::= "++" Primary
+
+UnaryDeref	::= '*' Primary
+
+UnaryRef	::= '&' Primary
+
+UnaryLnot	::= '!' Primary
+
+Unary2Scompl	::= '~' Primary
+
+Unary1Scompl	::= '-' Primary
+
+UnaryPlus	::= '+' Primary
+
++Syntax::Primary
+
+Primary		::= PrimExpr 
+		| PrimFuncall 
+		| PrimLiteral
+		| PrimIdent
+
+PrimExpr	::= '(' Expression ')'
+
+PrimFuncall	::= Identifier '(' ExprList ')'
+
+PrimLiteral	::= ConstLiteral
+
+PrimIdent	::= LongIndexOpt
+		| IndexOpt
+
+
++Syntax::Types
+
+TyyidPairList	::= TyyidPair { ',' TyyidPair }
+
+TyyidPair	::= TyyDecl [ KwConst ] [ '*' ] Identifier
+
+TyyLit		::= TyyEnumLit
+		| TyyExtLit
+
+TyyEnumLit	::= '{' TyyEnumField { ',' TyyEnumField } '}'
+
+TyyEnumField	::= Identifier [ '=' IntConst ]
+
+TyyExtLit	::= '{' TyyExtField { ';' TyyExtField } '}'
+
+TyyExtField	::= TyyDecl Identifier
+
+TyyDecl	::= [ TyyStorage ] [ TyyQualifier ] [ '*' ] TyyBody
+
+TyyDef	::= KwTypedef TyyBody TyyAlias
+
+TyyStorage	::= KwAuto
+		| KwStatic
+		| KwExtern
+		| KwRegister
+
+TyyQualifier	::= KwConst
+		| KwVolatile
+		| KwRestrict
+
+TyyCast	::= '(' TyyRef ')'
+
+TyyRef		::= TyyBody [ '*' ]
+
+TyyBody	::= TyyBase
+		| TyyExt
+		| TyyLit
+
+TyyExt		::= TyyExtUnion
+		| TyyExtEnum
+		| TyyExtStruct
+
+TyyExtUnion	::= KwUnion TyyAlias
+
+TyyExtEnum	::= KwEnum TyyAlias
+
+TyyExtStruct	::= KwStruct TyyAlias
+
+TyyAlias	::= Identifier
+
+TyyBase	::= [ TyyBaseWord ] [ TyyBaseSign ] TyyBaseBody
+
+TyyBaseWord	::= KwLong
+		| KwShort
+
+TyyBaseSign 	::= KwSigned
+		| KwUnsigned
+		
+TyyBaseBody	::= KwChar
+		| KwInt
+		| KwFloat
+		| KwDouble
+		| KwVoid
+
++Syntax::Idents
+
+LongIndexOpt	::= LongIdent [ Index ]
+
+IndexOpt	::= Identifier [ Index ]
+
+Index		::= '[' [ LongIdent | ConstLiteral ] ']'
+
+LongIdent	::= Identifier { ( DotIdent | ArrowIdent ) }
+
+DotIdent	::= Identifier { '.' Identifier }
+
+ArrowIdent	::= Identifier { ">" Identifier }
+
++Syntax::CompoundLiteral
+
+CompLiteral	::= [ '(' TyyDecl ')' ] ListLiteral
+
+ListLiteral	::= '{'  DesignatedInit { ',' DesignatedInit } '}'
+
+DesignatedInit ::= [ '.' Identifier '=' ] ConstLiteral
+
+Gramamr::Lexical::ANSIC
+
++Lexical::Keywords
+
+KwAuto		::= "Auto"
+KwBreak	::= "Break"
+KwCase		::= "Case"
+KwChar		::= "Char"
+KwConst	::= "Const"
+KwContinue	::= "Continue"
+KwDefault	::= "Default"
+KwDo		::= "Do"
+KwDouble	::= "Double"
+KwElse		::= "Else"
+KwEnum 	::= "Enum"
+KwExtern 	::= "Extern"
+KwFloat 	::= "Float"
+KwFor 		::= "For"
+KwGoto 	::= "Goto"
+KwIf 		::= "If"
+KwInt 		::= "Int"
+KwLong 	::= "Long"
+KwRegister 	::= "Register"
+KwReturn 	::= "Return"
+KwShort 	::= "Short"
+KwSigned 	::= "Signed"
+KwSizeof 	::= "Sizeof"
+KwStatic 	::= "Static"
+KwStruct 	::= "Struct"
+KwSwitch 	::= "Switch"
+KwTypedef 	::= "Typedef"
+KwUnion 	::= "Union"
+KwUnsigned 	::= "Unsigned"
+KwVoid 	::= "Void"
+KwVolatile 	::= "Volatile"
+KwWhile 	::= "While"
+
++Lexical::LiteralTokens
+
+ConstLiteral	::= ExprConst | StrConst | CharConst | NumConst | IntConst | NullConst
+
+NullConst	::= "NULL"
+
+ExprConst	::= IntConst { ( '+' | '' | '*' | '%' | '/' | '&' | '|' ) IntConst }
+
+StrConst	::= [ 'L' ] '"' { Character } '"'
+
+CharConst	::= "'" Character  "'"
+
+NumConst	::= Integer | Rational
+
+IntConst	::= Integer | CharConst
+
+Rational	::= [ Intenger ] '.' Integer
+
+Integer		::= DecDigit | HexDigit | OctDigit | BinDigit
+
+BinInteger	::= ( "0B" | "0B" ) BinDigit { BinDigit }
+
+OctInteger	::= ( "0O" | "0O" ) OctDigt { OctDigit }
+
+HexInteger	::= ( "0X" | "0X" ) HexDigit { HexDigit }
+
+DecInteger	::= Digit { Digit }
+
+Identifier	::= ( Letter | '_' ) { Letter | Digit | '_' }
+
+Letter		::= UpperCase | LowerCase
+
+LowerCase	::= 'A' | 'B' | 'C' | ... | 'X' | 'Y' | 'Z'
+
+UpperCase	::= 'A' | 'B' | 'C' | ... | 'X' | 'Y' | 'Z'
+
+HexDigit	::= Digit | 'A' | 'B' | 'C' | 'D' | 'E' | 'F'
+			 | 'A' | 'B' | 'C' | 'D' | 'E' | 'F'
+
+Digit		::= OctDigit | '8' | '9'
+
+OctDigit	::= BinDigit | '2' | '3' | '4' | '5' | '6' | '7'
+
+BinDigit	::= '0' | '1'
+
+Character	::= Printable | CharEscape | HexEscape | OctEscape
+
+Printable	::= ' ' | '!' | '"' | ... | '|' | '}' | '~'
+
+CharEscape	::= '\' Escapable
+
+HexEscape	::= "\X" HexDigit HexDigit
+
+OctEscape	::= '\' OctDigit OctDit OctDigit
+
+Escapble	::= 'N' | 'A' | 'B' | 'T' | 'F' | 'R' | 'V' | '\' | "'" | '"' | '?' | '0'
+
+Comment		::= "// " ? AnyChar ? "\N"
+		| "/*" ? AnyChar "*/"

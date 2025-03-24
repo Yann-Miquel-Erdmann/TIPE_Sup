@@ -135,7 +135,7 @@ ObjectName -> Ident
 LogicalConstant -> True | False
 
 PowerOp -> '\*\*'
-MultOp -> Asterisk | Divise
+MultOp -> Asterisk | Divide
 AddOp -> Sign
 
 Sign -> Plus | Minus
@@ -188,7 +188,7 @@ While -> 'while'
 If -> 'if'
 Else -> 'else'
 Then -> 'then'
-Divise -> '/'
+Divide -> '/'
 Plus -> '\+'
 Minus -> '-'
 IsEqual -> '(==)|(\.eq\.)'

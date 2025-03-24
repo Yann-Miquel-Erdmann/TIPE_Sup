@@ -22,7 +22,7 @@ let read_file (file_name: string) : string list =
 let get_rule_name (s: char list): string*(char list) = 
   let rec get_rule_name_aux (s: char list) (revname: char list): string*(char list) = 
     match s with
-    | [] -> failwith "no rule name one the line"
+    | [] ->  failwith "no rule name on the line"
     | ' '::q -> String.of_seq (List.to_seq (List.rev revname)),q
     | c::q -> get_rule_name_aux q (c::revname)
   in
@@ -64,8 +64,8 @@ let rule_filter (l: string): bool =
   if String.length l < 2 then false else l.[0] <> '/' && l.[1] <> '/'
 
 let get_rule (line : string): rule =
+  print_endline line ;
   let s = List.init (String.length line) (String.get line) in
-  
   let rule_name,s1 = get_rule_name s in
   let derivations = get_derivations (remove_arrow s1) in
   rule_name,derivations
