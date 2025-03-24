@@ -133,5 +133,5 @@ let generate_files (g_path: string): unit =
 
 let _ = (
   Sys.chdir "src/";
-  generate_files "../grammar/Our_Grammar.txt";
+  generate_files "../grammar/C/C_grammar.txt";
   print_endline "Finished generating, exiting.")

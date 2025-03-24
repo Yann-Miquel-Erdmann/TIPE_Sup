@@ -8,4 +8,10 @@ src/preprocessing/*.cm[aio]
 !.gitignore
 _build
 
+tests/C/*
+!tests/C/*.c
+
+tests/Fortran/*
+!tests/Fortran/*.f90
+
 research_docs

@@ -139,7 +139,7 @@ Then -> Syntax Then
 Else -> Syntax Else
 EndIf -> Syntax End_if
 
-Divise -> Operateur Division
+Divide -> Operateur Division
 Plus -> Operateur Plus
 Minus -> Operateur Moins
 
