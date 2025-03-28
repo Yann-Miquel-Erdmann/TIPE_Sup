@@ -159,8 +159,8 @@ let analyse_LL1_of_symbol (g: grammar) (text: (symbol * string) list) (s: symbol
   and 
   analyse_LL1_of_symbol_aux (text: (symbol*string) list) (s: symbol): at*((symbol*string) list) = 
     
-    print_endline ("analyse_LL1_of_symbol_aux "^string_of_symbol s);
-    print_patterns [List.map fst text];
+    (* print_endline ("analyse_LL1_of_symbol_aux "^string_of_symbol s);
+    print_patterns [List.map fst text]; *)
 
     if is_terminal (s, []) then(
       (* print_endline "is terminal"; *)
