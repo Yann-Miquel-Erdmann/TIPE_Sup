@@ -38,6 +38,7 @@ CharLength -> LParenthesis TypeParamValue RParenthesis | ScalarIntLiteralConstan
 TypeParamValue -> Expr_Or_Asterisk
 Expr_Or_Asterisk -> Expr | Asterisk
 
+
 TypeSpec -> Integer KindSelector_opt | Double | Complex KindSelector_opt | Logical KindSelector_opt
 
 
@@ -117,7 +118,7 @@ MultOperand -> Level1Expr PowerOp_Level1Expr_star
 PowerOp_Level1Expr_star -> PowerOp Level1Expr PowerOp_Level1Expr_star | E
 
 Level1Expr -> Primary
-Primary -> Icon | Rcon | Name | Scon | LogicalConstant
+Primary -> Icon | Rcon | Scon | Name | LogicalConstant
 
 Name -> Ident
 ArrayName -> Ident

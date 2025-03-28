@@ -135,7 +135,7 @@ Dot_or_Arrow -> Dot | Arrow
 
 Inplace -> LongIndexOpt InplaceOperator Expression
 
-InplaceOperator -> ImplacePlus | ImplaceMinus | ImplaceTimes | ImplaceDivide | ImplaceMod | ImplaceLeftBitShift | ImplaceRightBitShift | ImplaceBitwiseAnd | ImplaceBitwiseOr | ImplaceBitwiseXor
+InplaceOperator -> InplacePlus | InplaceMinus | InplaceTimes | InplaceDivide | InplaceMod | InplaceLeftBitShift | InplaceRightBitShift | InplaceBitwiseAnd | InplaceBitwiseOr | InplaceBitwiseXor
 
 Binary -> LogOrExpr
 
@@ -207,16 +207,16 @@ UnaryPlus -> Plus Primary
 LogicalAnd -> '&&'
 LogicalOr -> '||'
 
-ImplacePlus -> '+='
-ImplaceMinus -> '-='
-ImplaceTimes -> '*=' 
-ImplaceDivide -> '/='
-ImplaceMod -> '%='
-ImplaceLeftBitShift -> '<<='
-ImplaceRightBitShift -> '>>='
-ImplaceBitwiseAnd -> '&='
-ImplaceBitwiseOr -> '|='
-ImplaceBitwiseXor -> '^='
+InplacePlus -> '+='
+InplaceMinus -> '-='
+InplaceTimes -> '*=' 
+InplaceDivide -> '/='
+InplaceMod -> '%='
+InplaceLeftBitShift -> '<<='
+InplaceRightBitShift -> '>>='
+InplaceBitwiseAnd -> '&='
+InplaceBitwiseOr -> '|='
+InplaceBitwiseXor -> '^='
 
 Incr -> '++'
 Decr -> '--'

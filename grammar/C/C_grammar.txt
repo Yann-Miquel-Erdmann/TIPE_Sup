@@ -1,144 +1,41 @@
-TopLevel -> TopLevelElem TopLevel | Comment TopLevel | E
-TopLevelElem -> DeclStmt | FunDefinition
+Program -> Decl Decl_star
+Decl_star -> Decl Decl_star | E
 
+Decl -> VarDecl | FunDecl
 
-DeclStmt -> AssignList SemiColon | TyyDef SemiColon | FunSignature SemiColon
+VarDecl -> TypeSpec VarDeclInit Comma_VarDeclInit_star SemiColon
 
-AssignList -> AssignStmt Comma_AssignStmt_star
-Comma_AssignStmt_star -> Comma AssignStmt Comma_AssignStmt_star | E
+Comma_VarDeclInit_star -> Comma VarDeclInit Comma_VarDeclInit_star | E
+VarDeclInit -> VarDeclId | VarDeclId Assign Expr
+VarDeclId -> Id | Id LSquareBracket IntConst RSquareBracket
 
-AssignStmt -> DynInit | ConstInit | CompLiteral
+TypeSpec -> KwInt | KwBool | KwFloat | KwVoid
 
-CompInit -> TyyDecl_opt LhsId Assign_CompLiteral_opt
-DynInit -> TyyDecl_opt LhsId Assign_Expression_opt
-ConstInit -> TyyDecl_opt LhsId Assign_ConstLiteral_opt
-LhsId -> KwConst_opt Asterisk_opt LongIndexOpt_or_IndexOpt
-LongIndexOpt_or_IndexOpt -> LongIndexOpt | IndexOpt
-KwConst_opt -> KwConst | E
-Assign_CompLiteral_opt -> Assign TyyCast_opt CompLiteral | E
-Assign_Expression_opt -> Assign TyyCast_opt Expression | E
-Assign_ConstLiteral_opt -> Assign TyyCast_opt ConstLiteral | E
+// no parameters for now
+FunDecl -> TypeSpec Id LParenthesis RParenthesis CompoundStmt
 
+CompoundStmt -> LBracket Stmt_star RBracket
+Stmt_star -> Stmt Stmt_star | E
 
-CompLiteral -> LParenthesis_TyyDecl_LParenthesis_opt ListLiteral
-LParenthesis_TyyDecl_LParenthesis_opt -> LParenthesis TyyDecl LParenthesis | E
+Stmt -> VarDecl | Assign SemiColon | IfStmt
 
-ListLiteral -> LBracket DesignatedInit Comma_DesignatedInit_star RBracket
-Comma_DesignatedInit_star -> Comma DesignatedInit Comma_DesignatedInit_star | E
-DesignatedInit -> ConstLiteral
+VarAssign -> Id Assign Expr
 
-
-TyyCast -> LParenthesis TyyRef RParenthesis
-TyyCast_opt -> TyyCast | E 
-TyyDecl -> TyyStorage_opt TyyQualifier_opt Asterisk TyyBody
-TyyDecl_opt -> TyyDecl | E
-TyyRef -> TyyBody Asterisk_opt
-TyyDef -> KwTypedef TyyBody TyyAlias
-TyyBody -> TyyBase | TyyExt | TyyLit
-TyyBase -> TyyBaseWord_opt TyyBaseSign TyyBaseBody
-TyyBaseWord_opt -> KwLong | KwShort | E
-TyyBaseSign -> KwSigned | KwUnsigned | E
-TyyExt -> TyyExtUnion | TyyExtEnum | TyyExtStruct
-TyyLit -> TyyEnumLit | TyyExtLit
-
-TyyEnumLit -> LBracket TyyEnumField Comma_TyyEnumField_star RBracket
-Comma_TyyEnumField_star -> Comma TyyEnumField Comma_TyyEnumField_star | E
-TyyEnumField -> Identifier Assign_IntConst_opt
-Assign_IntConst_opt -> Assign IntConst | E 
-
-
-TyyExtLit -> LBracket TyyExtField SemiColon_TyyExtField_star RBracket
-SemiColon_TyyExtField_star -> SemiColon TyyExtField SemiColon_TyyExtField_star | E
-TyyExtField -> TyyDecl Identifier
-
-
-TyyExtUnion -> KwUnion TyyAlias
-
-TyyExtEnum -> KwEnum TyyAlias
-
-TyyExtStruct -> KwStruct TyyAlias
-
-TyyBaseBody -> KwChar | KwInt | KwFloat | KwDouble | KwVoid
-TyyAlias -> Identifier
-
-
-FunSignature -> KwStatic_opt KwInline_opt TyyDecl Identifier LParenthesis TyyidPairList RParenthesis
-KwStatic_opt -> KwStatic | E
-KwInline_opt -> KwInline | E
-
-
-TyyStorage_opt -> KwAuto | KwStatic | KwExtern | KwRegister | E
-TyyQualifier_opt -> KwConst | KwVolatile | KwRestrict | E
-
-TyyidPairList -> TyyidPair Comma_TyyidPair_star
-Comma_TyyidPair_star -> Comma TyyidPair Comma_TyyidPair_star | E
-TyyidPair -> TyyDecl KwConst_opt Asterisk_opt Identifier
-Asterisk_opt -> Asterisk | E
-
-FunDefinition -> FunSignature CompoundStmt
-
-Statement_star -> Statement Statement_star | E
-
-Statement -> DeclStmt | ForStmt | BreakStmt | NullStmt | ReturnStmt | CompoundStmt | ContinueStmt | IfStmt | WhileStmt | DoWhileStmt
-
-ForStmt -> KwFor LParenthesis AssignList SemiColon ExprList SemiColon ExprList RParenthesis CompoundStmt
-BreakStmt -> KwBreak SemiColon
-NullStmt -> SemiColon
-ReturnStmt -> KwReturn Expression SemiColon
-CompoundStmt -> LBracket Statement_star RBracket
-ContinueStmt -> KwContinue SemiColon
-
-
-IfStmt -> KwIf LParenthesis ExprList RParenthesis CompoundStmt Else_If_star Else_opt
-Else_If_star -> KwElse KwIf LParenthesis ExprList RParenthesis CompoundStmt Else_If_star | E
+IfStmt -> KwIf LParenthesis Expr RParenthesis CompoundStmt Else_If_star Else_opt
+Else_If_star -> KwElse KwIf LParenthesis Expr RParenthesis CompoundStmt Else_If_star | E
 Else_opt -> KwElse CompoundStmt | E
-LParenthesis_ExprList_RParenthesis_opt -> LParenthesis ExprList RParenthesis | E
+LParenthesis_Expr_RParenthesis_opt -> LParenthesis Expr RParenthesis | E
 
-WhileStmt -> KwWhile LParenthesis ExprList RParenthesis CompoundStmt
-DoWhileStmt -> KwDo CompoundStmt KwWhile LParenthesis ExprList RParenthesis
-
-
-ConstLiteral -> ExprConst | StrConst | CharConst | NumConst | IntConst | NullConst
-
-ExprConst -> IntConst ConstOperator_IntConst_star
-ConstOperator_IntConst_star -> ConstOperator IntConst ConstOperator_IntConst_star | E 
-ConstOperator -> Plus | Minus | Asterisk | Mod | Divide | BitwiseAnd | BitwiseOr
-NumConst -> Integer | Rational
-IntConst -> Integer | CharConst
-Integer -> DecDigit 
-
-ExprList -> Expression Comma_Expression_star
-Comma_Expression_star -> Comma Expression Comma_Expression_star | E
-
-ExprList_opt -> ExprList | E
-
-Expression -> Primary | Unary | Binary | Inplace 
-
-Primary -> PrimExpr | PrimFuncall | PrimLiteral | PrimIdent
-
-PrimExpr -> LParenthesis Expression RParenthesis
-PrimFuncall -> Identifier LParenthesis ExprList RParenthesis
-PrimLiteral -> ConstLiteral
-PrimIdent -> LongIndexOpt | IndexOpt
-
-LongIndexOpt -> LongIdent Index_opt
-
-IndexOpt -> Identifier Index_opt
-
-Index_opt -> LSquareBracket LongIdent_or_ConstLiteral RSquareBracket
-LongIdent_or_ConstLiteral -> LongIdent | ConstLiteral | E
-
-LongIdent -> Identifier Dot_or_Arrow_Identifier_star
-Dot_or_Arrow_Identifier_star -> Dot_or_Arrow Identifier Dot_or_Arrow_Identifier_star | E 
-Dot_or_Arrow -> Dot | Arrow
+WhileStmt -> KwWhile LParenthesis Expr RParenthesis CompoundStmt
+ForStmt -> KwFor LParenthesis VarAssign SemiColon Expr SemiColon Expr RParenthesis CompoundStmt
 
 
-Inplace -> LongIndexOpt InplaceOperator Expression
+Expr -> Primary | Binary | InPlace | Unary
+Primary -> LParenthesis Expr RParenthesis | Id | IntConst | FloatConst | BoolConst | NullConst
 
-InplaceOperator -> ImplacePlus | ImplaceMinus | ImplaceTimes | ImplaceDivide | ImplaceMod | ImplaceLeftBitShift | ImplaceRightBitShift | ImplaceBitwiseAnd | ImplaceBitwiseOr | ImplaceBitwiseXor
 
+// --------------------- Binary
 Binary -> LogOrExpr
-
 LogOrExpr -> LogAndExpr LogicalOr_LogOrExpr_star
 LogicalOr_LogOrExpr_star -> LogicalOr LogOrExpr LogicalOr_LogOrExpr_star | E
 
@@ -175,48 +72,33 @@ MultExpr -> Unary Asterisk_or_Divide_or_Mod_MultExpr_star
 Asterisk_or_Divide_or_Mod_MultExpr_star -> Asterisk_or_Divide_or_Mod MultExpr Asterisk_or_Divide_or_Mod_MultExpr_star | E
 Asterisk_or_Divide_or_Mod -> Asterisk | Divide | Mod
 
+// ----------------------- InPlace
+InPlace -> Id InPlaceOperator Expr
 
-Unary -> UnaryPlus | UnaryMinus | Unary1Scompl | UnaryLnot | UnaryRef | UnaryDeref | UnaryPreinc | UnaryPredec | UnaryPostinc | UnaryPostdec | UnaryOffsetof | UnarySizeof
+InPlaceOperator -> InPlacePlus | InPlaceMinus | InPlaceTimes | InPlaceDivide | InPlaceMod | InPlaceLeftBitShift | InPlaceRightBitShift | InPlaceBitwiseAnd | InPlaceBitwiseOr | InPlaceBitwiseXor
+InPlacePlus -> '+='
+InPlaceMinus -> '-='
+InPlaceTimes -> '*=' 
+InPlaceDivide -> '/='
+InPlaceMod -> '%='
+InPlaceLeftBitShift -> '<<='
+InPlaceRightBitShift -> '>>='
+InPlaceBitwiseAnd -> '&='
+InPlaceBitwiseOr -> '|='
+InPlaceBitwiseXor -> '^='
 
-UnaryOffsetof -> KwOffsetof Primary
-
-UnarySizeof -> KwSizeof Primary
-
+Unary -> UnaryPlus | UnaryMinus | Unary1Scompl | UnaryLnot | UnaryRef | UnaryDeref | UnaryPreinc | UnaryPredec | UnaryPostinc | UnaryPostdec 
 UnaryPostdec -> Primary Decr
-
 UnaryPostinc -> Primary Incr
-
 UnaryPredec -> Decr Primary
-
 UnaryPreinc -> Incr Primary
-
 UnaryDeref -> Asterisk Primary
-
 UnaryRef -> BitwiseAnd Primary
-
 UnaryLnot -> Not Primary
-
 Unary1Scompl -> FstCompl Primary
-
 UnaryMinus -> Minus Primary
-
 UnaryPlus -> Plus Primary
 
-
-
-LogicalAnd -> '&&'
-LogicalOr -> '||'
-
-ImplacePlus -> '+='
-ImplaceMinus -> '-='
-ImplaceTimes -> '*=' 
-ImplaceDivide -> '/='
-ImplaceMod -> '%='
-ImplaceLeftBitShift -> '<<='
-ImplaceRightBitShift -> '>>='
-ImplaceBitwiseAnd -> '&='
-ImplaceBitwiseOr -> '|='
-ImplaceBitwiseXor -> '^='
 
 Incr -> '++'
 Decr -> '--'
@@ -232,6 +114,9 @@ Equal -> '=='
 NotEqual -> '!='
 
 
+LogicalAnd -> '&&'
+LogicalOr -> '||'
+
 Not -> '!'
 Less -> '<='
 StrictLess -> '<'
@@ -241,47 +126,29 @@ StrictGreater -> '>'
 RightBitShift -> '>>'
 LeftBitShift -> '<<'
 
-CharConst -> r'[\'](~[\']|\')*[\']'
-DecDigit -> r'[0-9]+'
-Rational -> r'([0-9]+\.[0-9]*)|(\.[0-9]+)'
-NullConst -> 'NULL'
-StrConst -> r'["](~["]|"")*["]'
 
-KwAuto -> 'auto'
-KwBreak -> 'break'
-KwCase -> 'case'
-KwChar -> 'char'
-KwConst -> 'const'
-KwContinue -> 'continue'
-KwDefault -> 'default'
-KwDo -> 'do'
-KwDouble -> 'double'
+Id -> s'[a-zA-Z][a-zA-Z0-9_]*'
+BoolConst -> True | False
+True -> 'true'
+False -> 'false'
+IntConst -> r'[0-9]+'
+FloatConst -> r'([0-9]+\.[0-9]*)|(\.[0-9]+)'
+
+NullConst -> 'NULL'
+
+
 KwElse -> 'else'
-KwEnum -> 'enum'
-KwExtern -> 'extern'
-KwFloat -> 'float'
-KwFor -> 'for'
-KwGoto -> 'goto'
 KwIf -> 'if'
-KwInline -> 'inline'
-KwInt -> 'int'
-KwLong -> 'long'
-KwOffsetof -> 'Offsetof''
-KwRegister -> 'register'
-KwReturn -> 'return'
-KwRestrict -> 'restrict'
-KwShort -> 'short'
-KwSigned -> 'signed'
-KwSizeof -> 'sizeof'
-KwStatic -> 'static'
-KwStruct -> 'struct'
-KwSwitch -> 'switch'
-KwTypedef -> 'typedef'
-KwUnion -> 'union'
-KwUnsigned -> 'unsigned'
-KwVoid -> 'void'
-KwVolatile -> 'volatile'
 KwWhile -> 'while'
+KwFor -> 'for'
+
+KwInt -> 'int'
+KwFloat -> 'float'
+KwBool -> 'bool'
+KwVoid -> 'void'
+
+
+
 Comma -> ','
 SemiColon -> ';'
 LParenthesis -> '\('
