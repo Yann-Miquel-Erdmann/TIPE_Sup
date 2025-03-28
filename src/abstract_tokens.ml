@@ -425,6 +425,7 @@ type token =
   | Floating of string
   | Chaine of string
   | Commentaire of string
+  | Booleen of bool
   | Virgule
   | QuatrePoints
   | Parentheseouvrante
@@ -433,4 +434,4 @@ type token =
   | ProgramRoot
   | ToFlatten
 
-
+type ast = Noeud of token * (ast list) (* parameters then inner in the same list *)

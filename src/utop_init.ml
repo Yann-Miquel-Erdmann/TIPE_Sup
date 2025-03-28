@@ -5,9 +5,10 @@
 #load "regex.cmo"
 #load "automates.cmo" 
 #load "LL1.cmo"
-#use "LL1.ml"
+#load "convert_to_abstract.cmo"
+#load "environnement.cmo"
 #use "det_automaton.ml"
-#use "convert_to_abstract.ml"
+#use "generateC.ml"
 (* #load "dictionnaire.cmo"
 #load "environnement.cmo";;
 #load "bibliotheques.cmo"

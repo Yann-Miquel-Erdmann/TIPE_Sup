@@ -7,8 +7,10 @@ module SymbolSet = Set.Make(struct
 end )
 
 
-type symbol_SS_Htbl = (symbol,SymbolSet.t) Hashtbl.t
+(* arbre de syntaxe (non abstraite) *)
+type at = Noeud of (symbol*string) * (at list)
 
+type symbol_SS_Htbl = (symbol,SymbolSet.t) Hashtbl.t
 
 let print_SymbolSet (ss: SymbolSet.t): unit = 
   print_endline "SymbolSet(" ;
@@ -17,9 +19,6 @@ let print_SymbolSet (ss: SymbolSet.t): unit =
 
 let print_SymbolSet_Hastable (h: symbol_SS_Htbl): unit =
   Hashtbl.iter (fun s ss -> print_string (string_of_symbol s ^ " -> "); print_SymbolSet ss; print_newline ()) h
-
-
-
 
 (* returns a hashtable containing the first set of every non terminal *)
 let first (g: grammar): symbol_SS_Htbl = 
@@ -137,11 +136,6 @@ let follow (g:grammar):  symbol_SS_Htbl  =
   Hashtbl.iter (fun s _ -> follow_of_symbol s) g.rules_htbl;
   follow_h
 
-
-
-
-(* arbre de syntaxe (non abstraite) *)
-type at = Noeud of (symbol*string) * (at list)
 
 let analyse_LL1_of_symbol (g: grammar) (text: (symbol * string) list) (s: symbol): at*((symbol*string) list) = 
   let follow_sshtbl = follow g in

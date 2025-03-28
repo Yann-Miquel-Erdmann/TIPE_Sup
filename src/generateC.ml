@@ -1,53 +1,45 @@
 open Environnement
 open Abstract_tokens
 open Bibliotheques
+open Convert_to_abstract
+open LL1
 
 let rec generate_library_imports (l: Bibliotheques.libs): string =
   match l with
   | [] -> ""
   | name::q -> "#include " ^ name ^ "\n" ^ generate_library_imports q
 
-  
-
-let rec generate_format_string (l:Create_ast.ast list) (env: Environnement.environnement): string =
+let rec generate_format_string (l:ast list) (env: environnement_v2): string =
   match l with
   | [] -> ""
   
-  | Noeud(DataType Caractere _, [], [])::q -> "%s "^generate_format_string q env
-  | Noeud(DataType Entier _, [], [])::q  -> "%d "^generate_format_string q env
-  | Noeud(DataType Flottant _, [], [])::q -> "%f "^generate_format_string q env
-  | Noeud(DataType Booleen _, [], [])::q  -> "%d "^generate_format_string q env
-  | Noeud(DataType Imaginaire _, [], [])::q  -> "%d+i%d "^generate_format_string    q env
+  | Noeud(Chaine _, [])::q -> "%s "^generate_format_string q env
+  | Noeud(Integer _, [])::q  -> "%d "^generate_format_string q env
+  | Noeud(Floating _, [])::q -> "%f "^generate_format_string q env
+  | Noeud(Booleen _, [])::q  -> "%d "^generate_format_string q env
 
-  | Noeud(Syntax Real, [], [])::q  -> "%f "^generate_format_string q env
-  | Noeud(Syntax Integer, [], [])::q  -> "%i "^generate_format_string q env
-  | Noeud(Syntax Logical, [], [])::q  -> "%i "^generate_format_string q env
-  | Noeud(Syntax Character, [], [])::q  -> "%c "^generate_format_string q env
-  
-  | Noeud(Virgule, [], [])::q -> generate_format_string q env
-
-  | Noeud(Identificateur s, [], [])::q ->(
-      match get_type env s with
-      | Real -> "%f "
-      | Integer -> "%d "
-      | _ -> failwith "type de l'identificateur inconnu" 
+  | Noeud(Name s, [])::q ->(
+      match Hashtbl.find_opt env s with
+      | Some (Syntax Real) -> "%f "
+      | Some (Syntax Integer) -> "%d "
+      | Some (Syntax Logical) -> "%d "
+      | _ -> failwith "La variable n'est pas dans l'environnement" 
     ) ^ generate_format_string q env
-
 
   | _ -> failwith "type non def"
 
-let str_of_env_type (env: environnement) (var:string) : string = 
-  match List.assoc var env with 
-  | Integer -> "int" 
-  | Real -> "float" 
+let str_of_env_type (env: environnement_v2) (var:string) : string = 
+  match Hashtbl.find_opt env var with 
+  | Some (Integer _) -> "int" 
+  | Some (Floating _) -> "float"
   | _ -> failwith "type non supporté"
 
-let rec generate_function_parameter_string (prams: Create_ast.ast list) (env: environnement): string = 
+let rec generate_function_parameter_string (prams: ast list) (env: environnement_v2): string = 
   match prams with
   | [] -> ""
-  | Noeud(Identificateur(nom), [],[]):: [] -> str_of_env_type env nom ^ " " ^ nom
-  | Noeud(Identificateur(nom), [],[])::Noeud(Virgule, [], [])::q   
-  | Noeud(Identificateur(nom), [],[])::q -> str_of_env_type env nom ^ " " ^ nom ^  ", " ^ generate_function_parameter_string q env
+  | Noeud(Identificateur(nom), []):: [] -> str_of_env_type env nom ^ " " ^ nom
+  | Noeud(Identificateur(nom), [])::Noeud(Virgule, [])::q   
+  | Noeud(Identificateur(nom), [])::q -> str_of_env_type env nom ^ " " ^ nom ^  ", " ^ generate_function_parameter_string q env
   | _ -> failwith "paramètres de la fonction invalides dans la sa définition"
 
 let string_of_data_type (t: data_type): string = 
@@ -58,100 +50,153 @@ let string_of_data_type (t: data_type): string =
   | Imaginaire _ -> failwith "non pris en charge"
 
 
-let rec n_tabs (n: int): string = 
+let rec tabs_to_string (n: int): string = 
   if n > 0 then
-    "\t"^n_tabs (n-1)
+    "\t"^tabs_to_string (n-1)
   else
     ""
 
 let rec n_new_lines (n: int): string = 
   if n > 0 then
-    "\n"^n_tabs (n-1)
+    "\n"^tabs_to_string (n-1)
   else
     ""
 
-let rec convert_ast (ast: Create_ast.ast list) (env: Environnement.environnement) (tab: int) (new_lines: int): string = 
+let rec convert_ast (ast: ast list) (env: environnement_v2) (nb_tab: int) : string = 
   match ast with
-  | Noeud(Syntax Program, [], (Noeud(Identificateur nom, [],[]))::l1)::q ->
-    n_tabs tab ^ "// " ^ nom ^ "\n"^ n_tabs tab ^
-    "void main(void){\n"^ (convert_ast l1 env (tab +1) 1) ^"}"^ n_new_lines new_lines ^ convert_ast q env tab 1
-  
-  | Noeud(Syntax Function, [Noeud(Syntax t, [],[]);Noeud(Identificateur nom, [],[]); Noeud(Parentheseouvrante, [],l1)],instructions)::q -> 
-    "void " ^ nom ^ "(" ^ generate_function_parameter_string l1 env ^ ") {\n" ^ 
-    convert_ast instructions env (tab+1) 1 ^ "}\n"
-    ^convert_ast q env tab 1
+  | [] -> ""
+  | [Noeud (ProgramRoot, l)] -> convert_ast l env nb_tab
+  | Noeud(Syntax Program, (Noeud(Name nom, []))::l1)::q ->
+    tabs_to_string nb_tab ^ "// " ^ nom ^ "\n"^ tabs_to_string nb_tab ^
+    "void main(void){"^ (convert_ast l1 env (nb_tab +1)) ^"}"
 
-  | Noeud(DataType (Commentaire c), [] , [])::q ->n_tabs tab ^ "//"^c ^ n_new_lines new_lines^ convert_ast q env tab 1
+  | Noeud(Commentaire c, [])::q ->tabs_to_string nb_tab ^ "//"^c ^ convert_ast q env nb_tab
   
-  | Noeud(Syntax Print, [], (Noeud(Operateur Fois, [], []) )::l2)::q ->n_tabs tab ^ "printf(\""^generate_format_string l2 env^"\\n\" " ^ convert_ast l2 env tab 1 ^ ");" ^ n_new_lines new_lines ^convert_ast q env tab 1
-  | Noeud(Virgule, [], [])::q->"," ^convert_ast q env tab 1
-  | Noeud(PointVirgule, [], [])::q ->  ";" ^ convert_ast q env tab 1
-
-  | Noeud(DataType t, [], [])::q ->string_of_data_type t^convert_ast q env tab 1
-
-  (* ne transforme pas le implicit none en C car il n'a pas d'equivalent *)
-  | Noeud (Syntax Implicit, [], [])::Noeud (Identificateur "none", [], [])::q ->convert_ast q env tab 1
-  
-  | Noeud (Identificateur i, [], [])::q -> i^convert_ast q env tab 1
+  | Noeud(Syntax Print, l2)::q ->tabs_to_string nb_tab ^ "printf(\""^generate_format_string l2 env^"\", " ^ convert_ast l2 env nb_tab ^ ");" ^convert_ast q env nb_tab
 
   (* définit le type des variables *)
-  | Noeud (Syntax Real, [] ,Noeud( QuatrePoints, [], [])::l)::q ->n_tabs tab ^ "float "^convert_ast l env tab 0^";" ^ n_new_lines new_lines^convert_ast q env tab 1
-  | Noeud (Syntax Integer, [] ,Noeud( QuatrePoints, [], [])::l)::q ->n_tabs tab ^ "int "^convert_ast l env tab 0^";" ^ n_new_lines new_lines^convert_ast q env tab 1
+  | Noeud (Syntax Real, l)::q    -> tabs_to_string nb_tab ^ "float " ^ convert_ast l env 0 ^ ";" ^ convert_ast q env nb_tab
+  | Noeud (Syntax Integer, l)::q -> tabs_to_string nb_tab ^ "int "   ^ convert_ast l env 0 ^ ";" ^ convert_ast q env nb_tab
+  | Noeud (Syntax Logical, l)::q -> tabs_to_string nb_tab ^ "bool "  ^ convert_ast l env 0 ^ ";" ^ convert_ast q env nb_tab
 
-  | Noeud (Parentheseouvrante, [], l)::q ->  "("^convert_ast l env tab 0^")"^convert_ast q env tab 1
-
-  | Noeud (Operateur Assignation, [], Noeud(Identificateur i, [], [])::l)::q ->n_tabs tab ^  i ^ " = " ^ convert_ast l env tab 0^ ";" ^ n_new_lines new_lines ^ convert_ast q env tab 1
+  | Noeud (Operateur Assignation, (Noeud (Name s, []))::l)::q -> tabs_to_string nb_tab ^ s ^ " = " ^ convert_ast l env 0 ^ convert_ast q env nb_tab
+  | Noeud (Name s, [])::q -> s ^ convert_ast q env nb_tab
   
-  | Noeud (Operateur Plus, [], elem::l)::q ->  (convert_ast [elem] env tab 0) ^ " + " ^ convert_ast l env tab 0 ^ convert_ast q env tab 1
-  | Noeud (Operateur Moins, [], elem::l)::q ->  (convert_ast [elem] env tab 0) ^ " - " ^ convert_ast l env tab 0^ convert_ast q env tab 1
-  | Noeud (Operateur Fois, [], elem::l)::q ->  (convert_ast [elem] env tab 0) ^ " * " ^ convert_ast l env tab 0^ convert_ast q env tab 1
-  | Noeud (Operateur Division, [], elem::l)::q ->  (convert_ast [elem] env tab 0) ^ " / " ^ convert_ast l env tab 0^ convert_ast q env tab 1
+  | Noeud (Operateur Plus, elem::l)::q     -> convert_ast [elem] env nb_tab ^ " + " ^ convert_ast l env nb_tab ^ convert_ast q env nb_tab
+  | Noeud (Operateur Moins, elem::l)::q    -> convert_ast [elem] env nb_tab ^ " - " ^ convert_ast l env nb_tab ^ convert_ast q env nb_tab
+  | Noeud (Operateur Fois, elem::l)::q     -> convert_ast [elem] env nb_tab ^ " * " ^ convert_ast l env nb_tab ^ convert_ast q env nb_tab
+  | Noeud (Operateur Division, elem::l)::q -> convert_ast [elem] env nb_tab ^ " / " ^ convert_ast l env nb_tab ^ convert_ast q env nb_tab
 
-  | Noeud (Syntax If, condition, instructions)::Noeud(Syntax Else, [] , instructions2)::q ->convert_ast [Noeud (Syntax If, condition, instructions)] env tab 0 ^ convert_ast (Noeud(Syntax Else, [] , instructions2)::q) env tab 1
-  | Noeud (Syntax If, condition, instructions)::q ->n_tabs tab ^  
-      "if " ^ convert_ast condition env tab 0 ^ "{\n" ^ 
-        (convert_ast instructions env (tab+1) 1) ^ n_tabs tab ^ 
+  | Noeud (Parentheseouvrante, [])::q -> "("^convert_ast q env nb_tab
+  | Noeud (Parenthesefermante, [])::q -> ")"^convert_ast q env nb_tab
+
+  | Noeud(OperateurLogique NonEquivalent, [p1; p2])::q
+  | Noeud(Comparateur NonEgal, [p1; p2])::q        -> convert_ast [p1] env 0 ^ " != " ^ convert_ast [p2] env 0 ^ convert_ast q env nb_tab
+  | Noeud(OperateurLogique Equivalent, [p1;p2])::q
+  | Noeud(Comparateur Egal, [p1;p2])::q            -> convert_ast [p1] env 0 ^ " == " ^ convert_ast [p2] env 0 ^ convert_ast q env nb_tab
+  | Noeud(Comparateur StrictPlusPetit, [p1;p2])::q -> convert_ast [p1] env 0 ^ " < "  ^ convert_ast [p2] env 0 ^ convert_ast q env nb_tab
+  | Noeud(Comparateur PlusPetit, [p1;p2])::q       -> convert_ast [p1] env 0 ^ " <= " ^ convert_ast [p2] env 0 ^ convert_ast q env nb_tab
+  | Noeud(Comparateur StrictPlusGrand, [p1;p2])::q -> convert_ast [p1] env 0 ^ " > "  ^ convert_ast [p2] env 0 ^ convert_ast q env nb_tab
+  | Noeud(Comparateur PlusGrand, [p1;p2])::q       -> convert_ast [p1] env 0 ^ " >= " ^ convert_ast [p2] env 0 ^ convert_ast q env nb_tab
+
+  | Noeud(OperateurLogique Et, [p1; p2])::q        -> convert_ast [p1] env 0 ^ " && " ^ convert_ast [p2] env 0 ^ convert_ast q env nb_tab
+  | Noeud(OperateurLogique Ou, [p1; p2])::q        -> convert_ast [p1] env 0 ^ " || " ^ convert_ast [p2] env 0 ^ convert_ast q env nb_tab
+  | Noeud(OperateurLogique Non, [p1; p2])::q       -> convert_ast [p1] env 0 ^ " ! "  ^ convert_ast [p2] env 0 ^ convert_ast q env nb_tab
+
+  | Noeud(Operateur Puissance, [p1; p2])::q -> "pow((long)" ^ convert_ast [p1] env 0 ^ ", " ^ convert_ast [p2] env 0 ^ "(long))"
+
+  | Noeud (Syntax If, condition::instructions)::q -> tabs_to_string nb_tab ^
+    "if (" ^ convert_ast [condition] env nb_tab ^ "){"^ 
+      (convert_ast instructions env (nb_tab+1)) ^ tabs_to_string nb_tab ^
+    "}" ^ 
+    convert_ast q env nb_tab
+  | Noeud (Syntax Else_if, condition::instructions)::q -> tabs_to_string nb_tab ^
+    "else if (" ^ convert_ast [condition] env nb_tab ^ "){"^ 
+      (convert_ast instructions env (nb_tab+1)) ^ tabs_to_string nb_tab ^
+    "}" ^ 
+    convert_ast q env nb_tab
+  | Noeud (Syntax Else, instructions)::q -> tabs_to_string nb_tab ^
+    "else {" ^ 
+      (convert_ast instructions env (nb_tab+1)) ^ tabs_to_string nb_tab ^
+    "}" ^ 
+    convert_ast q env nb_tab
+
+  | Noeud(Syntax For, Noeud(Operateur Assignation, [variable; valeur])::fin::(Noeud (Syntax Step, [pas]))::instructions)::q -> tabs_to_string nb_tab ^ 
+      "for (" ^
+        convert_ast [Noeud(Operateur Assignation, [variable; valeur])] env 0 ^ " " ^
+        convert_ast [Noeud(Comparateur StrictPlusPetit, [variable; fin])] env 0 ^ "; " ^ 
+        convert_ast [variable] env 0 ^ "=" ^ convert_ast [Noeud(Operateur Plus, [variable; pas])] env 0 ^
+      ") {" ^ 
+        convert_ast instructions env (nb_tab+1) ^ tabs_to_string nb_tab ^
       "}" ^ 
-      n_new_lines new_lines ^ convert_ast q env tab 1
-  | Noeud (Syntax Else, [], instructions)::q ->  
-      " else {\n" ^ 
-        (convert_ast instructions env (tab+1) 1) ^ n_tabs tab ^ 
+      convert_ast q env nb_tab
+
+  | Noeud(Syntax While, condition::instructions)::q-> tabs_to_string nb_tab ^
+      "while (" ^ convert_ast [condition] env 0 ^ "){" ^
+        convert_ast instructions env (nb_tab+1) ^ tabs_to_string nb_tab ^
       "}" ^ 
-      n_new_lines new_lines ^ convert_ast q env tab 1
-  
-  | Noeud(Syntax Do, Noeud(Operateur Assignation, [], [variable; valeur])::fin::pas::[] , instructions)::q->n_tabs tab ^ 
-      "for (" ^ convert_ast [Noeud(Operateur Assignation, [], [variable; valeur])] env 0 0 ^ 
-        convert_ast [Noeud(Comparateur StrictPlusPetit, [], [variable; fin])] env 0 0 ^ "; " ^ 
-        convert_ast [variable] env 0 0^ "=" ^ convert_ast [Noeud(Operateur Plus, [], [variable; pas])] env 0 0 ^ ") {\n" ^ 
-        convert_ast instructions env (tab+1) 1 ^ 
-      n_tabs tab ^ "}" ^ 
-      n_new_lines new_lines^ convert_ast q env tab 1
+      convert_ast q env nb_tab
 
-  | Noeud(Syntax Do, Noeud(Operateur Assignation, [], [variable; valeur])::fin::[] , instructions)::q->n_tabs tab ^ 
-      "for (" ^ convert_ast [Noeud(Operateur Assignation, [], [variable; valeur])] env 0 0 ^ 
-        convert_ast [Noeud(Comparateur StrictPlusPetit, [], [variable; fin])] env 0 0 ^ "; " ^ 
-        convert_ast [variable] env 0 0^"=" ^convert_ast [Noeud(Operateur Plus, [], [variable; Noeud(DataType(Entier("1")), [], [])])] env 0 0 ^ ") {\n" ^ 
-        convert_ast instructions env (tab+1) 1 ^ 
-      n_tabs tab ^ "}" ^ 
-      n_new_lines new_lines^ convert_ast q env tab 1
- 
+  | Noeud (Integer s, [])::q  -> s ^ convert_ast q env nb_tab
+  | Noeud (Floating s, [])::q -> s ^ convert_ast q env nb_tab
+  | Noeud (Booleen b, [])::q  ->  (if b then "true" else "false") ^ convert_ast q env nb_tab
+  | Noeud (Chaine s, [])::q   ->  s ^ convert_ast q env nb_tab
 
-  | Noeud(Syntax While, condition, instructions)::q-> n_tabs tab ^
-      "while " ^ convert_ast condition env 0 0 ^ "{\n" ^
-        convert_ast instructions env (tab+1) 1 ^ 
-      n_tabs tab ^ "}" ^ 
-      n_new_lines new_lines^ convert_ast q env tab 1
+  | Noeud (NewLine, [])::q -> "\n" ^ convert_ast q env nb_tab
 
-  | Noeud (Comparateur Egal, [], elem::l)::q ->  (convert_ast [elem] env tab 0) ^ " == " ^ convert_ast l env tab 0^ convert_ast q env tab 1
-  | Noeud(Comparateur StrictPlusPetit, [], [p1;p2])::q -> convert_ast [p1] env 0 0 ^ " < " ^ convert_ast [p2] env 0 0 ^ (convert_ast q env tab 1)
-  | Noeud(Comparateur PlusPetit, [], [p1;p2])::q -> convert_ast [p1] env 0 0 ^ " <= " ^ convert_ast [p2] env 0 0 ^ (convert_ast q env tab 1)
-  | Noeud(Comparateur StrictPlusGrand, [], [p1;p2])::q -> convert_ast [p1] env 0 0 ^ " > " ^ convert_ast [p2] env 0 0 ^ (convert_ast q env tab 1)
-  | Noeud(Comparateur PlusGrand, [], [p1;p2])::q -> convert_ast [p1] env 0 0 ^ " >= " ^ convert_ast [p2] env 0 0 ^ (convert_ast q env tab 1)
+  | _ -> failwith ("La syntaxe donnée n'est pas encore prise en charge\n")
 
+let convert (ast: ast list) (env: environnement_v2) (biblios: Bibliotheques.libs): string = 
+  generate_library_imports biblios ^ convert_ast ast env 0
 
-  | Noeud (Commentaire _, [], [])::q -> (convert_ast q env tab 1)
-  | _ ->  print_string "La syntaxe donnée n'est pas encore prise en charge\n"; ""
+(*
+<--------------done---------------> 
+  Syntax Program
+  ProgramRoot
+  Commentaire s
+  Syntax Print
+  Syntax Integer
+  Syntax Logical
+  Operateur Assignation
+  Name s
+  Parentheseouvrante
+  Parenthesefermante
+  Operateur Plus
+  Operateur Moins
+  Operateur Fois
+  Operateur Division
+  Comparateur Egal
+  Comparateur NonEgal
+  Comparateur StrictPlusPetit
+  Comparateur PlusPetit
+  Comparateur StrictPlusGrand
+  Comparateur PlusGrand
+  OperateurLogique Equivalent
+  OperateurLogique NonEquivalent
+  OperateurLogique Ou
+  OperateurLogique Et
+  OperateurLogique Non
+  Syntax If
+  Syntax Else_if
+  Syntax Else
+  Syntax While
+  Syntax For
+  Syntax Step
+  Integer s
+  Floating s
+  Chaine s
+  Booleen b
+  Syntax Double_precision
 
+<-----------non existent---------->
+ (non implémentés pour le moment)
+  Syntax Complex
+  IntrinsicFunction Any (linked with char[] and char* not implemented yet)
+  Operateur Puissance
 
-let convert (ast: Create_ast.ast list) (env: Environnement.environnement) (biblios: Bibliotheques.libs): string = 
-  generate_library_imports biblios ^ convert_ast ast env 0 0
+<--------make env for it---------->
+  IntrinsicFunction Size
+
+<--------------TODO--------------->
+  Newline
+*)
