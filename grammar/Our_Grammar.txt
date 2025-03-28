@@ -38,7 +38,7 @@ CharLength -> LParenthesis TypeParamValue RParenthesis | ScalarIntLiteralConstan
 TypeParamValue -> Expr_Or_Asterisk
 Expr_Or_Asterisk -> Expr | Asterisk
 
-TypeSpec -> Integer KindSelector_opt | Double | Complex KindSelector_opt | Logical KindSelector_opt
+TypeSpec -> Integer KindSelector_opt | Double | Complex KindSelector_opt | Logical KindSelector_opt | Real KindSelector_opt
 
 
 KindSelector_opt -> LParenthesis Expr RParenthesis | E
