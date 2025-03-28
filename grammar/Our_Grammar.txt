@@ -117,7 +117,7 @@ MultOperand -> Level1Expr PowerOp_Level1Expr_star
 PowerOp_Level1Expr_star -> PowerOp Level1Expr PowerOp_Level1Expr_star | E
 
 Level1Expr -> Primary
-Primary -> Icon | Rcon | Name | Scon | LogicalConstant
+Primary -> Icon | Rcon | Name | Scon | LogicalConstant | LParenthesis Expr RParenthesis
 
 Name -> Ident
 ArrayName -> Ident
