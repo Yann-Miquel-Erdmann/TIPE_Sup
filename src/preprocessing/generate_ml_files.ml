@@ -71,7 +71,7 @@ let generate_file_grammar (g: grammar) (f_name: string): unit =
   output_string output_file "open Grammar_functions\nopen Symbols\n";
 
 
-  output_string output_file "let g = { ";
+  output_string output_file "let grammar = { ";
   output_string output_file ("start_symbol = NonTerminal " ^ (fst (List.nth nt 0)) ^ ";\nrules_htbl = Hashtbl.of_seq (List.to_seq [");
   List.iter (fun (s,p: rule) ->  output_string output_file ("("^type_string_of_symbol s^" "^s^",["); List.iter (fun pattern -> output_string output_file "[";(List.iter (fun s -> output_string output_file (type_string_of_symbol s^" "^s ^ ";")) pattern ); output_string output_file "];") p; output_string output_file "]);\n") nt;
   output_string output_file "])}";

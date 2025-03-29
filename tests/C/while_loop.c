@@ -1,15 +1,16 @@
-#include <stdio.h>
+// factorial
+void main(void){
 
-void factorial(void){
-	//! define variables
+	// define variables
 	int nfact;
 	int n;
 	n = 1;
 	nfact = 1;
-	//! compute factorials   
+
+	// compute factorials
 	while (n <= 10){
 		nfact = nfact * n;
 		n = n + 1;
-		printf("%i %s %i \n" ,n," ",nfact);
+		printf("%d %s %d ", n, " ", nfact);
 	}
 }

@@ -13,7 +13,7 @@ C_OUTPUT_DIR = tests/Output
 # fichiers
 EXECUTABLE = $(BUILD_DIR)/transpileur
 PREPROCESSING_EXECUTABLE = $(BUILD_DIR)/preprocessing
-BLACK_LIST = $(SRC_DIR)/utop_init.ml $(SRC_DIR)/tokens2.ml $(SRC_DIR)/create_ast.ml $(SRC_DIR)/transpiler.ml $(SRC_DIR)/main.ml #$(SRC_DIR)/generateC.ml
+BLACK_LIST = $(SRC_DIR)/utop_init.ml $(SRC_DIR)/tokens2.ml $(SRC_DIR)/create_ast.ml $(SRC_DIR)/transpiler.ml #$(SRC_DIR)/main.ml #$(SRC_DIR)/generateC.ml
 
 
 PREPROCESSING_FILES = $(wildcard $(PREPROCESSING_DIR)/*.ml)
