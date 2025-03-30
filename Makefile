@@ -1,7 +1,7 @@
 # commandes
 OCAMLC = ocamlc
 OCAMLDEP = ocamldep
-
+UTOP = utop
 # dossiers
 SRC_DIR = src
 PREPROCESSING_DIR = src/preprocessing
@@ -29,12 +29,19 @@ FORTRAN_TEST_FILES = $(notdir  $(wildcard $(FORTRAN_TEST_DIR)/*.f90))
 C_OUTPUT_FILES = $(addprefix $(C_OUTPUT_DIR)/, $(patsubst %.f90, %.c, $(FORTRAN_TEST_FILES)))
 C_TEST_FILES = $(addprefix $(C_TEST_DIR)/, $(patsubst %.f90, %.c, $(FORTRAN_TEST_FILES)))
 
-$(info $(ML_FILES))
-$(info $(ORDERED_ML_FILES))
+# $(info $(ML_FILES))
+# $(info $(ORDERED_ML_FILES))
+
+
 
 default: build
 # signale que ce ne sont pas de fichiers mais des "commandes"
-.PHONY: build clean test_suite preprocessing
+.PHONY: build clean full-build test_suite preprocessing utop
+
+utop: full-build
+	$(UTOP) -I $(SRC_DIR)
+
+full-build: preprocessing build
 
 preprocessing: $(PREPROCESSING_EXECUTABLE)
 	./$(PREPROCESSING_EXECUTABLE)
@@ -76,4 +83,6 @@ clean:
 	rm -f $(SRC_DIR)/*.cm[ioa]
 	rm -f $(PREPROCESSING_DIR)/*.cm[ioa]
 	rm -f $(C_OUTPUT_DIR)/*.c
+	find $(C_TEST_DIR) -type f -executable -delete 
+	find $(FORTRAN_TEST_DIR) -type f -executable -delete 
 
