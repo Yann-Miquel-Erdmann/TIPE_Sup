@@ -1,9 +1,14 @@
 *.out
 
+src/det_automaton.ml
+src/grammar.ml
+src/symbols.ml
+
 src/*.o
 src/*.cm[aio]
 src/preprocessing/*.o
 src/preprocessing/*.cm[aio]
+
 .*
 !.gitignore
 _build
