@@ -15,7 +15,8 @@ C_OUTPUT_DIR = tests/Output
 EXECUTABLE = $(BUILD_DIR)/transpileur
 PREPROCESSING_EXECUTABLE = $(BUILD_DIR)/preprocessing
 PREBUILD_EXECUTABLE = $(BUILD_DIR)/prebuild
-BLACK_LIST = $(SRC_DIR)/utop_init.ml $(SRC_DIR)/tokens2.ml $(SRC_DIR)/create_ast.ml $(SRC_DIR)/transpiler.ml #$(SRC_DIR)/main.ml #$(SRC_DIR)/generateC.ml
+BLACK_LIST = $(SRC_DIR)/utop_init.ml
+
 
 PREPROCESSING_FILES = $(wildcard $(PREPROCESSING_DIR)/*.ml)
 ORDERED_PREPROCESSING_FILES = $(shell $(OCAMLDEP) -sort -I $(PREPROCESSING_DIR) $(PREPROCESSING_FILES))
@@ -31,9 +32,8 @@ FORTRAN_TEST_FILES = $(notdir  $(wildcard $(FORTRAN_TEST_DIR)/*.f90))
 C_OUTPUT_FILES = $(addprefix $(C_OUTPUT_DIR)/, $(patsubst %.f90, %.c, $(FORTRAN_TEST_FILES)))
 C_TEST_FILES = $(addprefix $(C_TEST_DIR)/, $(patsubst %.f90, %.c, $(FORTRAN_TEST_FILES)))
 
-# $(info $(ML_FILES))
-# $(info $(ORDERED_ML_FILES))
-
+FORMAT_BLACKLIST = $(SRC_DIR)/grammar.ml $(SRC_DIR)/symbols.ml $(SRC_DIR)/
+FORMAT_LIST = $(filter-out $(FORMAT_BLACKLIST), $(ML_FILES))
 
 
 
@@ -43,11 +43,10 @@ default: build
 .PHONY: build clean full-build test_suite preprocessing prebuild utop format
 
 format: 
-	ocamlformat -i $(SRC_DIR)/*.ml
-	ocamlformat -i $(PREPROCESSING_DIR)/*.ml
+	ocamlformat -i $(FORMAT_LIST)
+	ocamlformat -i $(PREPROCESSING_FILES)
 	ocamlformat -i $(PREBUILD_DIR)/*.ml
-
-
+	ocamlformat -i $(SRC_DIR)/utop_init.ml
 
 prebuild: $(SRC_DIR)/vector.cma $(SRC_DIR)/vector.cmi $(PREBUILD_EXECUTABLE)
 	./$(PREBUILD_EXECUTABLE)
