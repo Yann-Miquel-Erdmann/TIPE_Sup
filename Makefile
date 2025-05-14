@@ -36,7 +36,9 @@ C_TEST_FILES = $(addprefix $(C_TEST_DIR)/, $(patsubst %.f90, %.c, $(FORTRAN_TEST
 
 
 default: build
+
 # signale que ce ne sont pas de fichiers mais des "commandes"
+.PHONY: build clean full-build test_suite preprocessing prebuild utop
 
 prebuild: $(SRC_DIR)/vector.cma $(SRC_DIR)/vector.cmi $(PREBUILD_EXECUTABLE)
 	./$(PREBUILD_EXECUTABLE)
@@ -44,7 +46,6 @@ prebuild: $(SRC_DIR)/vector.cma $(SRC_DIR)/vector.cmi $(PREBUILD_EXECUTABLE)
 
 $(PREBUILD_EXECUTABLE): preprocessing
 	$(OCAMLC) -I $(SRC_DIR) -o $@ $(SRC_DIR)/vector.cma $(ORDERED_PREBUILD_FILES)
-.PHONY: build clean full-build test_suite preprocessing prebuild utop
 
 utop: full-build
 	$(UTOP) -I $(SRC_DIR)
