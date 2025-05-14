@@ -269,6 +269,7 @@ let rec convert_to_abstract (t : at) : ast =
     (match l with
     | [Noeud ((Terminal Icon, s), [])] -> Noeud (Integer s, [])
     | [Noeud ((Terminal Rcon, s), [])] -> Noeud (Floating s, [])
+    | [Noeud ((Terminal Dcon, s), [])] -> Noeud (Double s, [])
     | [Noeud ((NonTerminal Name, _), [Noeud ((Terminal Ident, s), [])])] -> Noeud (Name s, [])
     | [Noeud ((NonTerminal Scon, _), [Noeud ((Terminal SconSingle, s), [])])] -> Noeud (Chaine s, [])
     | [Noeud ((NonTerminal Scon, _), [Noeud ((Terminal SconDouble, s), [])])] -> Noeud (Chaine s, [])
@@ -295,7 +296,7 @@ let rec convert_to_abstract (t : at) : ast =
   | _ -> (
     let string_of_symbol (s : symbol) : string =
       match s with
-      | Terminal x -> string_of_terminal x
+      | Terminal x -> repr_of_terminal x
       | NonTerminal x -> string_of_non_terminal x
     in 
     match t with

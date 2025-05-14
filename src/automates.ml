@@ -21,11 +21,18 @@ type automate_sans_eps = {
   transitions_sans_eps : (char*int) list array;
 }
 
-type automate_det = {
+type pre_automate_det = { (* used only during its building, the actual one is easier to represent in a file *)
   mutable nodes : int list;
   debut : int;
   mutable fin : terminal option array;
-  mutable transitions : (int array) Vector.t; (* arr.(i).(j), i le sommet de départ, j l'entier du caractère *)
+  mutable pre_transitions : (int array) Vector.t;
+}
+
+type automate_det = {
+  nodes : int list;
+  debut : int;
+  fin : terminal option array;
+  transitions : (int array) array; (* transitions.(i).(j), i le sommet de départ, j l'entier du caractère *)
 }
 
 (** Returns the list of all the lines in the file named [file_name]. *)
@@ -45,7 +52,6 @@ let range_list (n : int) : int list =
     l := i::!l
   done;
   !l
-
 
 let automate_gen (reg : regex) (t : terminal):  automate =
   let dico = Hashtbl.create 0 in
@@ -294,10 +300,10 @@ let determinise (a : automate_sans_eps) : automate_det =
     nodes = [start_node];
     debut = start_node;
     fin = [||];
-    transitions = Vector.create ~dummy:(Array.make 1 0);
+    pre_transitions = Vector.create ~dummy:(Array.make 1 0);
   } in
 
-  Vector.push a_det.transitions (Array.make 128 (-1)); (* pour le début *)
+  Vector.push a_det.pre_transitions (Array.make 128 (-1)); (* pour le début *)
   let fin  = IntSet.of_list (List.map (fun (a, b) -> a) a.fin) in 
   (*let fin = lin_v2 () lin_tbl delin_tbl in
   a_det.nodes <- fin::a_det.nodes;
@@ -333,8 +339,8 @@ let determinise (a : automate_sans_eps) : automate_det =
           if e2 = safe_token then
             a_det.fin.(elem) <- Some e1
           else
-            (print_char '"'; print_string (string_of_terminal e1); print_string "\" \""; print_string (string_of_terminal e2); print_char '"'; print_newline();
-            failwith "A syntax can't have more than one output2" (* il a plus d'un élément final *))
+            (print_char '"'; print_string (repr_of_terminal e1); print_string "\" \""; print_string (repr_of_terminal e2); print_char '"'; print_newline();
+            failwith "A syntax can't have more than one output" (* il a plus d'un élément final *))
       | _ -> failwith "A syntax can't have more than one output"
   in
 
@@ -350,7 +356,7 @@ let determinise (a : automate_sans_eps) : automate_det =
         let suivants = Array.make 128 (-1) in
         trouver_suivants (delin x delin_tbl) suivants;
         
-        let arr = Vector.get a_det.transitions x in
+        let arr = Vector.get a_det.pre_transitions x in
         for i = 0 to 127 do
           if (suivants.(i) >= init_len) then
             (* si c'est un nouveau noeud, on l'ajoute a la liste de traitement,
@@ -358,25 +364,30 @@ let determinise (a : automate_sans_eps) : automate_det =
             if not (IntSet.mem suivants.(i) !seen) then
               (seen := IntSet.add suivants.(i) !seen;
               todo := suivants.(i)::!todo;
-              Vector.push a_det.transitions (Array.make 128 (-1));
+              Vector.push a_det.pre_transitions (Array.make 128 (-1));
               a_det.nodes <- suivants.(i)::a_det.nodes);
           (* noeud déjà existant/complétion nouveau noeud, comme on ne traite qu'une fois chaque sommets,
           on sait que les sommets trouvé sont les bons, on les remplace *)
           if suivants.(i) <> -1 then
             arr.(i) <- suivants.(i)
         done;
-        Vector.set a_det.transitions x arr
+        Vector.set a_det.pre_transitions x arr
       end
   done;
 
   (* gérer le cas des mots vides, qui sont donc à la fois initiaux et finaux *)
   a_det.fin <- Array.make (List.length a_det.nodes) None;
   List.iter ajouter_fin a_det.nodes;
-  a_det
+  {
+    nodes = a_det.nodes;
+    debut = a_det.debut;
+    fin = a_det.fin;
+    transitions = Vector.to_array a_det.pre_transitions
+  }
 
 
 let exec_char (a : automate_det) (node : int) (c : char) : int =
-  (Vector.get a.transitions node).(int_of_char c)
+  a.transitions.(node).(int_of_char c)
 
 
 let execution_mot (a : automate_det) (texte : char list) : int * char list * char list =

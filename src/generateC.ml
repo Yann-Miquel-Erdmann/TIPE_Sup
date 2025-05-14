@@ -141,6 +141,7 @@ let rec convert_ast (ast: ast list) (env: environnement_v2) (nb_tab: int) : stri
 
   | Noeud (Integer s, [])::q  -> s ^ convert_ast q env nb_tab
   | Noeud (Floating s, [])::q -> s ^ convert_ast q env nb_tab
+  | Noeud (Double s, [])::q -> (String.fold_left (fun acc x -> if x = 'd' then acc^"e" else acc^String.make 1 x) "" s) ^ convert_ast q env nb_tab (* convertit les d en e de fortran *)
   | Noeud (Booleen b, [])::q  ->  (if b then "true" else "false") ^ convert_ast q env nb_tab
   | Noeud (Chaine s, [])::q   ->  s ^ convert_ast q env nb_tab
 
@@ -189,16 +190,17 @@ let convert (ast: ast list) (env: environnement_v2) (biblios: Bibliotheques.libs
   Chaine s
   Booleen b
   Syntax Double_precision
+  Newline
+  Operateur Puissance
 
 <-----------non existent---------->
  (non implémentés pour le moment)
   Syntax Complex
-  IntrinsicFunction Any (linked with char[] and char* not implemented yet)
-  Operateur Puissance
+  IntrinsicFunction Any (linked with char[] and char* (char[n] actually whith n the size given) => not implemented yet)
 
 <--------make env for it---------->
+  (might not make it)
   IntrinsicFunction Size
 
 <--------------TODO--------------->
-  Newline
 *)

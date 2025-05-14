@@ -5,6 +5,7 @@ type terminal =
   | NotOp
   | AndOp
   | OrOp
+  | Dcon
   | Rcon
   | Icon
   | SconSingle
@@ -29,7 +30,6 @@ type terminal =
   | Complex
   | Character
   | Logical
-  | Kind
   | Call
   | Print
   | Do
@@ -148,7 +148,7 @@ type symbol = | Terminal of terminal | NonTerminal of non_terminal
 let safe_token = Ident
 let unparsed_tokens = [Space; ]
 
-let string_of_terminal (t : terminal) : string =
+let repr_of_terminal (t : terminal) : string =
   match t with
   | EOF -> "End of file"
   | E -> "Epsilon"
@@ -156,8 +156,9 @@ let string_of_terminal (t : terminal) : string =
   | NotOp -> "\\.not\\."
   | AndOp -> "\\.and\\."
   | OrOp -> "\\.or\\."
-  | Rcon -> "([0-9]+\\.[0-9]*)|(\\.[0-9]+)"
-  | Icon -> "[0-9]+"
+  | Dcon -> "(([0-9]+\\.[0-9]*)|(\\.[0-9]+))(d(\\+|-)?[0-9]+)"
+  | Rcon -> "(([0-9]+\\.[0-9]*)|(\\.[0-9]+))(e(\\+|-)?[0-9]+)?"
+  | Icon -> "[0-9]+(e(\\+|-)?[0-9]+)"
   | SconSingle -> "['](~[']|'')*[']"
   | SconDouble -> "[\"](~[\"]|\"\")*[\"]"
   | Ident -> "[A-Za-z][A-Za-z0-9_]*"
@@ -180,7 +181,6 @@ let string_of_terminal (t : terminal) : string =
   | Complex -> "complex"
   | Character -> "character"
   | Logical -> "logical"
-  | Kind -> "kind"
   | Call -> "call"
   | Print -> "print"
   | Do -> "do"
@@ -200,6 +200,60 @@ let string_of_terminal (t : terminal) : string =
   | Equivalent -> "\\.eqv\\."
   | NotEquivalent -> "\\.neqv\\."
   | Space -> " "
+
+let string_of_terminal (t : terminal) : string =
+	match t with
+	| EOF -> "EOF"
+	| E -> "E"
+	| PowerOp -> "PowerOp"
+	| NotOp -> "NotOp"
+	| AndOp -> "AndOp"
+	| OrOp -> "OrOp"
+	| Dcon -> "Dcon"
+	| Rcon -> "Rcon"
+	| Icon -> "Icon"
+	| SconSingle -> "SconSingle"
+	| SconDouble -> "SconDouble"
+	| Ident -> "Ident"
+	| EOS -> "EOS"
+	| True -> "True"
+	| False -> "False"
+	| Program -> "Program"
+	| EndProgram -> "EndProgram"
+	| EndDo -> "EndDo"
+	| EndIf -> "EndIf"
+	| Colon -> "Colon"
+	| Comma -> "Comma"
+	| Equal -> "Equal"
+	| Asterisk -> "Asterisk"
+	| LParenthesis -> "LParenthesis"
+	| RParenthesis -> "RParenthesis"
+	| Integer -> "Integer"
+	| Real -> "Real"
+	| Double -> "Double"
+	| Complex -> "Complex"
+	| Character -> "Character"
+	| Logical -> "Logical"
+	| Call -> "Call"
+	| Print -> "Print"
+	| Do -> "Do"
+	| While -> "While"
+	| If -> "If"
+	| Else -> "Else"
+	| Then -> "Then"
+	| Divise -> "Divise"
+	| Plus -> "Plus"
+	| Minus -> "Minus"
+	| IsEqual -> "IsEqual"
+	| NotEqual -> "NotEqual"
+	| StrictLess -> "StrictLess"
+	| LessEqual -> "LessEqual"
+	| StrictGreater -> "StrictGreater"
+	| GreaterEqual -> "GreaterEqual"
+	| Equivalent -> "Equivalent"
+	| NotEquivalent -> "NotEquivalent"
+	| Space -> "Space"
+
 let string_of_non_terminal (nt : non_terminal) : string =
   match nt with
   | ExecutableProgram -> "ExecutableProgram"

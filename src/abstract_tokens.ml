@@ -423,6 +423,7 @@ type token =
   | Name of string
   | Integer of string
   | Floating of string
+  | Double of string
   | Chaine of string
   | Commentaire of string
   | Booleen of bool

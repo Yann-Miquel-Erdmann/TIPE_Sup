@@ -13,7 +13,7 @@ type grammar = {
 
 let string_of_symbol (s: symbol): string = 
   match s with
-  | Terminal(t) -> string_of_terminal t
+  | Terminal(t) -> repr_of_terminal t
   | NonTerminal(nt) -> string_of_non_terminal nt
 
 let print_symbol (s: symbol): unit = print_string (string_of_symbol s)

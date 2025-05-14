@@ -2,15 +2,13 @@ open Symbols
 
 (* 
   syntaxe actuelle:
-    * [] ✔️ ✔️
-    * |  ✔️ ✔️
-    * .  ✔️ ✔️
-    * *  ✔️ ✔️
-    * +  ✔️ ✔️
-    * a  ✔️ ✔️
+    * [] ✔️
+    * |  
+    * .  ✔️
+    * *  ✔️
+    * +  ✔️
+    * a  ✔️
     * \  ✔️
-
-  probablement à ajouter:
     * () ✔️
     * #  ✔️
     * ?  ✔️

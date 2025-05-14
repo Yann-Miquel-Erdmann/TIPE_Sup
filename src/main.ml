@@ -9,12 +9,12 @@ open Grammar
 let main () =
   let len = Array.length Sys.argv in
 
-  if len < 2 || len > 3 then
+  if len <> 2 && len <> 4 then
     (print_string "Usage : "; print_string Sys.argv.(0); print_string " <inupt_file> [-o <output_file>]"; print_newline();)
   else
     let filename =
-      if len == 3 then
-        Sys.argv.(2)
+      if len == 4 then
+        Sys.argv.(3)
       else
         let found = ref false in
         let stop = ref false in

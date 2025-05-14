@@ -73,7 +73,7 @@ rules_htbl = Hashtbl.of_seq (List.to_seq [(NonTerminal ExecutableProgram,[[NonTe
 (NonTerminal MultOperand,[[NonTerminal Level1Expr;NonTerminal PowerOp_Level1Expr_star;];]);
 (NonTerminal PowerOp_Level1Expr_star,[[Terminal PowerOp;NonTerminal Level1Expr;NonTerminal PowerOp_Level1Expr_star;];[Terminal E;];]);
 (NonTerminal Level1Expr,[[NonTerminal Primary;];]);
-(NonTerminal Primary,[[Terminal Icon;];[Terminal Rcon;];[NonTerminal Name;];[NonTerminal Scon;];[NonTerminal LogicalConstant;];[Terminal LParenthesis;NonTerminal Expr;Terminal RParenthesis;];]);
+(NonTerminal Primary,[[Terminal Icon;];[Terminal Rcon;];[Terminal Dcon;];[NonTerminal Name;];[NonTerminal Scon;];[NonTerminal LogicalConstant;];[Terminal LParenthesis;NonTerminal Expr;Terminal RParenthesis;];]);
 (NonTerminal Name,[[Terminal Ident;];]);
 (NonTerminal ArrayName,[[Terminal Ident;];]);
 (NonTerminal ComponentName,[[Terminal Ident;];]);

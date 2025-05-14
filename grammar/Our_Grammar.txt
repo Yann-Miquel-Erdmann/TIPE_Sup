@@ -117,7 +117,7 @@ MultOperand -> Level1Expr PowerOp_Level1Expr_star
 PowerOp_Level1Expr_star -> PowerOp Level1Expr PowerOp_Level1Expr_star | E
 
 Level1Expr -> Primary
-Primary -> Icon | Rcon | Name | Scon | LogicalConstant | LParenthesis Expr RParenthesis
+Primary -> Icon | Rcon | Dcon | Name | Scon | LogicalConstant | LParenthesis Expr RParenthesis
 
 Name -> Ident
 ArrayName -> Ident
@@ -150,9 +150,9 @@ EquivOp -> Equivalent | NotEquivalent
 
 ScalarIntLiteralConstant -> Icon
 
-
-Rcon -> r'([0-9]+\.[0-9]*)|(\.[0-9]+)'
-Icon -> r'[0-9]+'
+Dcon -> r'(([0-9]+\.[0-9]*)|(\.[0-9]+))(d(\+|-)?[0-9]+)'
+Rcon -> r'(([0-9]+\.[0-9]*)|(\.[0-9]+))(e(\+|-)?[0-9]+)?'
+Icon -> r'[0-9]+(e(\+|-)?[0-9]+)'
 SconSingle -> r'['](~[']|'')*[']'
 SconDouble -> r'["](~["]|"")*["]'
 Scon -> SconSingle | SconDouble
@@ -180,7 +180,6 @@ Double -> 'double precision'
 Complex -> 'complex'
 Character -> 'character'
 Logical -> 'logical'
-Kind -> 'kind'
 Call -> 'call'
 Print -> 'print'
 Do -> 'do'

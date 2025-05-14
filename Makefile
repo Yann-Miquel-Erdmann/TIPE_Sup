@@ -5,6 +5,7 @@ OCAMLDEP = ocamldep
 # dossiers
 SRC_DIR = src
 PREPROCESSING_DIR = src/preprocessing
+PREBUILD_DIR = src/prebuild
 BUILD_DIR = _build
 FORTRAN_TEST_DIR = tests/Fortran
 C_TEST_DIR = tests/C
@@ -13,8 +14,8 @@ C_OUTPUT_DIR = tests/Output
 # fichiers
 EXECUTABLE = $(BUILD_DIR)/transpileur
 PREPROCESSING_EXECUTABLE = $(BUILD_DIR)/preprocessing
+PREBUILD_EXECUTABLE = $(BUILD_DIR)/prebuild
 BLACK_LIST = $(SRC_DIR)/utop_init.ml $(SRC_DIR)/tokens2.ml $(SRC_DIR)/create_ast.ml $(SRC_DIR)/transpiler.ml #$(SRC_DIR)/main.ml #$(SRC_DIR)/generateC.ml
-
 
 PREPROCESSING_FILES = $(wildcard $(PREPROCESSING_DIR)/*.ml)
 ORDERED_PREPROCESSING_FILES = $(shell $(OCAMLDEP) -sort -I $(PREPROCESSING_DIR) $(PREPROCESSING_FILES))
@@ -24,6 +25,7 @@ ML_FILES = $(filter-out $(BLACK_LIST), $(wildcard $(SRC_DIR)/*.ml))
 # fichiers ml ordonnés pour la compilation de l'exécutable
 ORDERED_ML_FILES = $(shell $(OCAMLDEP) -sort -I $(SRC_DIR) $(ML_FILES))
 
+ORDERED_PREBUILD_FILES = $(filter-out $(SRC_DIR)/main.ml, $(ORDERED_ML_FILES) $(wildcard $(PREBUILD_DIR)/*.ml))
 
 FORTRAN_TEST_FILES = $(notdir  $(wildcard $(FORTRAN_TEST_DIR)/*.f90))
 C_OUTPUT_FILES = $(addprefix $(C_OUTPUT_DIR)/, $(patsubst %.f90, %.c, $(FORTRAN_TEST_FILES)))
@@ -34,7 +36,15 @@ $(info $(ORDERED_ML_FILES))
 
 default: build
 # signale que ce ne sont pas de fichiers mais des "commandes"
-.PHONY: build clean test_suite preprocessing
+.PHONY: build clean test_suite preprocessing prebuild
+
+prebuild: $(SRC_DIR)/vector.cma $(SRC_DIR)/vector.cmi $(PREBUILD_EXECUTABLE)
+	./$(PREBUILD_EXECUTABLE)
+
+
+$(PREBUILD_EXECUTABLE): preprocessing
+	$(OCAMLC) -I $(SRC_DIR) -o $@ $(SRC_DIR)/vector.cma $(ORDERED_PREBUILD_FILES)
+
 
 preprocessing: $(PREPROCESSING_EXECUTABLE)
 	./$(PREPROCESSING_EXECUTABLE)
@@ -76,4 +86,5 @@ clean:
 	rm -f $(SRC_DIR)/*.cm[ioa]
 	rm -f $(PREPROCESSING_DIR)/*.cm[ioa]
 	rm -f $(C_OUTPUT_DIR)/*.c
+	rm -f $(SRC_DIR)/det_automaton.ml
 
