@@ -1,23 +1,23 @@
 Program -> Decl Decl_star
 Decl_star -> Decl Decl_star | E
 
-Decl -> VarDecl | FunDecl
+Decl -> Include | TypeSpec Id VarDecl_or_FunDecl
+VarDecl_or_FunDecl -> VarDecl | FunDecl
+Include -> KwInclude Lib
 
-VarDecl -> TypeSpec VarDeclInit Comma_VarDeclInit_star SemiColon
-
+VarDecl -> Assign_Expr_opt Comma_VarDeclInit_star SemiColon
 Comma_VarDeclInit_star -> Comma VarDeclInit Comma_VarDeclInit_star | E
-VarDeclInit -> VarDeclId | VarDeclId Assign Expr
-VarDeclId -> Id | Id LSquareBracket IntConst RSquareBracket
+VarDeclInit -> Id Assign_Expr_opt
+Assign_Expr_opt -> Assign Expr | E
 
-TypeSpec -> KwInt | KwBool | KwFloat | KwVoid
 
 // no parameters for now
-FunDecl -> TypeSpec Id LParenthesis RParenthesis CompoundStmt
+FunDecl -> LParenthesis RParenthesis CompoundStmt
 
 CompoundStmt -> LBracket Stmt_star RBracket
 Stmt_star -> Stmt Stmt_star | E
 
-Stmt -> VarDecl | Assign SemiColon | IfStmt
+Stmt -> TypeSpec Id VarDecl | Assign SemiColon | IfStmt | PrintStmt
 
 VarAssign -> Id Assign Expr
 
@@ -29,70 +29,69 @@ LParenthesis_Expr_RParenthesis_opt -> LParenthesis Expr RParenthesis | E
 WhileStmt -> KwWhile LParenthesis Expr RParenthesis CompoundStmt
 ForStmt -> KwFor LParenthesis VarAssign SemiColon Expr SemiColon Expr RParenthesis CompoundStmt
 
+PrintStmt -> KwPrintf LParenthesis StrConst Comma_Expr_star RParenthesis SemiColon
+Comma_Expr_star -> Comma Expr Comma_Expr_star | E
 
-Expr -> Primary | Binary | InPlace | Unary
-Primary -> LParenthesis Expr RParenthesis | Id | IntConst | FloatConst | BoolConst | NullConst
-
+Expr -> Primary | Binary
+Primary -> LParenthesis Expr RParenthesis | Id PostOperator_opt | IntConst | FloatConst | BoolConst | NullConst
+PostOperator_opt -> Decr | Incr | InPlaceOperator Expr | E
 
 // --------------------- Binary
 Binary -> LogOrExpr
 LogOrExpr -> LogAndExpr LogicalOr_LogOrExpr_star
-LogicalOr_LogOrExpr_star -> LogicalOr LogOrExpr LogicalOr_LogOrExpr_star | E
+LogicalOr_LogOrExpr_star -> LogicalOr LogAndExpr LogicalOr_LogOrExpr_star | E
 
 LogAndExpr -> BitorExpr LogicalAnd_LogAndExpr_star
-LogicalAnd_LogAndExpr_star -> LogicalAnd LogAndExpr LogicalAnd_LogAndExpr_star | E
+LogicalAnd_LogAndExpr_star -> LogicalAnd BitorExpr LogicalAnd_LogAndExpr_star | E
 
 BitorExpr -> BitxorExpr BitwiseOr_BitorExpr_star
-BitwiseOr_BitorExpr_star -> BitwiseOr BitorExpr BitwiseOr_BitorExpr_star | E
+BitwiseOr_BitorExpr_star -> BitwiseOr BitxorExpr BitwiseOr_BitorExpr_star | E
 
 BitxorExpr -> BitandExpr BitwiseXor_BitxorExpr_star
-BitwiseXor_BitxorExpr_star -> BitwiseXor BitxorExpr BitwiseXor_BitxorExpr_star | E
+BitwiseXor_BitxorExpr_star -> BitwiseXor BitandExpr BitwiseXor_BitxorExpr_star | E
 
 BitandExpr -> EqopExpr BitwiseAnd_BitandExpr_star
-BitwiseAnd_BitandExpr_star -> BitwiseAnd BitandExpr BitwiseAnd_BitandExpr_star | E
+BitwiseAnd_BitandExpr_star -> BitwiseAnd EqopExpr BitwiseAnd_BitandExpr_star | E
 
 EqopExpr -> RelopExpr Equal_or_NotEqual_EqopExpr_star
-Equal_or_NotEqual_EqopExpr_star -> Equal_or_NotEqual EqopExpr Equal_or_NotEqual_EqopExpr_star | E
+Equal_or_NotEqual_EqopExpr_star -> Equal_or_NotEqual RelopExpr Equal_or_NotEqual_EqopExpr_star | E
 Equal_or_NotEqual -> Equal | NotEqual
 
 RelopExpr -> ShiftExpr Comparator_RelopExpr_star
-Comparator_RelopExpr_star -> Comparator RelopExpr Comparator_RelopExpr_star | E
+Comparator_RelopExpr_star -> Comparator ShiftExpr Comparator_RelopExpr_star | E
 Comparator -> Less | StrictLess | Greater | StrictGreater
 
 ShiftExpr -> AddExpr BitShift_ShiftExpr_star
-BitShift_ShiftExpr_star -> BitShift ShiftExpr BitShift_ShiftExpr_star | E
+BitShift_ShiftExpr_star -> BitShift AddExpr BitShift_ShiftExpr_star | E
 BitShift -> RightBitShift | LeftBitShift
 
 
 AddExpr -> MultExpr Plus_or_Minus_AddExpr_star
-Plus_or_Minus_AddExpr_star -> Plus_or_Minus AddExpr Plus_or_Minus_AddExpr_star | E
+Plus_or_Minus_AddExpr_star -> Plus_or_Minus MultExpr Plus_or_Minus_AddExpr_star | E
 Plus_or_Minus -> Plus | Minus
 
 MultExpr -> Unary Asterisk_or_Divide_or_Mod_MultExpr_star
-Asterisk_or_Divide_or_Mod_MultExpr_star -> Asterisk_or_Divide_or_Mod MultExpr Asterisk_or_Divide_or_Mod_MultExpr_star | E
+Asterisk_or_Divide_or_Mod_MultExpr_star -> Asterisk_or_Divide_or_Mod Unary Asterisk_or_Divide_or_Mod_MultExpr_star | E
 Asterisk_or_Divide_or_Mod -> Asterisk | Divide | Mod
 
 // ----------------------- InPlace
-InPlace -> Id InPlaceOperator Expr
-
 InPlaceOperator -> InPlacePlus | InPlaceMinus | InPlaceTimes | InPlaceDivide | InPlaceMod | InPlaceLeftBitShift | InPlaceRightBitShift | InPlaceBitwiseAnd | InPlaceBitwiseOr | InPlaceBitwiseXor
-InPlacePlus -> '+='
+InPlacePlus -> '\+='
 InPlaceMinus -> '-='
-InPlaceTimes -> '*=' 
+InPlaceTimes -> '\*=' 
 InPlaceDivide -> '/='
 InPlaceMod -> '%='
 InPlaceLeftBitShift -> '<<='
 InPlaceRightBitShift -> '>>='
 InPlaceBitwiseAnd -> '&='
-InPlaceBitwiseOr -> '|='
+InPlaceBitwiseOr -> '\|='
 InPlaceBitwiseXor -> '^='
 
-Unary -> UnaryPlus | UnaryMinus | Unary1Scompl | UnaryLnot | UnaryRef | UnaryDeref | UnaryPreinc | UnaryPredec | UnaryPostinc | UnaryPostdec 
-UnaryPostdec -> Primary Decr
-UnaryPostinc -> Primary Incr
-UnaryPredec -> Decr Primary
-UnaryPreinc -> Incr Primary
-UnaryDeref -> Asterisk Primary
+Unary -> UnaryPlus | UnaryMinus | Unary1Scompl | UnaryLnot | UnaryRef | UnaryDeref | UnaryPreinc | UnaryPredec
+
+UnaryPredec -> Decr Id
+UnaryPreinc -> Incr Id
+UnaryDeref -> Asterisk Id
 UnaryRef -> BitwiseAnd Primary
 UnaryLnot -> Not Primary
 Unary1Scompl -> FstCompl Primary
@@ -100,22 +99,22 @@ UnaryMinus -> Minus Primary
 UnaryPlus -> Plus Primary
 
 
-Incr -> '++'
+Incr -> '\+\+'
 Decr -> '--'
 Divide -> '/'
 Plus -> '\+'
 Minus -> '-'
 Mod -> '%'
 BitwiseAnd -> '&'
-BitwiseOr -> '|'
+BitwiseOr -> '\|'
 BitwiseXor -> '^'
-FstCompl -> '~'
+FstCompl -> '\~'
 Equal -> '=='
 NotEqual -> '!='
 
 
 LogicalAnd -> '&&'
-LogicalOr -> '||'
+LogicalOr -> '\|\|'
 
 Not -> '!'
 Less -> '<='
@@ -133,6 +132,10 @@ True -> 'true'
 False -> 'false'
 IntConst -> r'[0-9]+'
 FloatConst -> r'([0-9]+\.[0-9]*)|(\.[0-9]+)'
+StrConst -> r'".*"'
+Lib -> '<.*>'
+
+
 
 NullConst -> 'NULL'
 
@@ -141,25 +144,28 @@ KwElse -> 'else'
 KwIf -> 'if'
 KwWhile -> 'while'
 KwFor -> 'for'
+KwPrintf -> 'printf'
+KwInclude -> '\#include'
 
+TypeSpec -> KwInt | KwBool | KwFloat | KwVoid
 KwInt -> 'int'
 KwFloat -> 'float'
 KwBool -> 'bool'
 KwVoid -> 'void'
 
-
-
 Comma -> ','
 SemiColon -> ';'
 LParenthesis -> '\('
 RParenthesis -> '\)'
-LBracket -> '\{'
-RBracket -> '\}'
+LBracket -> '{'
+RBracket -> '}'
 LSquareBracket -> '\['
 RSquareBracket -> '\]'
-Comment -> r((//.*\n)|(/\*.*/\*))'
-Identifier -> s'[A-Za-z][A-Za-z0-9_]*'
-Asterisk -> '*'
+Comment -> r'((//.*\n)|(/\*.*\*/))'
+Asterisk -> '\*'
 Assign -> '='
 Dot -> '\.'
 Arrow -> '->'
+
+Space -> _' '
+NewLine -> _'\n'

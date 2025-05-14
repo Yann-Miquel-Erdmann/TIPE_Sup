@@ -1,17 +1,42 @@
-ExecutableProgram -> ProgramUnit | StartCommentBlock ProgramUnit
+ExecutableProgram -> ProgramUnit ProgramUnit_star | StartCommentBlock ProgramUnit ProgramUnit_star
 
-StartCommentBlock -> EOS
+ProgramUnit_star -> ProgramUnit ProgramUnit_star | E
 
-ProgramUnit -> MainProgram
+StartCommentBlock -> Eos
 
-MainProgram -> ProgramStmt MainRange
+ProgramUnit -> MainProgram | FunctionSubprogram | SubroutineSubprogram
 
-MainRange -> BodyConstruct BodyConstruct_star EndProgramStmt | EndProgramStmt
+MainProgram -> Program ProgramName Eos BodyConstruct_star EndProgram EndName_opt Eos
 
-BodyConstruct_star -> BodyConstruct BodyConstruct_star | E
 
-ProgramStmt -> Program ProgramName EOS
-EndProgramStmt -> EndProgram EndName_opt EOS
+FunctionSubprogram -> FunctionPrefix FunctionName FunctionRange 
+
+FunctionPrefix -> TypeSpec_opt Function
+TypeSpec_opt -> TypeSpec | E
+
+FunctionRange -> FunctionParList Eos BodyConstruct_star EndFunctionStmt 
+FunctionParList -> LParenthesis FunctionPar_Comma_FunctionPar_star_opt RParenthesis 
+FunctionPar_Comma_FunctionPar_star_opt -> FunctionPar Comma_FunctionPar_star | E
+Comma_FunctionPar_star -> Comma FunctionPar Comma_FunctionPar_star | E
+FunctionPar -> DummyArgName
+
+EndFunctionStmt -> EndFunction EndName_opt Eos
+
+
+
+SubroutineSubprogram -> Recursive_opt Subroutine SubroutineName SubroutineRange
+Recursive_opt -> Recursive | E
+
+SubroutineRange -> SubroutineParList_opt Eos BodyConstruct_star EndSubroutineStmt
+
+SubroutineParList_opt -> LParenthesis SubroutinePar_Comma_SubroutinePar_star_opt RParenthesis | E
+SubroutinePar_Comma_SubroutinePar_star_opt -> SubroutinePar Comma_SubroutinePar_star | E
+Comma_SubroutinePar_star -> Comma SubroutinePar Comma_SubroutinePar_star | E
+SubroutinePar -> DummyArgName | Asterisk         
+
+
+EndSubroutineStmt -> EndSubroutine EndName_opt Eos 
+
 
 EndName_opt -> EndName | E
 
@@ -20,13 +45,10 @@ BodyConstruct -> SpecificationPartConstruct | ExecutableConstruct
 SpecificationPartConstruct -> DeclarationConstruct
 DeclarationConstruct -> TypeDeclarationStmt
 
-TypeDeclarationStmt -> TypeSpec TypeDecl_Assignment EOS
+TypeDeclarationStmt -> TypeSpec Colon_Colon_opt EntityDecl EntityDecl_Comma_star Eos
+Colon_Colon_opt -> Colon Colon | E
+EntityDecl_Comma_star -> EntityDecl EntityDecl_Comma_star | E
 
-TypeDecl_Assignment -> Colon Colon EntityDecl Comma_EntityDecl_star | ObjectName Comma_ObjectName_star
-
-Comma_ObjectName_star -> Comma ObjectName Comma_ObjectName_star | E
-
-Comma_EntityDecl_star -> Comma EntityDecl Comma_EntityDecl_star | E
 
 EntityDecl -> ObjectName Asterisk_CharLength_opt Equal_Expr_opt
 Equal_Expr_opt -> Equal Expr | E
@@ -49,10 +71,13 @@ ExecutableConstruct -> ActionStmt | DoConstruct | IfConstruct
 
 ActionStmt -> AssignmentStmt | PrintStmt
 
-AssignmentStmt -> Name Equal Expr EOS
+AssignmentStmt -> Name Equal Expr Eos
 
 
-PrintStmt -> Print FormatIdentifier Comma_OutputItemList_opt EOS
+Expr_Or_Asterisk -> Expr | Asterisk
+
+
+PrintStmt -> Print FormatIdentifier Comma_OutputItemList_opt Eos
 Comma_OutputItemList_opt -> Comma OutputItemList | E
 
 FormatIdentifier -> Asterisk
@@ -63,11 +88,11 @@ Comma_OutputItem_star -> Comma OutputItem Comma_OutputItem_star | E
 OutputItem -> Expr
 
 DoConstruct -> BlockDoConstruct
-BlockDoConstruct -> Do LoopControl_opt ExecutionPartConstruct_star EndDoStmt
+BlockDoConstruct -> Do LoopControl_opt Eos
 
 LoopControl_opt -> LoopControl EOS | EOS
 
-EndDoStmt -> EndDo Name_opt EOS
+EndDoStmt -> EndDo Name_opt Eos
 Name_opt -> Name | E
 
 LoopControl -> While LParenthesis Expr RParenthesis | VariableName Equal IntRealDpExpression Comma IntRealDpExpression Comma_IntRealDpExpression_opt
@@ -83,10 +108,10 @@ ElseIfStmt_ExecutionPartConstruct_star_star -> ElseIfStmt ExecutionPartConstruct
 ExecutionPartConstruct_star -> ExecutionPartConstruct ExecutionPartConstruct_star | E
 ElseStmt_ExecutionPartConstruct_star_opt -> ElseStmt ExecutionPartConstruct_star | E
 
-IfThenStmt -> If LParenthesis ScalarLogicalExpr RParenthesis Then EOS
-ElseIfStmt -> Else If LParenthesis ScalarLogicalExpr RParenthesis Then EOS
-ElseStmt -> Else EOS
-EndIfStmt -> EndIf EOS
+IfThenStmt -> If RParenthesis ScalarLogicalExpr LParenthesis Then Eos
+ElseIfStmt -> Else If RParenthesis ScalarLogicalExpr LParenthesis Then Eos
+ElseStmt -> Else Eos
+EndIfStmt -> EndIf Eos
 
 ExecutionPartConstruct -> ExecutableConstruct
 
@@ -161,7 +186,7 @@ Scon -> SconSingle | SconDouble
 
 Ident -> s'[A-Za-z][A-Za-z0-9_]*'
 
-EOS -> r'((!~[\n]*)?\n[ ]*)+'
+Eos -> r'((!~[\n]*)?\n[ ]*)+'
 
 True -> '\.true\.'
 False -> '\.false\.'

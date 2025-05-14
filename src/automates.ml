@@ -335,7 +335,7 @@ let determinise (a : automate_sans_eps) : automate_det =
           else
             (print_char '"'; print_string (string_of_terminal e1); print_string "\" \""; print_string (string_of_terminal e2); print_char '"'; print_newline();
             failwith "A syntax can't have more than one output2" (* il a plus d'un élément final *))
-      | _ -> failwith "A syntax can't have more than one output"
+      | t::_ -> print_string (string_of_terminal t); failwith "A syntax can't have more than one output"
   in
 
   let finished = ref false in
@@ -412,7 +412,7 @@ let exec (a : automate_det) (txt : string) : (symbol * string) list =
     | [] -> List.rev out
     | _ -> 
       match execution_mot a texte with
-      | (-1, _, s) -> print_string "Le lexème '"; print_string (String.of_seq(List.to_seq (List.rev s))); print_string "' n'est pas un lexème reconnu\n"; failwith ""
+      | (-1, s, _) -> print_string "La chaîne '"; print_string (String.of_seq(List.to_seq s)); print_string "' n'est pas reconnu par l'automate\n"; failwith ""
       | (x, q, s) ->
         let s = (String.of_seq(List.to_seq (List.rev s))) in 
         match a.fin.(x) with

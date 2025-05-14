@@ -110,7 +110,7 @@ Icon ->
 SconSingle ->
 SconDouble ->
 Ident ->
-EOS ->
+Eos ->
 True ->
 False ->
 Program ->
