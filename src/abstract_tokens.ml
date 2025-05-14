@@ -1,23 +1,15 @@
-type data_type = 
+type data_type =
   (* types *)
   | Entier of string
   | Flottant of string
-  | Imaginaire of float*float
+  | Imaginaire of float * float
   | Booleen of bool
   | Caractere of string
   | Commentaire of string
 
+type operateur = Plus | Moins | Fois | Division | Puissance | Assignation
 
-type operateur = 
-  | Plus
-  | Moins
-  | Fois
-  | Division
-  | Puissance
-  | Assignation
-
-
-type comparateur =  
+type comparateur =
   | PlusPetit
   | PlusGrand
   | StrictPlusPetit
@@ -25,83 +17,76 @@ type comparateur =
   | Egal
   | NonEgal
 
+type operateur_logique = Et | Ou | Non | Equivalent | NonEquivalent
 
-type operateur_logique = 
-  | Et
-  | Ou
-  | Non
-  | Equivalent
-  | NonEquivalent
-
-
-type syntax = 
+type syntax =
   | End
-  | Allocatable	
-  | Allocate	
-  | Assign	
-  | Assignment	
-  | Block_data	
-  | Case	
-  | Character	
-  | Common	
-  | Complex	
-  | Contains	
-  | Data	
-  | Default	
-  | Do	
-  | End_do  
+  | Allocatable
+  | Allocate
+  | Assign
+  | Assignment
+  | Block_data
+  | Case
+  | Character
+  | Common
+  | Complex
+  | Contains
+  | Data
+  | Default
+  | Do
+  | End_do
   | Double_precision
-  | Else	
+  | Else
   | Else_if
-  | Elsewhere	
-  | Entry	
-  | Equivalence	
-  | Exit	
-  | External	
-  | Function	
-  | End_function  
+  | Elsewhere
+  | Entry
+  | Equivalence
+  | Exit
+  | External
+  | Function
+  | End_function
   | Go_to
-  | If	
-  | End_if  
-  | Implicit	
-  | In	
-  | Inout	
-  | Integer	
-  | Intent	
-  | Interface	
-  | End_interface  
-  | Intrinsic	
-  | Kind	
-  | Len	
-  | Logical	
-  | Module	
-  | End_module  
-  | Only	
-  | Operator	
-  | Optional	
-  | Out	
-  | Parameter	
-  | Pause	
-  | Pointer	
-  | Private	
-  | Program	
-  | End_program  
-  | Public	
-  | Real	
-  | Recursive	
-  | Result	
-  | Save	
-  | Select_case	
-  | End_select  
-  | Subroutine	
+  | If
+  | End_if
+  | Implicit
+  | In
+  | Inout
+  | Integer
+  | Intent
+  | Interface
+  | End_interface
+  | Intrinsic
+  | Kind
+  | Len
+  | Logical
+  | Module
+  | End_module
+  | Only
+  | Operator
+  | Optional
+  | Out
+  | Parameter
+  | Pause
+  | Pointer
+  | Private
+  | Program
+  | End_program
+  | Public
+  | Real
+  | Recursive
+  | Result
+  | Save
+  | Select_case
+  | End_select
+  | Subroutine
   | End_subroutine
-  | Target	
-  | Then	
-  | Type	
-  | End_type  
-  | Use	
-  | Where	
-  | End_where  
+  | Target
+  | Then
+  | Type
+  | End_type
+  | Use
+  | Where
+  | End_where
   | While
   | AllocateBackspace
   | Call
@@ -137,7 +122,6 @@ type syntax =
   | Select
   | For
   | Step
-
 
 type intrinsic_function =
   | Abort
@@ -409,8 +393,7 @@ type intrinsic_function =
   | Verify
   | Xor
 
-
-type token = 
+type token =
   | DataType of data_type
   | Operateur of operateur
   | Comparateur of comparateur
@@ -435,4 +418,5 @@ type token =
   | ProgramRoot
   | ToFlatten
 
-type ast = Noeud of token * (ast list) (* parameters then inner in the same list *)
+type ast = Noeud of token * ast list
+(* parameters then inner in the same list *)

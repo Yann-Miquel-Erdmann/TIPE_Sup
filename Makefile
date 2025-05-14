@@ -35,10 +35,19 @@ C_TEST_FILES = $(addprefix $(C_TEST_DIR)/, $(patsubst %.f90, %.c, $(FORTRAN_TEST
 # $(info $(ORDERED_ML_FILES))
 
 
+
+
 default: build
 
 # signale que ce ne sont pas de fichiers mais des "commandes"
-.PHONY: build clean full-build test_suite preprocessing prebuild utop
+.PHONY: build clean full-build test_suite preprocessing prebuild utop format
+
+format: 
+	ocamlformat -i $(SRC_DIR)/*.ml
+	ocamlformat -i $(PREPROCESSING_DIR)/*.ml
+	ocamlformat -i $(PREBUILD_DIR)/*.ml
+
+
 
 prebuild: $(SRC_DIR)/vector.cma $(SRC_DIR)/vector.cmi $(PREBUILD_EXECUTABLE)
 	./$(PREBUILD_EXECUTABLE)
