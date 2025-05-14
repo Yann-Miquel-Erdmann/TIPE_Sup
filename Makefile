@@ -29,12 +29,19 @@ FORTRAN_TEST_FILES = $(notdir  $(wildcard $(FORTRAN_TEST_DIR)/*.f90))
 C_OUTPUT_FILES = $(addprefix $(C_OUTPUT_DIR)/, $(patsubst %.f90, %.c, $(FORTRAN_TEST_FILES)))
 C_TEST_FILES = $(addprefix $(C_TEST_DIR)/, $(patsubst %.f90, %.c, $(FORTRAN_TEST_FILES)))
 
-$(info $(ML_FILES))
-$(info $(ORDERED_ML_FILES))
+# $(info $(ML_FILES))
+# $(info $(ORDERED_ML_FILES))
+
 
 default: build
 # signale que ce ne sont pas de fichiers mais des "commandes"
-.PHONY: build clean test_suite preprocessing
+.PHONY: build clean full-build test_suite preprocessing utop
+
+utop: full-build
+	$(UTOP) -I $(SRC_DIR)
+
+full-build: preprocessing build
+
 
 preprocessing: $(PREPROCESSING_EXECUTABLE)
 	./$(PREPROCESSING_EXECUTABLE)
