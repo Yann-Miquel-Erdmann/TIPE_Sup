@@ -1,11 +1,13 @@
 program printNum 
 
    ! define variables
-   integer :: n
+   integer :: n = 3
    
    if (n == 2) then
       n = 7
-   end if
+   else if 
+
+   end if 
 
    ! if (.true.) print *, "Hello"
 

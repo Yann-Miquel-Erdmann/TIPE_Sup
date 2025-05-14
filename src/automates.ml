@@ -9,21 +9,21 @@ type automate = {
   nodes : int list;
   debut_l : int list;
   fin : (int * terminal) list;
-  transitions : (char option*int) list array; 
+  transitions : (char option * int) list array;
 }
 
 type automate_sans_eps = {
   nodes : int list;
   debut_l : int list;
   fin : (int * terminal) list;
-  transitions_sans_eps : (char*int) list array;
+  transitions_sans_eps : (char * int) list array;
 }
 
 type pre_automate_det = {
   mutable nodes : int list;
   debut : int;
   mutable fin : terminal option array;
-  mutable pre_transitions : (int array) Vector.t;
+  mutable pre_transitions : int array Vector.t;
 }
 
 (* automate de sortie utile pour la transpilation *)
@@ -31,15 +31,17 @@ type automate_det = {
   nodes : int list;
   debut : int;
   fin : terminal option array;
-  transitions : (int array) array; (* transitions.(i).(j), i le sommet de départ, j l'entier du caractère *)
+  transitions : int array array;
+      (* transitions.(i).(j), i le sommet de départ, j l'entier du caractère *)
 }
 
 (** Renvoie la liste de toutes les lignes dans le fichier [file_name]. *)
 let read_file (file_name: string) : string list = 
   let rec lire file liste = 
     let line = input_line file in
-      ();
-    try lire file (line::liste) with End_of_file->
+    ();
+    try lire file (line :: liste)
+    with End_of_file ->
       close_in file;
       line::liste
   in List.rev (lire (open_in file_name) [])
@@ -48,8 +50,8 @@ let read_file (file_name: string) : string list =
 (** Renvoie la liste [[0...n-1]]*)
 let range_list (n : int) : int list =
   let l = ref [] in
-  for i = 0 to n-1 do
-    l := i::!l
+  for i = 0 to n - 1 do
+    l := i :: !l
   done;
   !l
 
@@ -66,9 +68,8 @@ let automate_gen (reg : regex) (t : terminal):  automate =
   (** ajoute la transition [n1 -> n2] étiquetée par [c] à l'automate *)
   let add_transition ((n1, c, n2) : int * char option * int) =
     if Hashtbl.mem dico n1 then
-      Hashtbl.replace dico n1 ((c, n2)::(Hashtbl.find dico n1))
-    else
-      Hashtbl.add dico n1 [(c, n2)];
+      Hashtbl.replace dico n1 ((c, n2) :: Hashtbl.find dico n1)
+    else Hashtbl.add dico n1 [ (c, n2) ]
   in
 
   let next_node = ref 2 in
@@ -93,7 +94,7 @@ let automate_gen (reg : regex) (t : terminal):  automate =
     | Range (a1, a2) -> 
       begin
         for i = int_of_char a1 to int_of_char a2 do
-          automate_gen_aux (Caractere(char_of_int i)) (node_before, node_after);
+          automate_gen_aux (Caractere (char_of_int i)) (node_before, node_after)
         done
       end
     | ZeroPlus e ->
@@ -113,18 +114,21 @@ let automate_gen (reg : regex) (t : terminal):  automate =
   in automate_gen_aux reg (0, 1);
 
   let l1 = List.of_seq (Hashtbl.to_seq_keys dico) in
-  let rec build_trans (l : int list) (arr : (char option * int) list array) : unit =
+  let rec build_trans (l : int list) (arr : (char option * int) list array) :
+      unit =
     match l with
     | [] -> ()
-    | x::q -> arr.(x) <- (Hashtbl.find dico x); build_trans q arr
-  in 
+    | x :: q ->
+        arr.(x) <- Hashtbl.find dico x;
+        build_trans q arr
+  in
   let arr = Array.make !next_node [] in
   build_trans l1 arr;
   {
     nodes = range_list !next_node;
     debut_l = !a.debut_l;
     fin = !a.fin;
-    transitions = arr
+    transitions = arr;
   }
 
 (** construit la disjonction des automates de [l_a], qui reconnait donc l'union des language des automates de [l_a] *)
@@ -172,22 +176,26 @@ let ou_automates (l_a : automate list) : automate =
     Array.append out [|List.map (fun x -> (None, x)) l|]
   in
   {
-    nodes         = nouv_d::a.nodes;
-    debut_l       = [nouv_d];
-    fin           = a.fin;
-    transitions  = ajouter_debut a.debut_l a.transitions;
+    nodes = nouv_d :: a.nodes;
+    debut_l = [ nouv_d ];
+    fin = a.fin;
+    transitions = ajouter_debut a.debut_l a.transitions;
   }
 
 
 (** enlève les doublons dans la liste [l] *)
 let remove_duplicates (l : 'a list) : 'a list =
   let tbl = Hashtbl.create 0 in
-  let rec aux (l : 'a list) (out : 'a list): 'a list =
+  let rec aux (l : 'a list) (out : 'a list) : 'a list =
     match l with
     | [] -> out
-    | x::q -> if Hashtbl.mem tbl x then aux q out else (Hashtbl.add tbl x 0; aux q (x::out))
-  in aux l []
-
+    | x :: q ->
+        if Hashtbl.mem tbl x then aux q out
+        else (
+          Hashtbl.add tbl x 0;
+          aux q (x :: out))
+  in
+  aux l []
 
 (*
   Étapes pour enlever les epsilon-transitions:
@@ -216,64 +224,92 @@ let enleve_epsilon_trans (a : automate) : automate_sans_eps =
   let deg_traite = ref 0 in
 
   (* trouve le premier sommet de degré zéro *)
-  let rec find_premier_deg_zero () : int  =
+  let rec find_premier_deg_zero () : int =
     let deg = !deg_traite in
-    if degres.(!deg_traite) <= 0 then
-      incr deg_traite;
+    if degres.(!deg_traite) <= 0 then incr deg_traite;
     while !deg_traite < len && degres.(!deg_traite) > 0 do
       incr deg_traite
     done;
-    if deg == !deg_traite then (incr deg_traite; find_premier_deg_zero()) else 
-    if !deg_traite >= len then -1 else !deg_traite
+    if deg == !deg_traite then (
+      incr deg_traite;
+      find_premier_deg_zero ())
+    else if !deg_traite >= len then -1
+    else !deg_traite
   in
 
   (* construit les listes d'entrants de chaque sommet *)
-  Array.iteri (fun e l -> List.iter (fun (c, s) -> entrants.(s) <- (e, c)::entrants.(s); degres.(s) <- degres.(s) + 1) l)  a.transitions;
+  Array.iteri
+    (fun e l ->
+      List.iter
+        (fun (c, s) ->
+          entrants.(s) <- (e, c) :: entrants.(s);
+          degres.(s) <- degres.(s) + 1)
+        l)
+    a.transitions;
   (* ajouter un de degré entrant pour chaque entrée *)
   List.iter (fun x -> degres.(x) <- degres.(x) + 1) a.debut_l;
-  
+
   (* applique l'algorithme de suppression des epsilon transitions sur chacun des sommets *)
-  List.iter (fun node_i ->
-    (* récupération les transitions entrantes avec epsilon transitions qui ne sont pas des boucles + enlever du degré entrant pour chaque epsilon transition *)
-    let res = remove_duplicates(List.fold_left (
-      fun acc x ->
-        match x with
-        | (_, Some x) -> acc
-        | (node , None) ->
-          degres.(node_i) <- degres.(node_i) -1 ;
-          if node == node_i then
-            acc
-          else
-            node::acc
-    ) [] entrants.(node_i)) in
-    (* on enlève les epsilon entrants de chaque epsilon transition *)
-    entrants.(node_i) <- List.filter (fun (_, c) -> c != None) entrants.(node_i);
-    (* on enlève les sortants de chaque epsilon transition *)
-    !trans_temp.(node_i) <- List.filter (fun (c, x) -> not (c == None && x == node_i)) !trans_temp.(node_i);
-    List.iter (fun x -> !trans_temp.(x) <- List.filter (fun (c, x1) -> not (c == None && x1 == node_i)) !trans_temp.(x)) res;
-    (* ajoute les transitions des entrants avec epsilon transitions vers les sortants et actualise les entrants/sortants/degré de deux sommets *)
-    List.iter (
-      fun x ->
-        List.iter (
-          fun (c, node) ->
-            !trans_temp.(x) <-  (c, node)::!trans_temp.(x);
-            entrants.(node) <- (x, c)::entrants.(node);
-            degres.(node) <- degres.(node) + 1
-      ) (List.filter (fun (c, n) -> not (n == node_i && c = None)) !trans_temp.(node_i));
-    ) res;
-    
-    (* récupération des états de fin du sommet de départ *)
-    let fins = List.fold_left (fun acc (x, t) -> if x == node_i then t::acc else acc) [] a.fin in
-    
-    (* applique l'ensemble des états de fin aux sommets qui avaient une epsilon transition *)
-    List.iter (fun x -> List.iter (fun t -> fin_temp :=  (x, t)::!fin_temp) fins) res
-  ) a.nodes;
-  
+  List.iter
+    (fun node_i ->
+      (* récupération les transitions entrantes avec epsilon transitions qui ne sont pas des boucles + enlever du degré entrant pour chaque epsilon transition *)
+      let res =
+        remove_duplicates
+          (List.fold_left
+             (fun acc x ->
+               match x with
+               | _, Some x -> acc
+               | node, None ->
+                   degres.(node_i) <- degres.(node_i) - 1;
+                   if node == node_i then acc else node :: acc)
+             [] entrants.(node_i))
+      in
+      (* on enlève les epsilon entrants de chaque epsilon transition *)
+      entrants.(node_i) <-
+        List.filter (fun (_, c) -> c != None) entrants.(node_i);
+      (* on enlève les sortants de chaque epsilon transition *)
+      !trans_temp.(node_i) <-
+        List.filter
+          (fun (c, x) -> not (c == None && x == node_i))
+          !trans_temp.(node_i);
+      List.iter
+        (fun x ->
+          !trans_temp.(x) <-
+            List.filter
+              (fun (c, x1) -> not (c == None && x1 == node_i))
+              !trans_temp.(x))
+        res;
+      (* ajoute les transitions des entrants avec epsilon transitions vers les sortants et actualise les entrants/sortants/degré de deux sommets *)
+      List.iter
+        (fun x ->
+          List.iter
+            (fun (c, node) ->
+              !trans_temp.(x) <- (c, node) :: !trans_temp.(x);
+              entrants.(node) <- (x, c) :: entrants.(node);
+              degres.(node) <- degres.(node) + 1)
+            (List.filter
+               (fun (c, n) -> not (n == node_i && c = None))
+               !trans_temp.(node_i)))
+        res;
+
+      (* récupération des états de fin du sommet de départ *)
+      let fins =
+        List.fold_left
+          (fun acc (x, t) -> if x == node_i then t :: acc else acc)
+          [] a.fin
+      in
+
+      (* applique l'ensemble des états de fin aux sommets qui avaient une epsilon transition *)
+      List.iter
+        (fun x -> List.iter (fun t -> fin_temp := (x, t) :: !fin_temp) fins)
+        res)
+    a.nodes;
+
   (* enlever les nodes qui ne sont plus atteintes *)
-  let todo = ref (find_premier_deg_zero()) in
+  let todo = ref (find_premier_deg_zero ()) in
   while !todo <> -1 do
-    List.iter (fun (_, x) -> degres.(x) <- degres.(x) -1) !trans_temp.(!todo);
-    todo := find_premier_deg_zero ();
+    List.iter (fun (_, x) -> degres.(x) <- degres.(x) - 1) !trans_temp.(!todo);
+    todo := find_premier_deg_zero ()
   done;
 
   (* enlever les option car toutes les transition (devraient être) sans epsilon transition *)
@@ -293,8 +329,8 @@ let lin (elem : IntSet.t) (lin_tbl : (IntSet.t, int) Hashtbl.t) (delin_tbl : Int
   if (Hashtbl.find lin_tbl IntSet.empty <> Vector.length delin_tbl) then
     failwith "La taille des deux tables n'est pas la même";
 
-  if not (Hashtbl.mem lin_tbl elem) then
-    (Hashtbl.add lin_tbl elem (Hashtbl.find lin_tbl IntSet.empty);
+  if not (Hashtbl.mem lin_tbl elem) then (
+    Hashtbl.add lin_tbl elem (Hashtbl.find lin_tbl IntSet.empty);
     Hashtbl.replace lin_tbl IntSet.empty (Hashtbl.find lin_tbl IntSet.empty + 1);
     Vector.push delin_tbl elem);
   Hashtbl.find lin_tbl elem
@@ -302,8 +338,7 @@ let lin (elem : IntSet.t) (lin_tbl : (IntSet.t, int) Hashtbl.t) (delin_tbl : Int
 (** Pour chaque entier [elem], renvoie l'ensemble de sommets corrspondant,
 à l'aide de la table de délinéarisation [delin_tbl] *)
 let delin (elem : int) (delin_tbl : IntSet.t Vector.t) : IntSet.t =
-  if elem = -1 then
-    IntSet.empty
+  if elem = -1 then IntSet.empty
   else if elem >= Vector.length delin_tbl then
     failwith "L'élément demandé n'est pas dans la table"
   else
@@ -314,16 +349,18 @@ let determinise (a : automate_sans_eps) : automate_det =
   (* crée les deux table utiles pour la linéarisation / délinéarisation *)
   let lin_tbl = Hashtbl.create (List.length a.nodes) in
   let delin_tbl = Vector.create ~dummy:IntSet.empty in
-  
-  let start_node = lin (IntSet.of_list a.debut_l) lin_tbl delin_tbl in 
-  let todo = ref [start_node] in
-  
-  let a_det = {
-    nodes = [start_node];
-    debut = start_node;
-    fin = [||];
-    pre_transitions = Vector.create ~dummy:(Array.make 1 0);
-  } in
+
+  let start_node = lin (IntSet.of_list a.debut_l) lin_tbl delin_tbl in
+  let todo = ref [ start_node ] in
+
+  let a_det =
+    {
+      nodes = [ start_node ];
+      debut = start_node;
+      fin = [||];
+      pre_transitions = Vector.create ~dummy:(Array.make 1 0);
+    }
+  in
 
   Vector.push a_det.pre_transitions (Array.make 128 (-1)); (* pour le début *)
   let fin  = IntSet.of_list (List.map (fun (a, b) -> a) a.fin) in 
@@ -334,13 +371,19 @@ let determinise (a : automate_sans_eps) : automate_det =
 
     (* on rassemble les éléments accessibles depuis tous les sommets de l *)
     let storage = Array.make len IntSet.empty in
-    IntSet.iter (fun x -> List.iter (fun (c, e) -> storage.(int_of_char c) <- IntSet.add e storage.(int_of_char c)) a.transitions_sans_eps.(x)) l;
-    
+    IntSet.iter
+      (fun x ->
+        List.iter
+          (fun (c, e) ->
+            storage.(int_of_char c) <- IntSet.add e storage.(int_of_char c))
+          a.transitions_sans_eps.(x))
+      l;
+
     (* on linéarise les sommets obtenus et on les stocke dans arr *)
-    for i = 0 to (len-1) do
+    for i = 0 to len - 1 do
       if not (IntSet.is_empty storage.(i)) then
         arr.(i) <- lin storage.(i) lin_tbl delin_tbl
-    done;
+    done
   in
 
   (** teste si le sommet [elem] linéarisé contient des éléments finaux et l'ajoute aux finaux si c'est le cas *)
@@ -368,30 +411,27 @@ let determinise (a : automate_sans_eps) : automate_det =
   while not !finished do
     match !todo with
     | [] -> finished := true
-    | x::q ->
-      begin
-        let init_len = Hashtbl.find lin_tbl IntSet.empty in 
+    | x :: q ->
+        let init_len = Hashtbl.find lin_tbl IntSet.empty in
         todo := q;
         let suivants = Array.make 128 (-1) in
         trouver_suivants (delin x delin_tbl) suivants;
-        
+
         let arr = Vector.get a_det.pre_transitions x in
         for i = 0 to 127 do
-          if (suivants.(i) >= init_len) then
+          if suivants.(i) >= init_len then
             (* si c'est un nouveau noeud, on l'ajoute a la liste de traitement,
             on l'ajoute dans l'automate et on vérifie s'il est final *)
-            if not (IntSet.mem suivants.(i) !seen) then
-              (seen := IntSet.add suivants.(i) !seen;
-              todo := suivants.(i)::!todo;
+            if not (IntSet.mem suivants.(i) !seen) then (
+              seen := IntSet.add suivants.(i) !seen;
+              todo := suivants.(i) :: !todo;
               Vector.push a_det.pre_transitions (Array.make 128 (-1));
-              a_det.nodes <- suivants.(i)::a_det.nodes);
+              a_det.nodes <- suivants.(i) :: a_det.nodes);
           (* noeud déjà existant/complétion nouveau noeud, comme on ne traite qu'une fois chaque sommets,
           on sait que les sommets trouvé sont les bons, on les remplace *)
-          if suivants.(i) <> -1 then
-            arr.(i) <- suivants.(i)
+          if suivants.(i) <> -1 then arr.(i) <- suivants.(i)
         done;
         Vector.set a_det.pre_transitions x arr
-      end
   done;
 
   (* gérer le cas des mots vides, qui sont donc à la fois initiaux et finaux *)
@@ -401,7 +441,7 @@ let determinise (a : automate_sans_eps) : automate_det =
     nodes = a_det.nodes;
     debut = a_det.debut;
     fin = a_det.fin;
-    transitions = Vector.to_array a_det.pre_transitions
+    transitions = Vector.to_array a_det.pre_transitions;
   }
 
 (** effectue le delta 1 sur l'automate [a] à partir de [node] avec l'étiquette [c] *)
@@ -460,7 +500,9 @@ let exec (a : automate_det) (txt : string) : (symbol * string) list =
   let res = exec_aux a (List.of_seq (String.to_seq txt)) [] in
   let tbl = Hashtbl.create (List.length unparsed_tokens) in
   List.iter (fun x -> Hashtbl.add tbl x ()) unparsed_tokens;
-  List.map (fun (t,s) -> Terminal t, s) (List.filter (fun (x, _) -> not (Hashtbl.mem tbl x)) res)
+  List.map
+    (fun (t, s) -> (Terminal t, s))
+    (List.filter (fun (x, _) -> not (Hashtbl.mem tbl x)) res)
 
 (** exécute l'automate [a] sur le fichier [f_name] *)
 let exec_of_file (a: automate_det) (f_name:string): (symbol*string) list = 

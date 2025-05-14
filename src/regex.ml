@@ -16,19 +16,19 @@ open Symbols
 *)
 
 type regex =
-(* cas de base *)
-| Epsilon
-| Caractere of char
-| AllChars
-| Range of char*char
-(* opérations sur les regex*)
-| Concat of regex*regex
-| Ou of regex*regex
-| UnPlus of regex
-| ZeroPlus of regex
-| Vide
-| Facultatif of regex
-| AllBut of bool array
+  (* cas de base *)
+  | Epsilon
+  | Caractere of char
+  | AllChars
+  | Range of char * char
+  (* opérations sur les regex*)
+  | Concat of regex * regex
+  | Ou of regex * regex
+  | UnPlus of regex
+  | ZeroPlus of regex
+  | Vide
+  | Facultatif of regex
+  | AllBut of bool array
 
 
 (** affiche l'expression [c] en argument *)
@@ -36,41 +36,103 @@ let print_reg_list (c: regex list) : unit =
   (** affiche en vidant au fur et à mesure la liste *)
   let rec print_list_aux (r:regex list) : unit =
     match r with
-    | []-> ()
-    | [Vide] -> print_char '_';
-    | Vide::q -> print_char '_'; print_char ' '; print_list_aux q
-
-    | [Epsilon] -> print_char '#';
-    | Epsilon::q -> print_char '#'; print_char ' '; print_list_aux q
-
-    | [Caractere c] -> print_char c;
-    | Caractere c ::q -> print_char c; print_char ' '; print_list_aux q
-
-    | [AllChars] -> print_char '.';
-    | AllChars::q -> print_char '.'; print_char ' '; print_list_aux q
-    
-    | [Range (s, e)] -> print_char '['; print_char s; print_char '-'; print_char e; print_char ']';
-    | (Range (s, e))::q -> print_char '['; print_char s; print_char '-'; print_char e; print_char ']'; print_char ' '; print_list_aux q
-
-    | [Concat (e1, e2)] -> print_list_aux [e1]; print_list_aux [e2];
-    | (Concat (e1, e2))::q -> print_list_aux [e1]; print_list_aux [e2]; print_char ' '; print_list_aux q
-    
-    | [Ou (e1, e2)] -> print_char '('; print_list_aux [e1]; print_char '|'; print_list_aux [e2]; print_char ')';
-    | (Ou (e1, e2))::q -> print_char '('; print_list_aux [e1]; print_char '|'; print_list_aux [e2]; print_char ')'; print_char ' '; print_list_aux q
-    
-    | [UnPlus e] -> print_char '('; print_list_aux [e]; print_string ")+";
-    | (UnPlus e)::q -> print_char '('; print_list_aux [e]; print_string ")+"; print_char ' '; print_list_aux q
-    
-    | [ZeroPlus e] -> print_char '('; print_list_aux [e]; print_string ")*";
-    | (ZeroPlus e)::q -> print_char '('; print_list_aux [e]; print_string ")*"; print_char ' '; print_list_aux q
-
-    | [Facultatif e] -> print_char '('; print_list_aux [e]; print_string ")?";
-    | (Facultatif e)::q -> print_char '('; print_list_aux [e]; print_string ")?"; print_char ' '; print_list_aux q
-
-    | [AllBut _] -> print_string "~(..."; print_string ")";
-    | (AllBut _)::q -> print_string "~(..."; print_string ")"; print_char ' '; print_list_aux q
-  in if List.length c = 0 then print_string "[]" else print_list_aux c
-
+    | [] -> ()
+    | [ Vide ] -> print_char '_'
+    | Vide :: q ->
+        print_char '_';
+        print_char ' ';
+        print_list_aux q
+    | [ Epsilon ] -> print_char '#'
+    | Epsilon :: q ->
+        print_char '#';
+        print_char ' ';
+        print_list_aux q
+    | [ Caractere c ] -> print_char c
+    | Caractere c :: q ->
+        print_char c;
+        print_char ' ';
+        print_list_aux q
+    | [ AllChars ] -> print_char '.'
+    | AllChars :: q ->
+        print_char '.';
+        print_char ' ';
+        print_list_aux q
+    | [ Range (s, e) ] ->
+        print_char '[';
+        print_char s;
+        print_char '-';
+        print_char e;
+        print_char ']'
+    | Range (s, e) :: q ->
+        print_char '[';
+        print_char s;
+        print_char '-';
+        print_char e;
+        print_char ']';
+        print_char ' ';
+        print_list_aux q
+    | [ Concat (e1, e2) ] ->
+        print_list_aux [ e1 ];
+        print_list_aux [ e2 ]
+    | Concat (e1, e2) :: q ->
+        print_list_aux [ e1 ];
+        print_list_aux [ e2 ];
+        print_char ' ';
+        print_list_aux q
+    | [ Ou (e1, e2) ] ->
+        print_char '(';
+        print_list_aux [ e1 ];
+        print_char '|';
+        print_list_aux [ e2 ];
+        print_char ')'
+    | Ou (e1, e2) :: q ->
+        print_char '(';
+        print_list_aux [ e1 ];
+        print_char '|';
+        print_list_aux [ e2 ];
+        print_char ')';
+        print_char ' ';
+        print_list_aux q
+    | [ UnPlus e ] ->
+        print_char '(';
+        print_list_aux [ e ];
+        print_string ")+"
+    | UnPlus e :: q ->
+        print_char '(';
+        print_list_aux [ e ];
+        print_string ")+";
+        print_char ' ';
+        print_list_aux q
+    | [ ZeroPlus e ] ->
+        print_char '(';
+        print_list_aux [ e ];
+        print_string ")*"
+    | ZeroPlus e :: q ->
+        print_char '(';
+        print_list_aux [ e ];
+        print_string ")*";
+        print_char ' ';
+        print_list_aux q
+    | [ Facultatif e ] ->
+        print_char '(';
+        print_list_aux [ e ];
+        print_string ")?"
+    | Facultatif e :: q ->
+        print_char '(';
+        print_list_aux [ e ];
+        print_string ")?";
+        print_char ' ';
+        print_list_aux q
+    | [ AllBut _ ] ->
+        print_string "~(...";
+        print_string ")"
+    | AllBut _ :: q ->
+        print_string "~(...";
+        print_string ")";
+        print_char ' ';
+        print_list_aux q
+  in
+  if List.length c = 0 then print_string "[]" else print_list_aux c
 
 (** convertit la chaîne de caractères s à partir de l'index index et l'ajoute à la liste c *)
 let rec string_to_char_2 (s:string) (c : char list) (index: int): char list =
@@ -92,8 +154,9 @@ let is_empty(l : 'a list ref) : bool =
 let pop (l : 'a list ref) : 'a =
   match !l with
   | [] -> raise Empty_pile
-  | x::q -> l := q; x
-
+  | x :: q ->
+      l := q;
+      x
 
 (** convertit l'entier [n] en booléen *)
 let bool_of_int (n: int) : bool =
@@ -103,29 +166,29 @@ let bool_of_int (n: int) : bool =
 
 (** renvoie la disjonction de toutes les expressions régulières dans la liste [l] *)
 let or_reg (l : regex list) : regex =
-  let rec or_reg_aux (l : regex list) (out : regex): regex =
-  match l, out with
-  | [], _ -> out
-  | x::q, Epsilon -> or_reg_aux q x
-  | x::q, _ -> or_reg_aux q (Ou(x, out))
+  let rec or_reg_aux (l : regex list) (out : regex) : regex =
+    match (l, out) with
+    | [], _ -> out
+    | x :: q, Epsilon -> or_reg_aux q x
+    | x :: q, _ -> or_reg_aux q (Ou (x, out))
   in
   or_reg_aux l Epsilon
 
 
 (** renvoie la concaténation de toutes les expressions régulières de [l] *)
 let concat_reg (l : regex list) : regex =
-  let rec concat_reg_aux (l : regex list) (out : regex): regex =
-  match l, out with
-  | [], _ -> out
-  | x::q, Epsilon -> concat_reg_aux q x
-  | x::q, _ -> concat_reg_aux q (Concat(x, out))
+  let rec concat_reg_aux (l : regex list) (out : regex) : regex =
+    match (l, out) with
+    | [], _ -> out
+    | x :: q, Epsilon -> concat_reg_aux q x
+    | x :: q, _ -> concat_reg_aux q (Concat (x, out))
   in
   concat_reg_aux l Epsilon
 
 
 (** transforme, si c'est possible, la chaine de caractères [s] en une expression régulière (regex) *)
 let rec gen_regex (s : string) : regex =
-  let caracters = ref (List.of_seq(String.to_seq s)) in
+  let caracters = ref (List.of_seq (String.to_seq s)) in
 
   (* fonction auxiliaire qui permet de générer le regex entre parenthèses *)
   let parenthesis () : regex =
@@ -151,7 +214,7 @@ let rec gen_regex (s : string) : regex =
         l := !c::!l;
         c := pop(caracters)
       done;
-      let s1 = (String.of_seq (List.to_seq (List.rev !l))) in
+      let s1 = String.of_seq (List.to_seq (List.rev !l)) in
       gen_regex s1
     with Empty_pile -> raise Invalid_syntax
   in
