@@ -31,7 +31,9 @@ type regex =
 | AllBut of bool array
 
 
+(** affiche l'expression [c] en argument *)
 let print_reg_list (c: regex list) : unit =
+  (** affiche en vidant au fur et à mesure la liste *)
   let rec print_list_aux (r:regex list) : unit =
     match r with
     | []-> ()
@@ -70,7 +72,7 @@ let print_reg_list (c: regex list) : unit =
   in if List.length c = 0 then print_string "[]" else print_list_aux c
 
 
-(* convertit la chaîne de caractères s à partir de l'index index et l'ajoute à la liste c *)
+(** convertit la chaîne de caractères s à partir de l'index index et l'ajoute à la liste c *)
 let rec string_to_char_2 (s:string) (c : char list) (index: int): char list =
   if index = String.length s then
     List.rev c
@@ -78,27 +80,28 @@ let rec string_to_char_2 (s:string) (c : char list) (index: int): char list =
     string_to_char_2 s (s.[index]::c) (index + 1)
   )
 
-
-
 exception Invalid_syntax
 exception Empty_pile
 
+(** teste si la liste référencée dans [l] est vide *)
 let is_empty(l : 'a list ref) : bool =
   List.length !l == 0
 
 
+(** dépile un élément de la pile référencée par [l]*)
 let pop (l : 'a list ref) : 'a =
   match !l with
   | [] -> raise Empty_pile
   | x::q -> l := q; x
 
 
+(** convertit l'entier [n] en booléen *)
 let bool_of_int (n: int) : bool =
   if n == 0 then false
   else true
 
 
-(* renvoie le ou de toutes les expressions régulières dans l *)
+(** renvoie la disjonction de toutes les expressions régulières dans la liste [l] *)
 let or_reg (l : regex list) : regex =
   let rec or_reg_aux (l : regex list) (out : regex): regex =
   match l, out with
@@ -109,7 +112,7 @@ let or_reg (l : regex list) : regex =
   or_reg_aux l Epsilon
 
 
-(* renvoie la concaténation de toutes les expressions régulières de l*)
+(** renvoie la concaténation de toutes les expressions régulières de [l] *)
 let concat_reg (l : regex list) : regex =
   let rec concat_reg_aux (l : regex list) (out : regex): regex =
   match l, out with
@@ -120,29 +123,31 @@ let concat_reg (l : regex list) : regex =
   concat_reg_aux l Epsilon
 
 
-(* fonction qui transforme, si c'est possible, la chaine de caractères s en une expression régulière (regex) *)
+(** transforme, si c'est possible, la chaine de caractères [s] en une expression régulière (regex) *)
 let rec gen_regex (s : string) : regex =
   let caracters = ref (List.of_seq(String.to_seq s)) in
 
   (* fonction auxiliaire qui permet de générer le regex entre parenthèses *)
-  let parenthesis () =
+  let parenthesis () : regex =
     let l = ref [] in
     try
       let count = ref 0 in
       let c = ref (pop(caracters)) in
-      let i = ref false in
-      while not (!c = ')' && !count = 0 && not !i) do
-        if not !i then
+      let ignore = ref false in
+      (* boucle sur le contenu de la parenthèse et ne s'arrete pas si elle est ignorée *)
+      while not (!c = ')' && !count = 0 && not !ignore) do
+        if not !ignore then
           begin
+            (* si on rencontre un \, on ignore le caractère suivant *)
             if !c = '\\' then
-              i := true
+              ignore := true
             else if !c = '(' then
               count := !count + 1
             else if !c = ')' then 
               count := !count -1;
           end
         else 
-          i := false;
+          ignore := false;
         l := !c::!l;
         c := pop(caracters)
       done;
@@ -152,37 +157,42 @@ let rec gen_regex (s : string) : regex =
   in
 
   (* fonction auxiliaire qui permet de générer le regex entre crochets *)
-  let crochet () =
+  let crochet () : regex =
     let l = ref [] in
     try
       let c = ref (pop(caracters)) in
-      let i = ref 0 in
+      let ignore_left = ref 0 in
       let pile1 = ref [] in
-      while not (!c = ']' && not (bool_of_int !i)) do
-        if not (bool_of_int !i) && !c = '\\' then
-          i := 2;
-        if !i <> 2 then 
+      (* on boucle tant que l'on a pas le crochet final et tant que l'on ignore pas *)
+      while not (!c = ']' && not (bool_of_int !ignore_left)) do
+        (* si on ignore pas encore, on ignore pour 2 tours si on rencontre un \ *)
+        if not (bool_of_int !ignore_left) && !c = '\\' then
+          ignore_left := 2;
+        if !ignore_left <> 2 then 
           begin
             match !pile1 with
             | [Caractere '-'; Caractere x] -> pile1 := [Range(x, !c)]
             | Caractere '-'::Caractere x::q -> pile1 := Range(x, !c)::q
 
-            | _ ->if !i = 1 && !c = 'n' then pile1 := Caractere '\n'::!pile1 else pile1 := Caractere !c::!pile1;
+            | _ ->if !ignore_left = 1 && !c = 'n' then pile1 := Caractere '\n'::!pile1 else pile1 := Caractere !c::!pile1;
             l := !c::!l
           end;
         c := pop(caracters);
-        if !i > 0 then i := !i-1
+        if !ignore_left > 0 then ignore_left := !ignore_left-1
       done;
       or_reg !pile1
     with Empty_pile -> raise Invalid_syntax
   in
 
-  (* fonction auxiliaire générale qui génère le regex à partir de la chaine, qui stocke au fur et à mesure dans la pile
+  (** fonction auxiliaire générale qui génère le regex à partir de la chaine, qui stocke au fur et à mesure dans la pile
   et qui ignore les caractères à effets lorsque ignore est à vrai *)
   let rec gen_regex_2 (pile : regex list) (ignore : bool) : regex =
+
+    (* s'il n'y a plus rien a convertir, on concatène les expressions régulières*)
     if is_empty(caracters) then
       concat_reg pile
     else
+
     let c = pop(caracters) in
     if ignore then if c = 'n' then gen_regex_2 (Caractere '\n'::pile) false else gen_regex_2 (Caractere c::pile) false
     else
@@ -199,11 +209,27 @@ let rec gen_regex (s : string) : regex =
         match pile, left with
         | [], _ -> raise Invalid_syntax
 
-        | [Caractere c], AllChars | [AllChars], Caractere c -> if c = '\n' then gen_regex_2 [Ou(Caractere c, AllChars)] false else gen_regex_2 [AllChars] false
-        | Caractere c::q, AllChars | AllChars::q, Caractere c -> if c = '\n' then gen_regex_2 (Ou(Caractere c, AllChars)::q) false else gen_regex_2 (AllChars::q) false
+        | [Caractere c], AllChars | [AllChars], Caractere c ->
+          if c = '\n' then
+            gen_regex_2 [Ou(Caractere c, AllChars)] false
+          else 
+            gen_regex_2 [AllChars] false
+        | Caractere c::q, AllChars | AllChars::q, Caractere c ->
+          if c = '\n' then
+            gen_regex_2 (Ou(Caractere c, AllChars)::q) false
+          else
+            gen_regex_2 (AllChars::q) false
         
-        | [Range (d, f)], AllChars | [AllChars], Range (d, f)  -> if int_of_char d < 32 || int_of_char f < 32 then gen_regex_2 [Ou(Range (d, f), AllChars)] false else gen_regex_2 [AllChars] false
-        | Range (d, f)::q, AllChars | AllChars::q, Range (d, f)-> if int_of_char d < 32 || int_of_char f < 32 then gen_regex_2 (Ou(Range (d, f), AllChars)::q) false else gen_regex_2 (AllChars::q) false
+        | [Range (d, f)], AllChars | [AllChars], Range (d, f)  ->
+          if int_of_char d < 32 || int_of_char f < 32 then
+            gen_regex_2 [Ou(Range (d, f), AllChars)] false
+          else
+            gen_regex_2 [AllChars] false
+        | Range (d, f)::q, AllChars | AllChars::q, Range (d, f)->
+          if int_of_char d < 32 || int_of_char f < 32 then
+            gen_regex_2 (Ou(Range (d, f), AllChars)::q) false
+          else
+            gen_regex_2 (AllChars::q) false
 
         | [x], _ -> gen_regex_2 [Ou(x, left)] false
         | x::q, _  -> gen_regex_2 (Ou(x, left)::q) false
@@ -275,27 +301,4 @@ let rec gen_regex (s : string) : regex =
         | c1 -> gen_regex_2 (AllBut (Array.init 128 ((<>) (int_of_char c1)))::pile) false
       end
     | _ -> gen_regex_2 (Caractere c::pile) false
-  in let reg = gen_regex_2 [] false in if not (is_empty caracters) then raise Invalid_syntax else reg 
-
-
-let r1 = gen_regex "[a-zA-Z0-9]+"
-let r2 = gen_regex "[0-9]+\\.[0-9]+"
-let r3 = gen_regex "\".*\""
-let r4 = gen_regex "'.*'"
-let r5 = gen_regex "[0-9]+"
-let r6 = gen_regex "!.*\n"
-let r7 = gen_regex "\".*\""
-let r8 = gen_regex "abc"
-
-(*
-let num = match_regex (C(num_reg, -2, Integer [], 0, false, [])) (0, false) '"'
-let num = match_regex num (1, false) 'a'
-
-let num = match_regex num (2, false) 'a'
-
-let num = match_regex num (3, false) 'a'
-
-let num = match_regex num (4, false) '\''
-
-let num = match_regex num (5, false) '"'
-*)
+  in let reg = gen_regex_2 [] false in if not (is_empty caracters) then raise Invalid_syntax else reg

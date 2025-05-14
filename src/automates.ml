@@ -2,11 +2,9 @@ open Regex
 open Symbols
 open Vector
 
-module IntSet = Set.Make(struct
-  type t = int
-  let compare = compare
-end)
+module IntSet = Set.Make(Int)
 
+(* différentes représentations d'automates utiles lors de sa transformation en automate déterministe *)
 type automate = {
   nodes : int list;
   debut_l : int list;
@@ -21,13 +19,14 @@ type automate_sans_eps = {
   transitions_sans_eps : (char*int) list array;
 }
 
-type pre_automate_det = { (* used only during its building, the actual one is easier to represent in a file *)
+type pre_automate_det = {
   mutable nodes : int list;
   debut : int;
   mutable fin : terminal option array;
   mutable pre_transitions : (int array) Vector.t;
 }
 
+(* automate de sortie utile pour la transpilation *)
 type automate_det = {
   nodes : int list;
   debut : int;
@@ -35,7 +34,7 @@ type automate_det = {
   transitions : (int array) array; (* transitions.(i).(j), i le sommet de départ, j l'entier du caractère *)
 }
 
-(** Returns the list of all the lines in the file named [file_name]. *)
+(** Renvoie la liste de toutes les lignes dans le fichier [file_name]. *)
 let read_file (file_name: string) : string list = 
   let rec lire file liste = 
     let line = input_line file in
@@ -46,6 +45,7 @@ let read_file (file_name: string) : string list =
   in List.rev (lire (open_in file_name) [])
 ;;
 
+(** Renvoie la liste [[0...n-1]]*)
 let range_list (n : int) : int list =
   let l = ref [] in
   for i = 0 to n-1 do
@@ -53,6 +53,7 @@ let range_list (n : int) : int list =
   done;
   !l
 
+(** crée l'automate de stage 1 à partir d'une expression régulière [reg] et d'un terminal [t] *)
 let automate_gen (reg : regex) (t : terminal):  automate =
   let dico = Hashtbl.create 0 in
   let a = ref {
@@ -61,13 +62,17 @@ let automate_gen (reg : regex) (t : terminal):  automate =
     fin = [(1, t)];
     transitions = [||];
   } in
+
+  (** ajoute la transition [n1 -> n2] étiquetée par [c] à l'automate *)
   let add_transition ((n1, c, n2) : int * char option * int) =
     if Hashtbl.mem dico n1 then
       Hashtbl.replace dico n1 ((c, n2)::(Hashtbl.find dico n1))
     else
       Hashtbl.add dico n1 [(c, n2)];
   in
+
   let next_node = ref 2 in
+  
   let rec automate_gen_aux (reg : regex) ((node_before, node_after) : int * int): unit =
     match reg with
     | Vide -> ()
@@ -77,17 +82,29 @@ let automate_gen (reg : regex) (t : terminal):  automate =
         add_transition (node_before, Some (char_of_int i), node_after)
       done;
     | Caractere x -> add_transition (node_before, Some x, node_after);
-    | Concat (g, d) -> let node = !next_node in next_node := !next_node + 1; automate_gen_aux g (node_before, node); automate_gen_aux d (node, node_after)
-    | Ou (g, d) -> automate_gen_aux g (node_before, node_after); automate_gen_aux d (node_before, node_after)
+    | Concat (g, d) ->
+      let node = !next_node in
+      next_node := !next_node + 1;
+      automate_gen_aux g (node_before, node);
+      automate_gen_aux d (node, node_after)
+    | Ou (g, d) ->
+      automate_gen_aux g (node_before, node_after);
+      automate_gen_aux d (node_before, node_after)
     | Range (a1, a2) -> 
       begin
         for i = int_of_char a1 to int_of_char a2 do
           automate_gen_aux (Caractere(char_of_int i)) (node_before, node_after);
         done
       end
-    | ZeroPlus e -> automate_gen_aux e (node_before, node_before); automate_gen_aux Epsilon (node_before, node_after)
-    | UnPlus e -> automate_gen_aux e (node_before, node_before); automate_gen_aux e (node_before, node_after)
-    | Facultatif e -> automate_gen_aux e (node_before, node_after); automate_gen_aux Epsilon (node_before, node_after)
+    | ZeroPlus e ->
+      automate_gen_aux e (node_before, node_before);
+      automate_gen_aux Epsilon (node_before, node_after)
+    | UnPlus e ->
+      automate_gen_aux e (node_before, node_before);
+      automate_gen_aux e (node_before, node_after)
+    | Facultatif e ->
+      automate_gen_aux e (node_before, node_after);
+      automate_gen_aux Epsilon (node_before, node_after)
     | AllBut e -> 
       for i = 0 to 127 do
         if e.(i) then 
@@ -110,9 +127,10 @@ let automate_gen (reg : regex) (t : terminal):  automate =
     transitions = arr
   }
 
-
+(** construit la disjonction des automates de [l_a], qui reconnait donc l'union des language des automates de [l_a] *)
 let ou_automates (l_a : automate list) : automate =
-  let rec ou_automate_aux (l : automate list) (out : automate) (depht : int) =
+  (** construit la disjonction de la liste [l] avec un automate [out] *)
+  let rec ou_automate_aux (l : automate list) (out : automate)=
     match l with
     | [] -> out
     | x::q ->
@@ -137,7 +155,7 @@ let ou_automates (l_a : automate list) : automate =
               out.transitions.(i)
             else
               List.map (fun (c, x) -> c, x + inc) x.transitions.(i-inc));
-      } (depht+1)
+      }
   in
   let a = ou_automate_aux l_a
   {
@@ -145,9 +163,11 @@ let ou_automates (l_a : automate list) : automate =
     debut_l       = [];
     fin           = [];
     transitions  = [||];
-  } 0 in
+  } in
   let nouv_d = List.length a.nodes in
 
+  (** Ajoute le début unique à l'automate par une transition [k -> x] étiquetée par epsilon (où k est l'état de départ,
+  x est un ancien départ d'un élément de [l]) à out *)
   let rec ajouter_debut (l : int list) (out : (char option*int) list array): (char option*int) list array =
     Array.append out [|List.map (fun x -> (None, x)) l|]
   in
@@ -159,7 +179,7 @@ let ou_automates (l_a : automate list) : automate =
   }
 
 
-
+(** enlève les doublons dans la liste [l] *)
 let remove_duplicates (l : 'a list) : 'a list =
   let tbl = Hashtbl.create 0 in
   let rec aux (l : 'a list) (out : 'a list): 'a list =
@@ -170,7 +190,7 @@ let remove_duplicates (l : 'a list) : 'a list =
 
 
 (*
-  Enlever les epsilon-transitions:
+  Étapes pour enlever les epsilon-transitions:
   - On prend un sommet
   - On regarde toutes les epsilon-transitions sortantes (pas les boucles)
   - On regarde tous les transitions entrantes
@@ -180,7 +200,7 @@ let remove_duplicates (l : 'a list) : 'a list =
   Requis:
   - transitions entrantes de chaque sommet => précalculé
 *)
-
+(** enlève les epsilon-transitions dans l'automate [a] en effectuant les étapes ci-dessus *)
 let enleve_epsilon_trans (a : automate) : automate_sans_eps = 
 
   let len = (List.length a.nodes) in
@@ -262,17 +282,16 @@ let enleve_epsilon_trans (a : automate) : automate_sans_eps =
     debut_l = a.debut_l;
     fin = List.filter (fun (x, _) -> degres.(x) > 0) !fin_temp;
     transitions_sans_eps = Array.map (fun x -> List.map (fun (c, n) -> match c with | None -> failwith "pas correct" | Some c1 -> (c1, n)) (List.filter (fun (_, n) -> degres.(n) > 0) x)) !trans_temp;
-    (*transitions_sans_eps_ = List.map (fun (n1, c) -> match c with | None -> failwith "pas correct" | Some c1 -> (lin n1, c1, lin n2)) (List.filter (fun (_, _, x) -> degres.(x) > 0) !trans_temp);*)
   } 
 
-
-
+(** Donne à chaque ensemble d'éléments [elem] un entier à partir de
+la table de linéarisation [lin_tbl] et cette de délinéarisation [delin_tbl] *)
 let lin (elem : IntSet.t) (lin_tbl : (IntSet.t, int) Hashtbl.t) (delin_tbl : IntSet.t Vector.t) : int=
   if not (Hashtbl.mem lin_tbl IntSet.empty) then
     Hashtbl.add lin_tbl IntSet.empty 0;
 
   if (Hashtbl.find lin_tbl IntSet.empty <> Vector.length delin_tbl) then
-    failwith "The size of the two tables are not matching";
+    failwith "La taille des deux tables n'est pas la même";
 
   if not (Hashtbl.mem lin_tbl elem) then
     (Hashtbl.add lin_tbl elem (Hashtbl.find lin_tbl IntSet.empty);
@@ -280,16 +299,19 @@ let lin (elem : IntSet.t) (lin_tbl : (IntSet.t, int) Hashtbl.t) (delin_tbl : Int
     Vector.push delin_tbl elem);
   Hashtbl.find lin_tbl elem
 
-
+(** Pour chaque entier [elem], renvoie l'ensemble de sommets corrspondant,
+à l'aide de la table de délinéarisation [delin_tbl] *)
 let delin (elem : int) (delin_tbl : IntSet.t Vector.t) : IntSet.t =
   if elem = -1 then
     IntSet.empty
   else if elem >= Vector.length delin_tbl then
-    failwith "Element was not found in the table"
+    failwith "L'élément demandé n'est pas dans la table"
   else
     Vector.get delin_tbl elem
 
+(** déterminise l'automate [a] *)
 let determinise (a : automate_sans_eps) : automate_det =
+  (* crée les deux table utiles pour la linéarisation / délinéarisation *)
   let lin_tbl = Hashtbl.create (List.length a.nodes) in
   let delin_tbl = Vector.create ~dummy:IntSet.empty in
   
@@ -305,15 +327,12 @@ let determinise (a : automate_sans_eps) : automate_det =
 
   Vector.push a_det.pre_transitions (Array.make 128 (-1)); (* pour le début *)
   let fin  = IntSet.of_list (List.map (fun (a, b) -> a) a.fin) in 
-  (*let fin = lin_v2 () lin_tbl delin_tbl in
-  a_det.nodes <- fin::a_det.nodes;
-  Vector.push a_det.transitions_ (Array.make 128 (-1)); (* pour la fin *)*)
 
-  (* l est un set des sommets dont il faut trouver les sommets et les place en fonction de leur étiquette de transition dans arr *)
+  (** trouve les successeurs de tous les sommets de [l] et on les stocke dans [arr] *)
   let rec trouver_suivants (l : IntSet.t) (arr: int array) : unit =
     let len = Array.length arr in
 
-    (* on rassemble les éléments accessibles depuis tous les sommets de l*)
+    (* on rassemble les éléments accessibles depuis tous les sommets de l *)
     let storage = Array.make len IntSet.empty in
     IntSet.iter (fun x -> List.iter (fun (c, e) -> storage.(int_of_char c) <- IntSet.add e storage.(int_of_char c)) a.transitions_sans_eps.(x)) l;
     
@@ -324,28 +343,28 @@ let determinise (a : automate_sans_eps) : automate_det =
     done;
   in
 
-  (* teste si le sommet elem linéarisé contient des éléments finaux et l'ajoute aux finaux si c'est le cas *)
+  (** teste si le sommet [elem] linéarisé contient des éléments finaux et l'ajoute aux finaux si c'est le cas *)
   let ajouter_fin (elem : int) : unit =
-    
     let res = remove_duplicates (List.map (fun e -> List.assoc e a.fin) (IntSet.to_list (IntSet.inter fin (delin elem delin_tbl)))) in
       match res with
       | [] -> ()
       | [e] -> a_det.fin.(elem) <- Some e
       | [e1; e2] ->
-        (* L'un des deux est une variable, elle peut être vue autrement donc elle est ignorée *)
+        (* L'un des deux est un safe_token, elle peut être vue autrement donc elle est ignorée *)
         if e1 = safe_token then
           a_det.fin.(elem) <- Some e2
         else
           if e2 = safe_token then
             a_det.fin.(elem) <- Some e1
           else
-            (print_char '"'; print_string (repr_of_terminal e1); print_string "\" \""; print_string (repr_of_terminal e2); print_char '"'; print_newline();
-            failwith "A syntax can't have more than one output" (* il a plus d'un élément final *))
+            (print_char '"'; print_string (repr_of_terminal e1); print_string "\" \""; print_string (repr_of_terminal e2); print_char '"'; print_string "on un état final commun"; print_newline();
+            failwith "" (* il a plus d'un élément final *))
       | _ -> failwith "A syntax can't have more than one output"
   in
 
   let finished = ref false in
   let seen = ref IntSet.empty in 
+  (* on construit l'automate déterministe *)
   while not !finished do
     match !todo with
     | [] -> finished := true
@@ -385,11 +404,12 @@ let determinise (a : automate_sans_eps) : automate_det =
     transitions = Vector.to_array a_det.pre_transitions
   }
 
-
+(** effectue le delta 1 sur l'automate [a] à partir de [node] avec l'étiquette [c] *)
 let exec_char (a : automate_det) (node : int) (c : char) : int =
   a.transitions.(node).(int_of_char c)
 
 
+(** effectue le delta étoile sur l'automate [a] avec le texte [texte] *)
 let execution_mot (a : automate_det) (texte : char list) : int * char list * char list =
   let node = ref a.debut in
   let last_found = ref (-1) in
@@ -397,37 +417,44 @@ let execution_mot (a : automate_det) (texte : char list) : int * char list * cha
   let texte = ref texte in
   let text_read = ref [] in
   let last_read = ref [] in
+
+  (* tant que l'on est pas dans le puit *)
   while !node != -1 do
     match !texte with
     | [] -> node := -1 (* forcer la fin de la boucle *)
     | c::q ->
       begin
+        (* on effectue le delta 1 *)
         text_read := c::!text_read;
         node := exec_char a !node c;
         texte := q;
-        if !node = -1 then () else 
-        match a.fin.(!node) with
-        | None -> ()
-        | Some t ->
-          last_found := !node;
-          text_as_last := !texte;
-          last_read := !text_read
-      end;
+        (* on note si on passe par un état final*)
+        if !node = -1 then ()
+        else
+          ((match a.fin.(!node) with
+          | None -> ()
+          | Some t -> 
+            last_found := !node;
+            text_as_last := !texte);
+          last_read := !text_read)
+      end
   done;
+  (* on renvoie le dernier état final trouvé*)
   !last_found, !text_as_last, !last_read
 
-
+(** exécute l'automate [a] en boucle sur le texte [txt] pour créer une liste de léxèmes *)
 let exec (a : automate_det) (txt : string) : (symbol * string) list =
+  (** éxecute l'automate [a] en boucl sur le texte [texte] et concatène le résultat dans [out] *)
   let rec exec_aux (a : automate_det) (texte : char list) (out : (terminal * string) list) : (terminal * string) list =
     match texte with
     | [] -> List.rev out
     | _ -> 
       match execution_mot a texte with
-      | (-1, _, s) -> print_string "Le lexème '"; print_string (String.of_seq(List.to_seq (List.rev s))); print_string "' n'est pas un lexème reconnu\n"; failwith ""
+      | (-1, _, s) -> print_string "Le lexème '"; print_string (String.of_seq(List.to_seq (List.rev s))); print_string "' n'est pas un lexème reconnu1\n"; failwith ""
       | (x, q, s) ->
         let s = (String.of_seq(List.to_seq (List.rev s))) in 
         match a.fin.(x) with
-        | None -> print_string "Le lexème '"; print_string s; print_string "' n'est pas un lexème reconnu\n"; failwith ""
+        | None -> print_string "Le lexème '"; print_string s; print_string "' n'est pas un lexème reconnu2\n"; failwith ""
         | Some t -> exec_aux a q ((t, s)::out) 
   in
   let res = exec_aux a (List.of_seq (String.to_seq txt)) [] in
@@ -435,6 +462,6 @@ let exec (a : automate_det) (txt : string) : (symbol * string) list =
   List.iter (fun x -> Hashtbl.add tbl x ()) unparsed_tokens;
   List.map (fun (t,s) -> Terminal t, s) (List.filter (fun (x, _) -> not (Hashtbl.mem tbl x)) res)
 
-
+(** exécute l'automate [a] sur le fichier [f_name] *)
 let exec_of_file (a: automate_det) (f_name:string): (symbol*string) list = 
   exec a (List.fold_left (fun acc line -> acc ^ line ^ "\n" ) "" (read_file f_name))

@@ -435,4 +435,5 @@ type token =
   | ProgramRoot
   | ToFlatten
 
-type ast = Noeud of token * (ast list) (* parameters then inner in the same list *)
+(* paramètres et enfants confondus dans la liste *)
+type ast = Noeud of token * (ast list) 
