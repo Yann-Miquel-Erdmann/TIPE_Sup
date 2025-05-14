@@ -1,6 +1,6 @@
 open Grammar_functions
 open Symbols
-let g = { start_symbol = NonTerminal ExecutableProgram;
+let grammar = { start_symbol = NonTerminal ExecutableProgram;
 rules_htbl = Hashtbl.of_seq (List.to_seq [(NonTerminal ExecutableProgram,[[NonTerminal ProgramUnit;];[NonTerminal StartCommentBlock;NonTerminal ProgramUnit;];]);
 (NonTerminal StartCommentBlock,[[Terminal EOS;];]);
 (NonTerminal ProgramUnit,[[NonTerminal MainProgram;];]);
@@ -23,7 +23,7 @@ rules_htbl = Hashtbl.of_seq (List.to_seq [(NonTerminal ExecutableProgram,[[NonTe
 (NonTerminal CharLength,[[Terminal LParenthesis;NonTerminal TypeParamValue;Terminal RParenthesis;];[NonTerminal ScalarIntLiteralConstant;];]);
 (NonTerminal TypeParamValue,[[NonTerminal Expr_Or_Asterisk;];]);
 (NonTerminal Expr_Or_Asterisk,[[NonTerminal Expr;];[Terminal Asterisk;];]);
-(NonTerminal TypeSpec,[[Terminal Integer;NonTerminal KindSelector_opt;];[Terminal Double;];[Terminal Complex;NonTerminal KindSelector_opt;];[Terminal Logical;NonTerminal KindSelector_opt;];]);
+(NonTerminal TypeSpec,[[Terminal Integer;NonTerminal KindSelector_opt;];[Terminal Double;];[Terminal Complex;NonTerminal KindSelector_opt;];[Terminal Logical;NonTerminal KindSelector_opt;];[Terminal Real;NonTerminal KindSelector_opt;];]);
 (NonTerminal KindSelector_opt,[[Terminal LParenthesis;NonTerminal Expr;Terminal RParenthesis;];[Terminal E;];]);
 (NonTerminal ExecutableConstruct,[[NonTerminal ActionStmt;];[NonTerminal DoConstruct;];[NonTerminal IfConstruct;];]);
 (NonTerminal ActionStmt,[[NonTerminal AssignmentStmt;];[NonTerminal PrintStmt;];]);
@@ -73,7 +73,7 @@ rules_htbl = Hashtbl.of_seq (List.to_seq [(NonTerminal ExecutableProgram,[[NonTe
 (NonTerminal MultOperand,[[NonTerminal Level1Expr;NonTerminal PowerOp_Level1Expr_star;];]);
 (NonTerminal PowerOp_Level1Expr_star,[[Terminal PowerOp;NonTerminal Level1Expr;NonTerminal PowerOp_Level1Expr_star;];[Terminal E;];]);
 (NonTerminal Level1Expr,[[NonTerminal Primary;];]);
-(NonTerminal Primary,[[Terminal Icon;];[Terminal Rcon;];[NonTerminal Name;];[NonTerminal Scon;];[NonTerminal LogicalConstant;];]);
+(NonTerminal Primary,[[Terminal Icon;];[Terminal Rcon;];[NonTerminal Name;];[NonTerminal Scon;];[NonTerminal LogicalConstant;];[Terminal LParenthesis;NonTerminal Expr;Terminal RParenthesis;];]);
 (NonTerminal Name,[[Terminal Ident;];]);
 (NonTerminal ArrayName,[[Terminal Ident;];]);
 (NonTerminal ComponentName,[[Terminal Ident;];]);

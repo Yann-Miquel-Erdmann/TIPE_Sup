@@ -72,14 +72,16 @@ let rec convert_ast (ast: ast list) (env: environnement_v2) (nb_tab: int) : stri
 
   | Noeud(Commentaire c, [])::q ->tabs_to_string nb_tab ^ "//"^c ^ convert_ast q env nb_tab
   
-  | Noeud(Syntax Print, l2)::q ->tabs_to_string nb_tab ^ "printf(\""^generate_format_string l2 env^"\", " ^ convert_ast l2 env nb_tab ^ ");" ^convert_ast q env nb_tab
+  | Noeud(Syntax Print, l2)::q ->tabs_to_string nb_tab ^ "printf(\""^generate_format_string l2 env ^ "\"" ^ List.fold_left (fun acc x -> acc ^ ", " ^ convert_ast [x] env nb_tab) "" l2 ^ ");" ^convert_ast q env nb_tab
 
   (* définit le type des variables *)
-  | Noeud (Syntax Real, l)::q    -> tabs_to_string nb_tab ^ "float " ^ convert_ast l env 0 ^ ";" ^ convert_ast q env nb_tab
-  | Noeud (Syntax Integer, l)::q -> tabs_to_string nb_tab ^ "int "   ^ convert_ast l env 0 ^ ";" ^ convert_ast q env nb_tab
-  | Noeud (Syntax Logical, l)::q -> tabs_to_string nb_tab ^ "bool "  ^ convert_ast l env 0 ^ ";" ^ convert_ast q env nb_tab
+  | Noeud (Syntax Real, l)::q             -> let s = convert_ast l env 0 in let s = if String.ends_with s ~suffix:";" then s else s^";" in tabs_to_string nb_tab ^ "float " ^ s ^ convert_ast q env nb_tab
+  | Noeud (Syntax Integer, l)::q          -> let s = convert_ast l env 0 in let s = if String.ends_with s ~suffix:";" then s else s^";" in tabs_to_string nb_tab ^ "int "   ^ s ^ convert_ast q env nb_tab
+  | Noeud (Syntax Logical, l)::q          -> let s = convert_ast l env 0 in let s = if String.ends_with s ~suffix:";" then s else s^";" in tabs_to_string nb_tab ^ "bool "  ^ s ^ convert_ast q env nb_tab
+  | Noeud (Syntax Double_precision, l)::q -> let s = convert_ast l env 0 in let s = if String.ends_with s ~suffix:";" then s else s^";" in tabs_to_string nb_tab ^ "long "  ^ s ^ convert_ast q env nb_tab
 
-  | Noeud (Operateur Assignation, (Noeud (Name s, []))::l)::q -> tabs_to_string nb_tab ^ s ^ " = " ^ convert_ast l env 0 ^ convert_ast q env nb_tab
+
+  | Noeud (Operateur Assignation, (Noeud (Name s, []))::l)::q -> tabs_to_string nb_tab ^ s ^ " = " ^ convert_ast l env 0 ^ ";" ^ convert_ast q env nb_tab
   | Noeud (Name s, [])::q -> s ^ convert_ast q env nb_tab
   
   | Noeud (Operateur Plus, elem::l)::q     -> convert_ast [elem] env nb_tab ^ " + " ^ convert_ast l env nb_tab ^ convert_ast q env nb_tab
