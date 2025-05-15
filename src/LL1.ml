@@ -211,12 +211,13 @@ let analyse_LL1_of_symbol (g : grammar) (text : (symbol * string) list)
                   SymbolSet.mem (Terminal E) (first_of_pattern first_sshtbl p))
                 (Hashtbl.find g.rules_htbl s)
             in
-            if l = [] then
-              failwith
-                ("expected "
+            if l = [] then(
+              print_string ("on "^string_of_symbol s ^", expected "
                 ^ string_of_symbol (Terminal E)
-                ^ " in first of patterns")
-            else ();
+                ^ " in first of patterns but first of patters is\n");
+              print_SymbolSet (Hashtbl.find first_sshtbl s);
+              failwith "error 1"
+            )else ();
             analyse_LL1_of_pattern text s (List.nth l 0))
           else failwith "text is epsilon but more symbols are expected"
       | _ ->
@@ -234,12 +235,14 @@ let analyse_LL1_of_symbol (g : grammar) (text : (symbol * string) list)
                   SymbolSet.mem (Terminal E) (first_of_pattern first_sshtbl p))
                 (Hashtbl.find g.rules_htbl s)
             in
-            if l = [] then
-              failwith
-                ("expected "
+            if l = [] then(
+              print_string ("on "^string_of_symbol s ^", expected "
                 ^ string_of_symbol (Terminal E)
-                ^ " in first of patterns")
-            else ();
+                ^ " in first of patterns but first of patters is\n");
+              print_SymbolSet (Hashtbl.find first_sshtbl s);
+              failwith "error 2"
+  
+            )else ();
             analyse_LL1_of_pattern text s (List.nth l 0))
           else
             (* print_endline "cas 2";
@@ -253,12 +256,14 @@ let analyse_LL1_of_symbol (g : grammar) (text : (symbol * string) list)
                     (first_of_pattern first_sshtbl p))
                 (Hashtbl.find g.rules_htbl s)
             in
-            if l = [] then
-              failwith
-                ("expected "
+            if l = [] then(
+            
+              print_string ("on "^string_of_symbol s ^", expected "
                 ^ string_of_symbol (fst (List.nth text 0))
-                ^ " in first of patterns")
-            else ();
+                ^ " in first of patterns but first of patters is\n");
+              print_SymbolSet (Hashtbl.find first_sshtbl s);
+              failwith "error 3"
+            )else ();
             analyse_LL1_of_pattern text s (List.nth l 0)
   in
   analyse_LL1_of_symbol_aux text s
