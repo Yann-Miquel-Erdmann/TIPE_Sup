@@ -70,125 +70,159 @@ let add_semi_colon (s : string) : string =
 
 (** convertis l'arbre de syntaxe abstrait [ast] à l'aide de l'environnement
     [env] et l'indente de [n_tab] *)
-let rec convert_ast (ast : ast list) (env : environnement_v2) (nb_tab : int) :
-    string =
+let rec convert_ast_to_C (ast : ast list) (env : environnement_v2)
+    (nb_tab : int) : string =
   match ast with
   | [] -> ""
-  | [ Noeud (ProgramRoot, l) ] -> convert_ast l env nb_tab
+  | [ Noeud (ProgramRoot, l) ] -> convert_ast_to_C l env nb_tab
   | Noeud (Syntax Program, Noeud (Name nom, []) :: l1) :: q ->
       tabs_to_string nb_tab ^ "// " ^ nom ^ "\n" ^ tabs_to_string nb_tab
       ^ "void main(void){"
-      ^ convert_ast l1 env (nb_tab + 1)
+      ^ convert_ast_to_C l1 env (nb_tab + 1)
       ^ "}"
   | Noeud (Commentaire c, []) :: q ->
-      tabs_to_string nb_tab ^ "//" ^ c ^ convert_ast q env nb_tab
+      tabs_to_string nb_tab ^ "//" ^ c ^ convert_ast_to_C q env nb_tab
   | Noeud (Syntax Print, l2) :: q ->
       tabs_to_string nb_tab ^ "printf(\""
       ^ generate_format_string l2 env
       ^ "\""
       ^ List.fold_left
-          (fun acc x -> acc ^ ", " ^ convert_ast [ x ] env nb_tab)
+          (fun acc x -> acc ^ ", " ^ convert_ast_to_C [ x ] env nb_tab)
           "" l2
-      ^ ");" ^ convert_ast q env nb_tab
+      ^ ");"
+      ^ convert_ast_to_C q env nb_tab
   (* définit le type des variables *)
   | Noeud (Syntax Real, l) :: q ->
-      let s = convert_ast l env 0 in
+      let s = convert_ast_to_C l env 0 in
       let s = add_semi_colon s in
-      tabs_to_string nb_tab ^ "float " ^ s ^ convert_ast q env nb_tab
+      tabs_to_string nb_tab ^ "float " ^ s ^ convert_ast_to_C q env nb_tab
   | Noeud (Syntax Integer, l) :: q ->
-      let s = convert_ast l env 0 in
+      let s = convert_ast_to_C l env 0 in
       let s = add_semi_colon s in
-      tabs_to_string nb_tab ^ "int " ^ s ^ convert_ast q env nb_tab
+      tabs_to_string nb_tab ^ "int " ^ s ^ convert_ast_to_C q env nb_tab
   | Noeud (Syntax Logical, l) :: q ->
-      let s = convert_ast l env 0 in
+      let s = convert_ast_to_C l env 0 in
       let s = add_semi_colon s in
-      tabs_to_string nb_tab ^ "bool " ^ s ^ convert_ast q env nb_tab
+      tabs_to_string nb_tab ^ "bool " ^ s ^ convert_ast_to_C q env nb_tab
   | Noeud (Syntax Double_precision, l) :: q ->
-      let s = convert_ast l env 0 in
+      let s = convert_ast_to_C l env 0 in
       let s = add_semi_colon s in
-      tabs_to_string nb_tab ^ "long " ^ s ^ convert_ast q env nb_tab
+      tabs_to_string nb_tab ^ "long " ^ s ^ convert_ast_to_C q env nb_tab
   | Noeud (Syntax Character, Noeud (Syntax Constant, []) :: l) :: q ->
-      let s = convert_ast l env 0 in
+      let s = convert_ast_to_C l env 0 in
       let s = add_semi_colon s in
-      tabs_to_string nb_tab ^ "const char " ^ s ^ convert_ast q env nb_tab
+      tabs_to_string nb_tab ^ "const char " ^ s ^ convert_ast_to_C q env nb_tab
   | Noeud (Syntax Character, l) :: q ->
-      let s = convert_ast l env 0 in
+      let s = convert_ast_to_C l env 0 in
       let s = add_semi_colon s in
-      tabs_to_string nb_tab ^ "char " ^ s ^ convert_ast q env nb_tab
+      tabs_to_string nb_tab ^ "char " ^ s ^ convert_ast_to_C q env nb_tab
   | Noeud (Operateur Assignation, Noeud (Name s, []) :: l) :: q ->
-      tabs_to_string nb_tab ^ s ^ " = " ^ convert_ast l env 0 ^ ";"
-      ^ convert_ast q env nb_tab
+      tabs_to_string nb_tab ^ s ^ " = " ^ convert_ast_to_C l env 0 ^ ";"
+      ^ convert_ast_to_C q env nb_tab
   | Noeud (Syntax Size, l) :: q ->
-      tabs_to_string nb_tab ^ "[" ^ convert_ast l env 0 ^ "] "
-      ^ convert_ast q env nb_tab
+      tabs_to_string nb_tab ^ "[" ^ convert_ast_to_C l env 0 ^ "] "
+      ^ convert_ast_to_C q env nb_tab
   | Noeud (Operateur Assignation, Noeud (Syntax Size, l1) :: l) :: q ->
       tabs_to_string nb_tab
-      ^ convert_ast [ Noeud (Syntax Size, l1) ] env 0
-      ^ convert_ast (Noeud (Operateur Assignation, l) :: q) env nb_tab
-  | Noeud (Syntax Any, []) :: q -> convert_ast q env 0
-  | Noeud (Name s, []) :: q -> s ^ convert_ast q env nb_tab
+      ^ convert_ast_to_C [ Noeud (Syntax Size, l1) ] env 0
+      ^ convert_ast_to_C (Noeud (Operateur Assignation, l) :: q) env nb_tab
+  | Noeud (Syntax Any, []) :: q -> convert_ast_to_C q env 0
+  | Noeud (Name s, []) :: q -> s ^ convert_ast_to_C q env nb_tab
   | Noeud (Operateur Plus, elem :: l) :: q ->
-      convert_ast [ elem ] env nb_tab
-      ^ " + " ^ convert_ast l env nb_tab ^ convert_ast q env nb_tab
+      convert_ast_to_C [ elem ] env nb_tab
+      ^ " + "
+      ^ convert_ast_to_C l env nb_tab
+      ^ convert_ast_to_C q env nb_tab
   | Noeud (Operateur Moins, elem :: l) :: q ->
-      convert_ast [ elem ] env nb_tab
-      ^ " - " ^ convert_ast l env nb_tab ^ convert_ast q env nb_tab
+      convert_ast_to_C [ elem ] env nb_tab
+      ^ " - "
+      ^ convert_ast_to_C l env nb_tab
+      ^ convert_ast_to_C q env nb_tab
   | Noeud (Operateur Fois, elem :: l) :: q ->
-      convert_ast [ elem ] env nb_tab
-      ^ " * " ^ convert_ast l env nb_tab ^ convert_ast q env nb_tab
+      convert_ast_to_C [ elem ] env nb_tab
+      ^ " * "
+      ^ convert_ast_to_C l env nb_tab
+      ^ convert_ast_to_C q env nb_tab
   | Noeud (Operateur Division, elem :: l) :: q ->
-      convert_ast [ elem ] env nb_tab
-      ^ " / " ^ convert_ast l env nb_tab ^ convert_ast q env nb_tab
-  | Noeud (Parentheseouvrante, []) :: q -> "(" ^ convert_ast q env nb_tab
-  | Noeud (Parenthesefermante, []) :: q -> ")" ^ convert_ast q env nb_tab
+      convert_ast_to_C [ elem ] env nb_tab
+      ^ " / "
+      ^ convert_ast_to_C l env nb_tab
+      ^ convert_ast_to_C q env nb_tab
+  | Noeud (Parentheseouvrante, []) :: q -> "(" ^ convert_ast_to_C q env nb_tab
+  | Noeud (Parenthesefermante, []) :: q -> ")" ^ convert_ast_to_C q env nb_tab
   | Noeud (OperateurLogique NonEquivalent, [ p1; p2 ]) :: q
   | Noeud (Comparateur NonEgal, [ p1; p2 ]) :: q ->
-      convert_ast [ p1 ] env 0 ^ " != " ^ convert_ast [ p2 ] env 0
-      ^ convert_ast q env nb_tab
+      convert_ast_to_C [ p1 ] env 0
+      ^ " != "
+      ^ convert_ast_to_C [ p2 ] env 0
+      ^ convert_ast_to_C q env nb_tab
   | Noeud (OperateurLogique Equivalent, [ p1; p2 ]) :: q
   | Noeud (Comparateur Egal, [ p1; p2 ]) :: q ->
-      convert_ast [ p1 ] env 0 ^ " == " ^ convert_ast [ p2 ] env 0
-      ^ convert_ast q env nb_tab
+      convert_ast_to_C [ p1 ] env 0
+      ^ " == "
+      ^ convert_ast_to_C [ p2 ] env 0
+      ^ convert_ast_to_C q env nb_tab
   | Noeud (Comparateur StrictPlusPetit, [ p1; p2 ]) :: q ->
-      convert_ast [ p1 ] env 0 ^ " < " ^ convert_ast [ p2 ] env 0
-      ^ convert_ast q env nb_tab
+      convert_ast_to_C [ p1 ] env 0
+      ^ " < "
+      ^ convert_ast_to_C [ p2 ] env 0
+      ^ convert_ast_to_C q env nb_tab
   | Noeud (Comparateur PlusPetit, [ p1; p2 ]) :: q ->
-      convert_ast [ p1 ] env 0 ^ " <= " ^ convert_ast [ p2 ] env 0
-      ^ convert_ast q env nb_tab
+      convert_ast_to_C [ p1 ] env 0
+      ^ " <= "
+      ^ convert_ast_to_C [ p2 ] env 0
+      ^ convert_ast_to_C q env nb_tab
   | Noeud (Comparateur StrictPlusGrand, [ p1; p2 ]) :: q ->
-      convert_ast [ p1 ] env 0 ^ " > " ^ convert_ast [ p2 ] env 0
-      ^ convert_ast q env nb_tab
+      convert_ast_to_C [ p1 ] env 0
+      ^ " > "
+      ^ convert_ast_to_C [ p2 ] env 0
+      ^ convert_ast_to_C q env nb_tab
   | Noeud (Comparateur PlusGrand, [ p1; p2 ]) :: q ->
-      convert_ast [ p1 ] env 0 ^ " >= " ^ convert_ast [ p2 ] env 0
-      ^ convert_ast q env nb_tab
+      convert_ast_to_C [ p1 ] env 0
+      ^ " >= "
+      ^ convert_ast_to_C [ p2 ] env 0
+      ^ convert_ast_to_C q env nb_tab
   | Noeud (OperateurLogique Et, [ p1; p2 ]) :: q ->
-      convert_ast [ p1 ] env 0 ^ " && " ^ convert_ast [ p2 ] env 0
-      ^ convert_ast q env nb_tab
+      convert_ast_to_C [ p1 ] env 0
+      ^ " && "
+      ^ convert_ast_to_C [ p2 ] env 0
+      ^ convert_ast_to_C q env nb_tab
   | Noeud (OperateurLogique Ou, [ p1; p2 ]) :: q ->
-      convert_ast [ p1 ] env 0 ^ " || " ^ convert_ast [ p2 ] env 0
-      ^ convert_ast q env nb_tab
+      convert_ast_to_C [ p1 ] env 0
+      ^ " || "
+      ^ convert_ast_to_C [ p2 ] env 0
+      ^ convert_ast_to_C q env nb_tab
   | Noeud (OperateurLogique Non, [ p1; p2 ]) :: q ->
-      convert_ast [ p1 ] env 0 ^ " ! " ^ convert_ast [ p2 ] env 0
-      ^ convert_ast q env nb_tab
+      convert_ast_to_C [ p1 ] env 0
+      ^ " ! "
+      ^ convert_ast_to_C [ p2 ] env 0
+      ^ convert_ast_to_C q env nb_tab
   | Noeud (Operateur Puissance, [ p1; p2 ]) :: q ->
-      "pow((long)" ^ convert_ast [ p1 ] env 0 ^ ", " ^ convert_ast [ p2 ] env 0
-      ^ "(long))" ^ convert_ast q env nb_tab
+      "pow((long)"
+      ^ convert_ast_to_C [ p1 ] env 0
+      ^ ", "
+      ^ convert_ast_to_C [ p2 ] env 0
+      ^ "(long))"
+      ^ convert_ast_to_C q env nb_tab
   | Noeud (Syntax If, condition :: instructions) :: q ->
       tabs_to_string nb_tab ^ "if ("
-      ^ convert_ast [ condition ] env nb_tab
+      ^ convert_ast_to_C [ condition ] env nb_tab
       ^ "){"
-      ^ convert_ast instructions env (nb_tab + 1)
-      ^ tabs_to_string nb_tab ^ "}" ^ convert_ast q env nb_tab
+      ^ convert_ast_to_C instructions env (nb_tab + 1)
+      ^ tabs_to_string nb_tab ^ "}"
+      ^ convert_ast_to_C q env nb_tab
   | Noeud (Syntax Else_if, condition :: instructions) :: q ->
       tabs_to_string nb_tab ^ "else if ("
-      ^ convert_ast [ condition ] env nb_tab
+      ^ convert_ast_to_C [ condition ] env nb_tab
       ^ "){"
-      ^ convert_ast instructions env (nb_tab + 1)
-      ^ tabs_to_string nb_tab ^ "}" ^ convert_ast q env nb_tab
+      ^ convert_ast_to_C instructions env (nb_tab + 1)
+      ^ tabs_to_string nb_tab ^ "}"
+      ^ convert_ast_to_C q env nb_tab
   | Noeud (Syntax Else, instructions) :: q ->
       tabs_to_string nb_tab ^ "else {"
-      ^ convert_ast instructions env (nb_tab + 1)
-      ^ tabs_to_string nb_tab ^ "}" ^ convert_ast q env nb_tab
+      ^ convert_ast_to_C instructions env (nb_tab + 1)
+      ^ tabs_to_string nb_tab ^ "}"
+      ^ convert_ast_to_C q env nb_tab
   | Noeud
       ( Syntax For,
         Noeud (Operateur Assignation, [ variable; valeur ])
@@ -197,44 +231,46 @@ let rec convert_ast (ast : ast list) (env : environnement_v2) (nb_tab : int) :
         :: instructions )
     :: q ->
       tabs_to_string nb_tab ^ "for ("
-      ^ convert_ast
+      ^ convert_ast_to_C
           [ Noeud (Operateur Assignation, [ variable; valeur ]) ]
           env 0
       ^ " "
-      ^ convert_ast
+      ^ convert_ast_to_C
           [ Noeud (Comparateur StrictPlusPetit, [ variable; fin ]) ]
           env 0
       ^ "; "
-      ^ convert_ast [ variable ] env 0
+      ^ convert_ast_to_C [ variable ] env 0
       ^ "="
-      ^ convert_ast [ Noeud (Operateur Plus, [ variable; pas ]) ] env 0
+      ^ convert_ast_to_C [ Noeud (Operateur Plus, [ variable; pas ]) ] env 0
       ^ ") {"
-      ^ convert_ast instructions env (nb_tab + 1)
-      ^ tabs_to_string nb_tab ^ "}" ^ convert_ast q env nb_tab
+      ^ convert_ast_to_C instructions env (nb_tab + 1)
+      ^ tabs_to_string nb_tab ^ "}"
+      ^ convert_ast_to_C q env nb_tab
   | Noeud (Syntax While, condition :: instructions) :: q ->
       tabs_to_string nb_tab ^ "while ("
-      ^ convert_ast [ condition ] env 0
+      ^ convert_ast_to_C [ condition ] env 0
       ^ "){"
-      ^ convert_ast instructions env (nb_tab + 1)
-      ^ tabs_to_string nb_tab ^ "}" ^ convert_ast q env nb_tab
-  | Noeud (Integer s, []) :: q -> s ^ convert_ast q env nb_tab
-  | Noeud (Floating s, []) :: q -> s ^ convert_ast q env nb_tab
+      ^ convert_ast_to_C instructions env (nb_tab + 1)
+      ^ tabs_to_string nb_tab ^ "}"
+      ^ convert_ast_to_C q env nb_tab
+  | Noeud (Integer s, []) :: q -> s ^ convert_ast_to_C q env nb_tab
+  | Noeud (Floating s, []) :: q -> s ^ convert_ast_to_C q env nb_tab
   | Noeud (Double s, []) :: q ->
       String.fold_left
         (fun acc x -> if x = 'd' then acc ^ "e" else acc ^ String.make 1 x)
         "" s
-      ^ convert_ast q env nb_tab (* convertit les d en e de fortran *)
+      ^ convert_ast_to_C q env nb_tab (* convertit les d en e de fortran *)
   | Noeud (Booleen b, []) :: q ->
-      (if b then "true" else "false") ^ convert_ast q env nb_tab
-  | Noeud (Chaine s, []) :: q -> s ^ convert_ast q env nb_tab
-  | Noeud (NewLine, []) :: q -> "\n" ^ convert_ast q env nb_tab
+      (if b then "true" else "false") ^ convert_ast_to_C q env nb_tab
+  | Noeud (Chaine s, []) :: q -> s ^ convert_ast_to_C q env nb_tab
+  | Noeud (NewLine, []) :: q -> "\n" ^ convert_ast_to_C q env nb_tab
   | _ -> failwith "La syntaxe donnée n'est pas encore prise en charge\n"
 
 (** convertis l'arbre de syntaxe abstrait [ast] et ajoute les librairies
     nécessaires depuis [biblios] grace à [env] *)
 let convert (ast : ast list) (env : environnement_v2)
     (biblios : Bibliotheques.libs) : string =
-  generate_library_imports biblios ^ convert_ast ast env 0
+  generate_library_imports biblios ^ convert_ast_to_C ast env 0
 
 (*
 <--------------done---------------> 
