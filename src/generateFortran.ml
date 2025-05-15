@@ -5,7 +5,7 @@ open Convert_to_abstract
 open LL1
 
 let rec tabs_to_string (n : int) : string =
-  if n > 0 then "\t" ^ tabs_to_string (n - 1) else ""
+  if n > 0 then "    " ^ tabs_to_string (n - 1) else ""
 
 let rec n_new_lines (n : int) : string =
   if n > 0 then "\n" ^ tabs_to_string (n - 1) else ""
