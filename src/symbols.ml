@@ -30,6 +30,7 @@ type terminal =
   | Complex
   | Character
   | Logical
+  | Parameter
   | Call
   | Print
   | Do
@@ -64,6 +65,8 @@ type non_terminal =
   | SpecificationPartConstruct
   | DeclarationConstruct
   | TypeDeclarationStmt
+  | Comma_AttrSpec_star
+  | AttrSpec
   | TypeDecl_Assignment
   | Comma_ObjectName_star
   | Comma_EntityDecl_star
@@ -181,6 +184,7 @@ let repr_of_terminal (t : terminal) : string =
   | Complex -> "complex"
   | Character -> "character"
   | Logical -> "logical"
+  | Parameter -> "parameter"
   | Call -> "call"
   | Print -> "print"
   | Do -> "do"
@@ -234,6 +238,7 @@ let string_of_terminal (t : terminal) : string =
 	| Complex -> "Complex"
 	| Character -> "Character"
 	| Logical -> "Logical"
+	| Parameter -> "Parameter"
 	| Call -> "Call"
 	| Print -> "Print"
 	| Do -> "Do"
@@ -269,6 +274,8 @@ let string_of_non_terminal (nt : non_terminal) : string =
   | SpecificationPartConstruct -> "SpecificationPartConstruct"
   | DeclarationConstruct -> "DeclarationConstruct"
   | TypeDeclarationStmt -> "TypeDeclarationStmt"
+  | Comma_AttrSpec_star -> "Comma_AttrSpec_star"
+  | AttrSpec -> "AttrSpec"
   | TypeDecl_Assignment -> "TypeDecl_Assignment"
   | Comma_ObjectName_star -> "Comma_ObjectName_star"
   | Comma_EntityDecl_star -> "Comma_EntityDecl_star"

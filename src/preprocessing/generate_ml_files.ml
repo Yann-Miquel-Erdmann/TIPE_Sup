@@ -3,34 +3,49 @@ open Generate_grammar
 let repr_of_terminal ((_, p) : rule) : string = List.nth (List.nth p 0) 0
 
 (** enlève les guillemets simples de l'expresion terminale [r] *)
-let printable_repr_of_terminal (r: rule): string = 
+let printable_repr_of_terminal (r : rule) : string =
   let s = repr_of_terminal r in
-  if s.[0] = '\'' then
-    String.sub s 1 ((String.length s) - 2)
-  else 
-    String.sub s 2 ((String.length s) - 3)
+  if s.[0] = '\'' then String.sub s 1 (String.length s - 2)
+  else String.sub s 2 (String.length s - 3)
 
 (* array qui permet de convertir rapidement une lettre en la disjonction entre la minnuscule et la majuscule *)
-let case_arr = Array.init 26 (fun i -> "("^(String.make 1 (char_of_int (97+i)))^"|"^(String.make 1 (char_of_int (65+i)))^")")
+let case_arr =
+  Array.init 26 (fun i ->
+      "("
+      ^ String.make 1 (char_of_int (97 + i))
+      ^ "|"
+      ^ String.make 1 (char_of_int (65 + i))
+      ^ ")")
 
 (** convertit la chaîne [s] en une liste de caractères *)
-let char_list_of_string (s : string) : char list =
-  List.of_seq(String.to_seq s)
+let char_list_of_string (s : string) : char list = List.of_seq (String.to_seq s)
 
-(** récupère le symbole safe de la liste de règles [term], le seul qui peut être remplacé par un autre *)
-let get_safe_symbol (term: rule list): string =
-  fst (List.nth (List.filter (fun (r : rule) -> (repr_of_terminal (r)).[0] = 's') term) 0)
+(** récupère le symbole safe de la liste de règles [term], le seul qui peut être
+    remplacé par un autre *)
+let get_safe_symbol (term : rule list) : string =
+  fst
+    (List.nth
+       (List.filter (fun (r : rule) -> (repr_of_terminal r).[0] = 's') term)
+       0)
 
 (** récupère la liste des symboles non donnés à LL1 dans la liste [term] *)
-let get_unparsed_symbol (term: rule list): string list =
-  List.map fst (List.filter (fun (r : rule) -> (repr_of_terminal (r)).[0] = '_') term)
+let get_unparsed_symbol (term : rule list) : string list =
+  List.map fst
+    (List.filter (fun (r : rule) -> (repr_of_terminal r).[0] = '_') term)
 
-(** transforme la chaîne [s] pour ne plus être sensible à la casse lorsque transformée en expression régulière *)
-let make_non_case_sentive (s :string) : string =
-  List.fold_left (fun acc x -> if alphanumerical_min x then acc^case_arr.(int_of_char x - 97) else acc^(String.make 1 x)) "" (char_list_of_string s)
+(** transforme la chaîne [s] pour ne plus être sensible à la casse lorsque
+    transformée en expression régulière *)
+let make_non_case_sentive (s : string) : string =
+  List.fold_left
+    (fun acc x ->
+      if alphanumerical_min x then acc ^ case_arr.(int_of_char x - 97)
+      else acc ^ String.make 1 x)
+    "" (char_list_of_string s)
 
-(** crée le fichier [f_name] qui va créer l'automate pour une utilisation ultérieure dans [writing_file_name] à partir de la grammaire [g] *)
-let generate_file_lexer (g: grammar) (f_name: string) (writing_file_name : string): unit = 
+(** crée le fichier [f_name] qui va créer l'automate pour une utilisation
+    ultérieure dans [writing_file_name] à partir de la grammaire [g] *)
+let generate_file_lexer (g : grammar) (f_name : string)
+    (writing_file_name : string) : unit =
   let file = open_out f_name in
   let t = terminals g in
   print_endline ("Generating the " ^ f_name ^ " file...");
@@ -82,10 +97,13 @@ let generate_file_lexer (g: grammar) (f_name: string) (writing_file_name : strin
   flush file;
   close_out file
 
-(** crée le fichier [f_name] qui va contenir l'ensemble des terminaux et non terminaux de la grammaire [g] *)
-let generate_file_symbols (g: grammar) (f_name: string): unit =  
-
-  let t = ("EOF", [["'End of file'"]])::("E", [["'Epsilon'"]]):: (terminals g) in
+(** crée le fichier [f_name] qui va contenir l'ensemble des terminaux et non
+    terminaux de la grammaire [g] *)
+let generate_file_symbols (g : grammar) (f_name : string) : unit =
+  let t =
+    ("EOF", [ [ "'End of file'" ] ])
+    :: ("E", [ [ "'Epsilon'" ] ]) :: terminals g
+  in
   let nt = non_terminals g in
 
   print_endline ("Generating the " ^ f_name ^ " file...");
@@ -93,14 +111,19 @@ let generate_file_symbols (g: grammar) (f_name: string): unit =
 
   (* ajout des terminaux *)
   output_string output_file "type terminal =\n";
-  List.iter (fun (symbol, _) -> output_string output_file ("  | "^symbol^"\n")) t;
+  List.iter
+    (fun (symbol, _) -> output_string output_file ("  | " ^ symbol ^ "\n"))
+    t;
   (* ajout des non terminaux*)
   output_string output_file "\ntype non_terminal =\n";
-  List.iter (fun (symbol, _) -> output_string output_file ("  | "^symbol^"\n")) nt;
+  List.iter
+    (fun (symbol, _) -> output_string output_file ("  | " ^ symbol ^ "\n"))
+    nt;
 
-  output_string output_file ("type symbol = | Terminal of terminal | NonTerminal of non_terminal");
+  output_string output_file
+    "type symbol = | Terminal of terminal | NonTerminal of non_terminal";
   (* ajoute le symbole safe *)
-  output_string output_file ("\nlet safe_token = "^get_safe_symbol t^"\n");
+  output_string output_file ("\nlet safe_token = " ^ get_safe_symbol t ^ "\n");
   (* ajoute les tokens non utilisés par LL1 *)
   output_string output_file "let unparsed_tokens = [";
   List.iter
@@ -110,18 +133,34 @@ let generate_file_symbols (g: grammar) (f_name: string): unit =
 
   (* Fonctions utiles :*)
   (* représentation en expression régulière des terminaux *)
-  output_string output_file "let repr_of_terminal (t : terminal) : string =\n  match t with\n";
-  List.iter (fun (s, p) -> output_string output_file ("  | "^s^" -> \""^(String.escaped (printable_repr_of_terminal (s, p)))^"\"\n")) t;
+  output_string output_file
+    "let repr_of_terminal (t : terminal) : string =\n  match t with\n";
+  List.iter
+    (fun (s, p) ->
+      output_string output_file
+        ("  | " ^ s ^ " -> \""
+        ^ String.escaped (printable_repr_of_terminal (s, p))
+        ^ "\"\n"))
+    t;
   output_string output_file "\n";
 
   (* représentation en chaîne des terminaux *)
-  output_string output_file "let string_of_terminal (t : terminal) : string =\n\tmatch t with\n";
-  List.iter (fun (s, _) -> output_string output_file ("\t| "^s^" -> \""^s^"\"\n")) t;
+  output_string output_file
+    "let string_of_terminal (t : terminal) : string =\n\tmatch t with\n";
+  List.iter
+    (fun (s, _) ->
+      output_string output_file ("\t| " ^ s ^ " -> \"" ^ s ^ "\"\n"))
+    t;
   output_string output_file "\n";
 
   (* représentation en chaîne des non terminaux *)
-  output_string output_file "let string_of_non_terminal (nt : non_terminal) : string =\n  match nt with\n";
-  List.iter (fun (s, _) -> output_string output_file ("  | "^s^" -> \""^s^"\"\n")) nt;
+  output_string output_file
+    "let string_of_non_terminal (nt : non_terminal) : string =\n\
+    \  match nt with\n";
+  List.iter
+    (fun (s, _) ->
+      output_string output_file ("  | " ^ s ^ " -> \"" ^ s ^ "\"\n"))
+    nt;
 
   flush output_file;
   close_out output_file

@@ -20,7 +20,11 @@ BodyConstruct -> SpecificationPartConstruct | ExecutableConstruct
 SpecificationPartConstruct -> DeclarationConstruct
 DeclarationConstruct -> TypeDeclarationStmt
 
-TypeDeclarationStmt -> TypeSpec TypeDecl_Assignment EOS
+TypeDeclarationStmt -> TypeSpec Comma_AttrSpec_star TypeDecl_Assignment EOS
+
+Comma_AttrSpec_star -> Comma AttrSpec Comma_AttrSpec_star | E
+
+AttrSpec -> Parameter
 
 TypeDecl_Assignment -> Colon Colon EntityDecl Comma_EntityDecl_star | ObjectName Comma_ObjectName_star
 
@@ -38,7 +42,7 @@ CharLength -> LParenthesis TypeParamValue RParenthesis | ScalarIntLiteralConstan
 TypeParamValue -> Expr_Or_Asterisk
 Expr_Or_Asterisk -> Expr | Asterisk
 
-TypeSpec -> Integer KindSelector_opt | Double | Complex KindSelector_opt | Logical KindSelector_opt | Real KindSelector_opt
+TypeSpec -> Integer KindSelector_opt | Double | Complex KindSelector_opt | Logical KindSelector_opt | Real KindSelector_opt | Character
 
 
 KindSelector_opt -> LParenthesis Expr RParenthesis | E
@@ -180,6 +184,7 @@ Double -> 'double precision'
 Complex -> 'complex'
 Character -> 'character'
 Logical -> 'logical'
+Parameter -> 'parameter'
 Call -> 'call'
 Print -> 'print'
 Do -> 'do'

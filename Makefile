@@ -34,7 +34,7 @@ FORTRAN_TEST_FILES = $(notdir  $(wildcard $(FORTRAN_TEST_DIR)/*.f90))
 C_OUTPUT_FILES = $(addprefix $(C_OUTPUT_DIR)/, $(patsubst %.f90, %.c, $(FORTRAN_TEST_FILES)))
 C_TEST_FILES = $(addprefix $(C_TEST_DIR)/, $(patsubst %.f90, %.c, $(FORTRAN_TEST_FILES)))
 
-FORMAT_BLACKLIST = $(SRC_DIR)/grammar.ml $(SRC_DIR)/symbols.ml $(SRC_DIR)/det_automaton.ml 
+FORMAT_BLACKLIST = $(SRC_DIR)/grammar.ml $(SRC_DIR)/symbols.ml $(SRC_DIR)/det_automaton.ml
 FORMAT_LIST = $(filter-out $(FORMAT_BLACKLIST), $(ML_FILES))
 
 
