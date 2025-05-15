@@ -96,24 +96,17 @@
 ~~EquivOp -> ...~~
 ~~ScalarIntLiteralConstant -> ...~~
 ~~Scon -> ...~~
-~~Rcon -> Floating _~~
-~~Icon -> Integer _~~
-~~SconSingle -> Chaine _~~
-~~SconDouble -> Chaine _~~
-~~Ident -> Name _~~
+~~Rcon -> Floating \_~~
+~~Icon -> Integer \_~~
+~~SconSingle -> Chaine \_~~
+~~SconDouble -> Chaine \_~~
+~~Ident -> Name \_~~
 ~~True -> DataType Boolean true~~
 ~~False -> DataType Boolean false~~
 
-~~((EOS -> (Commentaire _ / Newline) => later)~~
-
-
-
-
-
-
+~~((Eos -> (Commentaire \_ / Newline) => later)~~
 
 => after here is not relevant
-
 
 ~~Program -> Syntax Program~~
 ~~EndProgram -> Syntax End_program~~

@@ -10,7 +10,7 @@ type terminal =
   | SconSingle
   | SconDouble
   | Ident
-  | EOS
+  | Eos
   | True
   | False
   | Program
@@ -58,14 +58,13 @@ type terminal =
 type non_terminal =
   | ExecutableProgram
   | StartCommentBlock
-  | ProgramUnit
+  | Function_or_Subroutine_star_MainProgram
+  | Function_or_Subroutine_star
+  | Function_or_Subroutine
+  | Comment_MainProgram
   | MainProgram
-  | ProgramStmt
-  | MainRange
-  | EndProgramStmt
   | FunctionSubprogram
   | FunctionPrefix
-  | TypeSpec_opt
   | FunctionRange
   | FunctionParList
   | FunctionPar_Comma_FunctionPar_star_opt
@@ -73,13 +72,11 @@ type non_terminal =
   | FunctionPar
   | EndFunctionStmt
   | SubroutineSubprogram
-  | Recursive_opt
   | SubroutineRange
   | SubroutineParList_opt
   | SubroutinePar_Comma_SubroutinePar_star_opt
   | Comma_SubroutinePar_star
   | SubroutinePar
-  | Body_opt
   | EndSubroutineStmt
   | EndName_opt
   | BodyConstruct_star
@@ -95,12 +92,12 @@ type non_terminal =
   | Asterisk_CharLength_opt
   | CharLength
   | TypeParamValue
-  | Expr_Or_Asterisk
   | TypeSpec
   | KindSelector_opt
   | ExecutableConstruct
   | ActionStmt
   | AssignmentStmt
+  | Expr_Or_Asterisk
   | PrintStmt
   | Comma_OutputItemList_opt
   | FormatIdentifier
@@ -184,7 +181,7 @@ let string_of_terminal (t : terminal) : string =
   | SconSingle -> "['](~[']|'')*[']"
   | SconDouble -> "[\"](~[\"]|\"\")*[\"]"
   | Ident -> "[A-Za-z][A-Za-z0-9_]*"
-  | EOS -> "((!~[\\n]*)?\\n[ ]*)+"
+  | Eos -> "((!~[\\n]*)?\\n[ ]*)+"
   | True -> "\\.true\\."
   | False -> "\\.false\\."
   | Program -> "program"
@@ -232,14 +229,13 @@ let string_of_non_terminal (nt : non_terminal) : string =
   match nt with
   | ExecutableProgram -> "ExecutableProgram"
   | StartCommentBlock -> "StartCommentBlock"
-  | ProgramUnit -> "ProgramUnit"
+  | Function_or_Subroutine_star_MainProgram -> "Function_or_Subroutine_star_MainProgram"
+  | Function_or_Subroutine_star -> "Function_or_Subroutine_star"
+  | Function_or_Subroutine -> "Function_or_Subroutine"
+  | Comment_MainProgram -> "Comment_MainProgram"
   | MainProgram -> "MainProgram"
-  | ProgramStmt -> "ProgramStmt"
-  | MainRange -> "MainRange"
-  | EndProgramStmt -> "EndProgramStmt"
   | FunctionSubprogram -> "FunctionSubprogram"
   | FunctionPrefix -> "FunctionPrefix"
-  | TypeSpec_opt -> "TypeSpec_opt"
   | FunctionRange -> "FunctionRange"
   | FunctionParList -> "FunctionParList"
   | FunctionPar_Comma_FunctionPar_star_opt -> "FunctionPar_Comma_FunctionPar_star_opt"
@@ -247,13 +243,11 @@ let string_of_non_terminal (nt : non_terminal) : string =
   | FunctionPar -> "FunctionPar"
   | EndFunctionStmt -> "EndFunctionStmt"
   | SubroutineSubprogram -> "SubroutineSubprogram"
-  | Recursive_opt -> "Recursive_opt"
   | SubroutineRange -> "SubroutineRange"
   | SubroutineParList_opt -> "SubroutineParList_opt"
   | SubroutinePar_Comma_SubroutinePar_star_opt -> "SubroutinePar_Comma_SubroutinePar_star_opt"
   | Comma_SubroutinePar_star -> "Comma_SubroutinePar_star"
   | SubroutinePar -> "SubroutinePar"
-  | Body_opt -> "Body_opt"
   | EndSubroutineStmt -> "EndSubroutineStmt"
   | EndName_opt -> "EndName_opt"
   | BodyConstruct_star -> "BodyConstruct_star"
@@ -269,12 +263,12 @@ let string_of_non_terminal (nt : non_terminal) : string =
   | Asterisk_CharLength_opt -> "Asterisk_CharLength_opt"
   | CharLength -> "CharLength"
   | TypeParamValue -> "TypeParamValue"
-  | Expr_Or_Asterisk -> "Expr_Or_Asterisk"
   | TypeSpec -> "TypeSpec"
   | KindSelector_opt -> "KindSelector_opt"
   | ExecutableConstruct -> "ExecutableConstruct"
   | ActionStmt -> "ActionStmt"
   | AssignmentStmt -> "AssignmentStmt"
+  | Expr_Or_Asterisk -> "Expr_Or_Asterisk"
   | PrintStmt -> "PrintStmt"
   | Comma_OutputItemList_opt -> "Comma_OutputItemList_opt"
   | FormatIdentifier -> "FormatIdentifier"

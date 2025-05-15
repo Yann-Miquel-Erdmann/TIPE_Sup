@@ -1,9 +1,13 @@
-ExecutableProgram -> ProgramUnit | StartCommentBlock ProgramUnit
-
+ExecutableProgram -> StartCommentBlock Function_or_Subroutine_star_MainProgram | Function_or_Subroutine_star_MainProgram
 
 StartCommentBlock -> Eos
 
-ProgramUnit -> MainProgram | FunctionSubprogram | SubroutineSubprogram
+Function_or_Subroutine_star_MainProgram -> Function_or_Subroutine Function_or_Subroutine_star_MainProgram | MainProgram Function_or_Subroutine_star
+Function_or_Subroutine_star -> Function_or_Subroutine Function_or_Subroutine_star | E
+
+Function_or_Subroutine -> FunctionSubprogram | SubroutineSubprogram
+
+Comment_MainProgram -> StartCommentBlock MainProgram | MainProgram
 
 MainProgram -> Program ProgramName Eos BodyConstruct_star EndProgram EndName_opt Eos
 
@@ -25,11 +29,10 @@ EndFunctionStmt -> EndFunction EndName_opt Eos
 SubroutineSubprogram -> Recursive Subroutine SubroutineName SubroutineRange | Subroutine SubroutineName SubroutineRange
 
 SubroutineRange -> SubroutineParList_opt Eos BodyConstruct_star EndSubroutineStmt
-
 SubroutineParList_opt -> LParenthesis SubroutinePar_Comma_SubroutinePar_star_opt RParenthesis | E
 SubroutinePar_Comma_SubroutinePar_star_opt -> SubroutinePar Comma_SubroutinePar_star | E
 Comma_SubroutinePar_star -> Comma SubroutinePar Comma_SubroutinePar_star | E
-SubroutinePar -> DummyArgName | Asterisk         
+SubroutinePar -> DummyArgName
 
 
 EndSubroutineStmt -> EndSubroutine EndName_opt Eos 
