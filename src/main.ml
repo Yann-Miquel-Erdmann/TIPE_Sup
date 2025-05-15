@@ -17,10 +17,12 @@ let main () =
   else
     let filename =
       if len == 4 then
-        if (Sys.argv.(3) == "-o") then 
-          Sys.argv.(3)
-        else
-          (print_string "Usage : "; print_string Sys.argv.(0); print_string " <inupt_file> [-o <output_file>]"; print_newline();
+        if Sys.argv.(3) == "-o" then Sys.argv.(3)
+        else (
+          print_string "Usage : ";
+          print_string Sys.argv.(0);
+          print_string " <inupt_file> [-o <output_file>]";
+          print_newline ();
           raise (Invalid_argument ""))
       else
         let found = ref false in

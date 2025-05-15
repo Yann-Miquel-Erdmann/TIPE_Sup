@@ -4,11 +4,16 @@ open Bibliotheques
 open Convert_to_abstract
 open LL1
 
-let rec generate_library_imports (l : Bibliotheques.libs) : string =
+(* TODO add libraries *)
+
+(** Renvoie les imports nécessaires contenus dans [l] *)
+let rec generate_library_imports (l : libs) : string =
   match l with
   | [] -> ""
-  | name :: q -> "#include " ^ name ^ "\n" ^ generate_library_imports q
+  | name :: q -> "#include <" ^ name ^ ".h>\n" ^ generate_library_imports q
 
+(** Renvoie le format de string dans les printf pour afficher les éléments de
+    [l] en s'aidant des types dans [env] *)
 let rec generate_format_string (l : ast list) (env : environnement_v2) : string
     =
   match l with
@@ -26,15 +31,17 @@ let rec generate_format_string (l : ast list) (env : environnement_v2) : string
       ^ generate_format_string q env
   | _ -> failwith "type non def"
 
+(** renvoie la chaîne associée au type de [var] dans [env] *)
 let str_of_env_type (env : environnement_v2) (var : string) : string =
   match Hashtbl.find_opt env var with
   | Some (Integer _) -> "int"
   | Some (Floating _) -> "float"
   | _ -> failwith "type non supporté"
 
-let rec generate_function_parameter_string (prams : ast list)
+(** renvoie la chaîne associée à chaque variable de [params] dans [env] *)
+let rec generate_function_parameter_string (params : ast list)
     (env : environnement_v2) : string =
-  match prams with
+  match params with
   | [] -> ""
   | Noeud (Identificateur nom, []) :: [] -> str_of_env_type env nom ^ " " ^ nom
   | Noeud (Identificateur nom, []) :: Noeud (Virgule, []) :: q
@@ -43,6 +50,7 @@ let rec generate_function_parameter_string (prams : ast list)
       ^ generate_function_parameter_string q env
   | _ -> failwith "paramètres de la fonction invalides dans la sa définition"
 
+(** convertis en chaîne la donnée constante [t] *)
 let string_of_data_type (t : data_type) : string =
   match t with
   | Entier s | Flottant s | Commentaire s -> s
@@ -50,16 +58,18 @@ let string_of_data_type (t : data_type) : string =
   | Booleen b -> if b then "true" else "false"
   | Imaginaire _ -> failwith "non pris en charge"
 
-let rec tabs_to_string (n : int) : string =
-  if n > 0 then "\t" ^ tabs_to_string (n - 1) else ""
+(** crée une chaîne de [n] tabulations *)
+let tabs_to_string (n : int) : string = String.make n '\t'
 
-let rec n_new_lines (n : int) : string =
-  if n > 0 then "\n" ^ tabs_to_string (n - 1) else ""
+(** crée une chaîne de [n] retours à la ligne *)
+let rec n_new_lines (n : int) : string = String.make n '\n'
 
-(* adds a semi colon at the end of the string if there is none *)
+(** ajoute un point-virgule à la fin de [s] si elle n'en a pas déjà *)
 let add_semi_colon (s : string) : string =
   if String.ends_with s ~suffix:";" then s else s ^ ";"
 
+(** convertis l'arbre de syntaxe abstrait [ast] à l'aide de l'environnement
+    [env] et l'indente de [n_tab] *)
 let rec convert_ast (ast : ast list) (env : environnement_v2) (nb_tab : int) :
     string =
   match ast with
@@ -97,9 +107,25 @@ let rec convert_ast (ast : ast list) (env : environnement_v2) (nb_tab : int) :
       let s = convert_ast l env 0 in
       let s = add_semi_colon s in
       tabs_to_string nb_tab ^ "long " ^ s ^ convert_ast q env nb_tab
+  | Noeud (Syntax Character, Noeud (Syntax Constant, []) :: l) :: q ->
+      let s = convert_ast l env 0 in
+      let s = add_semi_colon s in
+      tabs_to_string nb_tab ^ "const char " ^ s ^ convert_ast q env nb_tab
+  | Noeud (Syntax Character, l) :: q ->
+      let s = convert_ast l env 0 in
+      let s = add_semi_colon s in
+      tabs_to_string nb_tab ^ "char " ^ s ^ convert_ast q env nb_tab
   | Noeud (Operateur Assignation, Noeud (Name s, []) :: l) :: q ->
       tabs_to_string nb_tab ^ s ^ " = " ^ convert_ast l env 0 ^ ";"
       ^ convert_ast q env nb_tab
+  | Noeud (Syntax Size, l) :: q ->
+      tabs_to_string nb_tab ^ "[" ^ convert_ast l env 0 ^ "] "
+      ^ convert_ast q env nb_tab
+  | Noeud (Operateur Assignation, Noeud (Syntax Size, l1) :: l) :: q ->
+      tabs_to_string nb_tab
+      ^ convert_ast [ Noeud (Syntax Size, l1) ] env 0
+      ^ convert_ast (Noeud (Operateur Assignation, l) :: q) env nb_tab
+  | Noeud (Syntax Any, []) :: q -> convert_ast q env 0
   | Noeud (Name s, []) :: q -> s ^ convert_ast q env nb_tab
   | Noeud (Operateur Plus, elem :: l) :: q ->
       convert_ast [ elem ] env nb_tab
@@ -204,6 +230,8 @@ let rec convert_ast (ast : ast list) (env : environnement_v2) (nb_tab : int) :
   | Noeud (NewLine, []) :: q -> "\n" ^ convert_ast q env nb_tab
   | _ -> failwith "La syntaxe donnée n'est pas encore prise en charge\n"
 
+(** convertis l'arbre de syntaxe abstrait [ast] et ajoute les librairies
+    nécessaires depuis [biblios] grace à [env] *)
 let convert (ast : ast list) (env : environnement_v2)
     (biblios : Bibliotheques.libs) : string =
   generate_library_imports biblios ^ convert_ast ast env 0
@@ -252,11 +280,11 @@ let convert (ast : ast list) (env : environnement_v2)
 <-----------non existent---------->
  (non implémentés pour le moment)
   Syntax Complex
-  IntrinsicFunction Any (linked with char[] and char* (char[n] actually whith n the size given) => not implemented yet)
+  Syntax Any (linked with char[] and char* (char[n] actually whith n the size given) => not implemented yet)
 
 <--------make env for it---------->
   (might not make it)
-  IntrinsicFunction Size
+  Syntax Size
 
 <--------------TODO--------------->
 *)

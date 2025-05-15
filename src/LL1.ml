@@ -215,7 +215,7 @@ let analyse_LL1_of_symbol (g : grammar) (text : (symbol * string) list)
               failwith
                 ("expected "
                 ^ string_of_symbol (Terminal E)
-                ^ "in first of patterns")
+                ^ " in first of patterns")
             else ();
             analyse_LL1_of_pattern text s (List.nth l 0))
           else failwith "text is epsilon but more symbols are expected"
@@ -238,7 +238,7 @@ let analyse_LL1_of_symbol (g : grammar) (text : (symbol * string) list)
               failwith
                 ("expected "
                 ^ string_of_symbol (Terminal E)
-                ^ "in first of patterns")
+                ^ " in first of patterns")
             else ();
             analyse_LL1_of_pattern text s (List.nth l 0))
           else
@@ -257,7 +257,7 @@ let analyse_LL1_of_symbol (g : grammar) (text : (symbol * string) list)
               failwith
                 ("expected "
                 ^ string_of_symbol (fst (List.nth text 0))
-                ^ "in first of patterns")
+                ^ " in first of patterns")
             else ();
             analyse_LL1_of_pattern text s (List.nth l 0)
   in

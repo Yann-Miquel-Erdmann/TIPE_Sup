@@ -13,7 +13,9 @@ rules_htbl = Hashtbl.of_seq (List.to_seq [(NonTerminal ExecutableProgram,[[NonTe
 (NonTerminal BodyConstruct,[[NonTerminal SpecificationPartConstruct;];[NonTerminal ExecutableConstruct;];]);
 (NonTerminal SpecificationPartConstruct,[[NonTerminal DeclarationConstruct;];]);
 (NonTerminal DeclarationConstruct,[[NonTerminal TypeDeclarationStmt;];]);
-(NonTerminal TypeDeclarationStmt,[[NonTerminal TypeSpec;NonTerminal TypeDecl_Assignment;Terminal EOS;];]);
+(NonTerminal TypeDeclarationStmt,[[NonTerminal TypeSpec;NonTerminal Comma_AttrSpec_star;NonTerminal TypeDecl_Assignment;Terminal EOS;];]);
+(NonTerminal Comma_AttrSpec_star,[[Terminal Comma;NonTerminal AttrSpec;NonTerminal Comma_AttrSpec_star;];[Terminal E;];]);
+(NonTerminal AttrSpec,[[Terminal Parameter;];]);
 (NonTerminal TypeDecl_Assignment,[[Terminal Colon;Terminal Colon;NonTerminal EntityDecl;NonTerminal Comma_EntityDecl_star;];[NonTerminal ObjectName;NonTerminal Comma_ObjectName_star;];]);
 (NonTerminal Comma_ObjectName_star,[[Terminal Comma;NonTerminal ObjectName;NonTerminal Comma_ObjectName_star;];[Terminal E;];]);
 (NonTerminal Comma_EntityDecl_star,[[Terminal Comma;NonTerminal EntityDecl;NonTerminal Comma_EntityDecl_star;];[Terminal E;];]);
@@ -23,7 +25,7 @@ rules_htbl = Hashtbl.of_seq (List.to_seq [(NonTerminal ExecutableProgram,[[NonTe
 (NonTerminal CharLength,[[Terminal LParenthesis;NonTerminal TypeParamValue;Terminal RParenthesis;];[NonTerminal ScalarIntLiteralConstant;];]);
 (NonTerminal TypeParamValue,[[NonTerminal Expr_Or_Asterisk;];]);
 (NonTerminal Expr_Or_Asterisk,[[NonTerminal Expr;];[Terminal Asterisk;];]);
-(NonTerminal TypeSpec,[[Terminal Integer;NonTerminal KindSelector_opt;];[Terminal Double;];[Terminal Complex;NonTerminal KindSelector_opt;];[Terminal Logical;NonTerminal KindSelector_opt;];[Terminal Real;NonTerminal KindSelector_opt;];]);
+(NonTerminal TypeSpec,[[Terminal Integer;NonTerminal KindSelector_opt;];[Terminal Double;];[Terminal Complex;NonTerminal KindSelector_opt;];[Terminal Logical;NonTerminal KindSelector_opt;];[Terminal Real;NonTerminal KindSelector_opt;];[Terminal Character;];]);
 (NonTerminal KindSelector_opt,[[Terminal LParenthesis;NonTerminal Expr;Terminal RParenthesis;];[Terminal E;];]);
 (NonTerminal ExecutableConstruct,[[NonTerminal ActionStmt;];[NonTerminal DoConstruct;];[NonTerminal IfConstruct;];]);
 (NonTerminal ActionStmt,[[NonTerminal AssignmentStmt;];[NonTerminal PrintStmt;];]);
