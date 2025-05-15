@@ -1,54 +1,48 @@
-open Det_automaton
-open LL1
-open Convert_to_abstract
-open Environnement
-open GenerateC
-open Automates
-open Grammar
+open Transpileurs
+
+let print_usage () = 
+    print_string "Usage : ";
+    print_newline();
+    print_string Sys.argv.(0);
+    print_string " -C <inupt_fortran_file> [-o <output_c_file>]";
+    print_newline ();
+    print_string Sys.argv.(0);
+    print_string " -Fortran <inupt_fortran_file> [-o <output_fortran_file>]";
+    print_newline ()
+
+let output_file (len: int): string = 
+  if len == 5 then
+    (* un nom de fichier de sortie est donné *)
+    if Sys.argv.(3) == "-o" then 
+      Sys.argv.(5)
+    else (
+      print_usage ();
+      raise (Invalid_argument ""))
+  else
+    (* un nom de fichier de sortie n'est pas donné, on en donne un par défaut*)
+    match Sys.argv.(1) with
+    | "-Fortran" ->  "out.f90" 
+    | "-C" ->  "out.c" 
+    | _ ->   print_usage (); raise (Invalid_argument "") 
+
+    
 
 let main () =
   let len = Array.length Sys.argv in
 
-  if len <> 2 && len <> 4 then (
-    print_string "Usage : ";
-    print_string Sys.argv.(0);
-    print_string " <inupt_file> [-o <output_file>]";
-    print_newline ())
+  if len <> 3 && len <> 5 then
+    print_usage()
   else
-    let filename =
-      if len == 4 then
-        if (Sys.argv.(3) == "-o") then 
-          Sys.argv.(3)
-        else
-          (print_string "Usage : "; print_string Sys.argv.(0); print_string " <inupt_file> [-o <output_file>]"; print_newline();
-          raise (Invalid_argument ""))
-      else
-        let found = ref false in
-        let stop = ref false in
-        "tests/C/"
-        ^ String.fold_right
-            (fun x acc ->
-              if !stop then acc
-              else if not !found then (
-                if x = '.' then found := true;
-                acc)
-              else if x = '/' then (
-                stop := true;
-                acc)
-              else String.make 1 x ^ acc)
-            Sys.argv.(1) ""
-        ^ ".c"
-    in
-    print_string ("Generating " ^ filename ^ "...");
+    let input_file_name = Sys.argv.(2) in
+    let output_file_name = output_file len in
+    print_string ("Generating " ^ output_file_name ^ "...");
     print_newline ();
-    let l = exec_of_file syntax_automate_det Sys.argv.(1) in
-    let a = analyse_LL1 grammar l in
-    let t = convert_to_abstract a in
-    let s = convert_ast [ t ] (create_env_from_ast t) 0 in
-    let out_file = open_out filename in
-    output_string out_file s;
-    close_out out_file;
-    print_string ("Finished generating " ^ filename);
+    if Sys.argv.(1) = "-C" then 
+      transpile_Fortran_to_C input_file_name output_file_name
+    else(
+      transpile_Fortran_to_C input_file_name output_file_name
+    );
+    print_string ("Finished generating " ^ output_file_name);
     print_newline ()
 
 let _ = main ()
