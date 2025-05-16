@@ -6,7 +6,6 @@ rules_htbl = Hashtbl.of_seq (List.to_seq [(NonTerminal ExecutableProgram,[[NonTe
 (NonTerminal Function_or_Subroutine_star_MainProgram,[[NonTerminal Function_or_Subroutine;NonTerminal Function_or_Subroutine_star_MainProgram;];[NonTerminal MainProgram;NonTerminal Function_or_Subroutine_star;];]);
 (NonTerminal Function_or_Subroutine_star,[[NonTerminal Function_or_Subroutine;NonTerminal Function_or_Subroutine_star;];[Terminal E;];]);
 (NonTerminal Function_or_Subroutine,[[NonTerminal FunctionSubprogram;];[NonTerminal SubroutineSubprogram;];]);
-(NonTerminal Comment_MainProgram,[[NonTerminal StartCommentBlock;NonTerminal MainProgram;];[NonTerminal MainProgram;];]);
 (NonTerminal MainProgram,[[NonTerminal ProgramStmt;NonTerminal MainRange;];]);
 (NonTerminal MainRange,[[NonTerminal BodyConstruct;NonTerminal BodyConstruct_star;NonTerminal EndProgramStmt;];[NonTerminal EndProgramStmt;];]);
 (NonTerminal BodyConstruct_star,[[NonTerminal BodyConstruct;NonTerminal BodyConstruct_star;];[Terminal E;];]);

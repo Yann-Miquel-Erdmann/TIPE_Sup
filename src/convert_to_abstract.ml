@@ -46,23 +46,385 @@ let convert_comments (t : ast) : ast list =
 (** Enlève le niveau d'abstraction de l'arbre de syntaxe [t] créé avec LL1 *)
 let rec convert_to_abstract (t : at) : ast =
   match t with
-  | Noeud ((NonTerminal ExecutableProgram, s0), l) -> (
+  | Noeud ((NonTerminal ExecutableProgram, _), l) -> (
       match l with
       | [
-       Noeud ((Terminal EOS, s1), []); Noeud ((NonTerminal MainProgram, s), l);
+       Noeud ((NonTerminal StartCommentBlock, s1), l1);
+       Noeud ((NonTerminal Function_or_Subroutine_star_MainProgram, s), l);
       ] ->
           Noeud
             ( ProgramRoot,
-              [
-                convert_to_abstract (Noeud ((Terminal EOS, s1), []));
-                convert_to_abstract (Noeud ((NonTerminal MainProgram, s), l));
-              ] )
-      | [ Noeud ((NonTerminal MainProgram, s), l) ] ->
+              convert_to_abstract (Noeud ((Terminal EOS, s1), []))
+              :: flatten
+                   (convert_to_abstract
+                      (Noeud ((NonTerminal MainProgram, s), l)))
+                   [] )
+      | [ Noeud ((NonTerminal Function_or_Subroutine_star_MainProgram, s), l) ]
+        ->
           Noeud
             ( ProgramRoot,
-              [ convert_to_abstract (Noeud ((NonTerminal MainProgram, s), l)) ]
-            )
-      | _ -> failwith "")
+              flatten
+                (convert_to_abstract
+                   (Noeud
+                      ( (NonTerminal Function_or_Subroutine_star_MainProgram, s),
+                        l )))
+                [] )
+      | _ -> failwith "ExecutableProgram")
+  | Noeud ((NonTerminal Function_or_Subroutine_star_MainProgram, _), l) -> (
+      match l with
+      | [
+       Noeud ((NonTerminal Function_or_Subroutine, s), l);
+       Noeud ((NonTerminal Function_or_Subroutine_star_MainProgram, s1), l1);
+      ] ->
+          Noeud
+            ( ToFlatten,
+              [
+                convert_to_abstract
+                  (Noeud ((NonTerminal Function_or_Subroutine, s), l));
+                convert_to_abstract
+                  (Noeud
+                     ( (NonTerminal Function_or_Subroutine_star_MainProgram, s1),
+                       l1 ));
+              ] )
+      | [
+       Noeud ((NonTerminal MainProgram, s), l);
+       Noeud
+         ( (NonTerminal Function_or_Subroutine_star, _),
+           [ Noeud ((Terminal E, _), []) ] );
+      ] ->
+          convert_to_abstract (Noeud ((NonTerminal MainProgram, s), l))
+      | [
+       Noeud ((NonTerminal MainProgram, s), l);
+       Noeud ((NonTerminal Function_or_Subroutine_star, s1), l1);
+      ] ->
+          Noeud
+            ( ToFlatten,
+              [
+                convert_to_abstract (Noeud ((NonTerminal MainProgram, s), l));
+                convert_to_abstract
+                  (Noeud ((NonTerminal Function_or_Subroutine_star, s1), l1));
+              ] )
+      | _ -> failwith "Function_or_Subroutine_star_MainProgram")
+  | Noeud ((NonTerminal Function_or_Subroutine_star, _), l) -> (
+      match l with
+      | [
+       Noeud ((NonTerminal Function_or_Subroutine, s), l);
+       Noeud
+         ( (NonTerminal Function_or_Subroutine_star, _),
+           [ Noeud ((Terminal E, _), []) ] );
+      ] ->
+          convert_to_abstract
+            (Noeud ((NonTerminal Function_or_Subroutine, s), l))
+      | [
+       Noeud ((NonTerminal Function_or_Subroutine, s), l);
+       Noeud ((NonTerminal Function_or_Subroutine_star, s1), l1);
+      ] ->
+          Noeud
+            ( ToFlatten,
+              [
+                convert_to_abstract
+                  (Noeud ((NonTerminal Function_or_Subroutine, s), l));
+                convert_to_abstract
+                  (Noeud ((NonTerminal Function_or_Subroutine_star, s1), l1));
+              ] )
+      | _ -> failwith "Function_or_Subroutine_star")
+  | Noeud
+      ( (NonTerminal Function_or_Subroutine, _),
+        [ Noeud ((NonTerminal FunctionSubprogram, s), l) ] ) ->
+      convert_to_abstract (Noeud ((NonTerminal FunctionSubprogram, s), l))
+  | Noeud
+      ( (NonTerminal Function_or_Subroutine, _),
+        [ Noeud ((NonTerminal SubroutineSubprogram, s), l) ] ) ->
+      convert_to_abstract (Noeud ((NonTerminal SubroutineSubprogram, s), l))
+  | Noeud
+      ( (NonTerminal FunctionSubprogram, _),
+        [
+          Noeud ((NonTerminal FunctionPrefix, s), l);
+          Noeud ((NonTerminal FunctionName, s1), l1);
+          Noeud ((NonTerminal FunctionRange, s2), l2);
+        ] ) -> (
+      match l with
+      | [ Noeud ((Terminal Function, _), []) ] ->
+          Noeud
+            ( Syntax Program,
+              flatten
+                (Noeud
+                   ( ToFlatten,
+                     [
+                       convert_to_abstract
+                         (Noeud ((NonTerminal FunctionName, s1), l1));
+                       convert_to_abstract
+                         (Noeud ((NonTerminal FunctionRange, s2), l2));
+                     ] ))
+                [] )
+      | _ ->
+          Noeud
+            ( Syntax Program,
+              flatten
+                (Noeud
+                   ( ToFlatten,
+                     [
+                       convert_to_abstract
+                         (Noeud ((NonTerminal FunctionPrefix, s), l));
+                       convert_to_abstract
+                         (Noeud ((NonTerminal FunctionName, s1), l1));
+                       convert_to_abstract
+                         (Noeud ((NonTerminal FunctionRange, s2), l2));
+                     ] ))
+                [] ))
+  | Noeud
+      ( (NonTerminal FunctionPrefix, _),
+        [
+          Noeud ((NonTerminal TypeSpec, s), l);
+          Noeud ((Terminal Function, _), []);
+        ] ) ->
+      convert_to_abstract (Noeud ((NonTerminal TypeSpec, s), l))
+  (* FunctionRange -> FunctionParList EOS BodyConstruct_star EndFunctionStmt *)
+  | Noeud
+      ( (NonTerminal FunctionRange, _),
+        [
+          Noeud ((NonTerminal FunctionParList, s), l);
+          Noeud ((Terminal EOS, s1), l1);
+          Noeud ((NonTerminal BodyConstruct_star, s3), l3);
+          Noeud ((NonTerminal EndFunctionStmt, s2), l2);
+        ] ) ->
+      let n1 = ref [] in
+      let n3 = ref [] in
+      (match l3 with
+      | [ Noeud ((Terminal E, _), []) ] -> ()
+      | _ ->
+          n3 :=
+            [
+              convert_to_abstract
+                (Noeud ((NonTerminal BodyConstruct_star, s3), l3));
+            ]);
+      (match l with
+      | [
+       Noeud ((Terminal LParenthesis, _), []);
+       Noeud
+         ( (NonTerminal FunctionPar_Comma_FunctionPar_star_opt, _),
+           [ Noeud ((Terminal E, _), []) ] );
+       Noeud ((Terminal RParenthesis, _), []);
+      ] ->
+          ()
+      | _ ->
+          n1 :=
+            [
+              convert_to_abstract (Noeud ((NonTerminal FunctionParList, s), l));
+            ]);
+      Noeud
+        ( ToFlatten,
+          flatten
+            (Noeud (ToFlatten, !n1))
+            (convert_to_abstract (Noeud ((Terminal EOS, s1), l1))
+            :: flatten
+                 (Noeud (ToFlatten, !n3))
+                 [
+                   convert_to_abstract
+                     (Noeud ((NonTerminal EndFunctionStmt, s2), l2));
+                 ]) )
+  | Noeud
+      ( (NonTerminal FunctionParList, _),
+        [
+          Noeud ((Terminal LParenthesis, _), []);
+          Noeud ((NonTerminal FunctionPar_Comma_FunctionPar_star_opt, s), l);
+          Noeud ((Terminal RParenthesis, _), []);
+        ] ) ->
+      convert_to_abstract
+        (Noeud ((NonTerminal FunctionPar_Comma_FunctionPar_star_opt, s), l))
+  | Noeud
+      ( (NonTerminal FunctionPar_Comma_FunctionPar_star_opt, _),
+        [
+          Noeud ((NonTerminal FunctionPar, s), l);
+          Noeud
+            ( (NonTerminal Comma_FunctionPar_star, _),
+              [ Noeud ((Terminal E, _), []) ] );
+        ] ) ->
+      convert_to_abstract (Noeud ((NonTerminal FunctionPar, s), l))
+  | Noeud
+      ( (NonTerminal FunctionPar_Comma_FunctionPar_star_opt, _),
+        [
+          Noeud ((NonTerminal FunctionPar, s), l);
+          Noeud ((NonTerminal Comma_FunctionPar_star, s1), l1);
+        ] ) ->
+      Noeud
+        ( ToFlatten,
+          [
+            convert_to_abstract (Noeud ((NonTerminal FunctionPar, s), l));
+            convert_to_abstract
+              (Noeud ((NonTerminal Comma_FunctionPar_star, s1), l1));
+          ] )
+  (* Comma_FunctionPar_star -> Comma FunctionPar Comma_FunctionPar_star | E *)
+  | Noeud
+      ( (NonTerminal Comma_FunctionPar_star, _),
+        [
+          Noeud ((Terminal Comma, _), []);
+          Noeud ((NonTerminal FunctionPar, s), l);
+          Noeud
+            ( (NonTerminal Comma_FunctionPar_star, _),
+              [ Noeud ((Terminal E, _), []) ] );
+        ] ) ->
+      convert_to_abstract (Noeud ((NonTerminal FunctionPar, s), l))
+  | Noeud
+      ( (NonTerminal Comma_FunctionPar_star, _),
+        [
+          Noeud ((Terminal Comma, _), []);
+          Noeud ((NonTerminal FunctionPar, s), l);
+          Noeud ((NonTerminal Comma_FunctionPar_star, s1), l1);
+        ] ) ->
+      Noeud
+        ( ToFlatten,
+          [
+            convert_to_abstract (Noeud ((NonTerminal FunctionPar, s), l));
+            convert_to_abstract
+              (Noeud ((NonTerminal Comma_FunctionPar_star, s1), l1));
+          ] )
+  | Noeud
+      ( (NonTerminal FunctionPar, _),
+        [ Noeud ((NonTerminal DummyArgName, s), l) ] ) ->
+      convert_to_abstract (Noeud ((NonTerminal DummyArgName, s), l))
+  | Noeud
+      ( (NonTerminal EndFunctionStmt, _),
+        [
+          Noeud ((Terminal EndFunction, _), []);
+          Noeud ((NonTerminal EndName_opt, _), _);
+          Noeud ((Terminal EOS, s), l);
+        ] ) ->
+      convert_to_abstract (Noeud ((Terminal EOS, s), l))
+  | Noeud ((NonTerminal SubroutineSubprogram, _), l) -> (
+      match l with
+      | [
+          Noeud ((Terminal Recursive, _), []);
+          Noeud ((Terminal Subroutine, _), []);
+          Noeud ((NonTerminal SubroutineName, s), l);
+          Noeud ((NonTerminal SubroutineRange, s1), l1);
+        ]
+      | [
+          Noeud ((Terminal Subroutine, _), []);
+          Noeud ((NonTerminal SubroutineName, s), l);
+          Noeud ((NonTerminal SubroutineRange, s1), l1);
+        ] ->
+          Noeud
+            ( ToFlatten,
+              [
+                convert_to_abstract (Noeud ((NonTerminal SubroutineName, s), l));
+                convert_to_abstract
+                  (Noeud ((NonTerminal SubroutineRange, s1), l1));
+              ] )
+      | _ -> failwith "SubroutineSubprogram")
+  | Noeud
+      ( (NonTerminal SubroutineRange, _),
+        [
+          Noeud ((NonTerminal SubroutineParList_opt, s), l);
+          Noeud ((Terminal EOS, s1), l1);
+          Noeud ((NonTerminal BodyConstruct_star, s2), l2);
+          Noeud ((NonTerminal EndSubroutineStmt, s3), l3);
+        ] ) ->
+      let n = ref [] in
+      let n2 = ref [] in
+      (match l with
+      | [ Noeud ((Terminal E, _), []) ] -> ()
+      | _ ->
+          n :=
+            [
+              convert_to_abstract
+                (Noeud ((NonTerminal SubroutineParList_opt, s), l));
+            ]);
+      (match l2 with
+      | [ Noeud ((Terminal E, _), []) ]
+      | [
+          Noeud ((Terminal LParenthesis, _), []);
+          Noeud
+            ( (NonTerminal SubroutinePar_Comma_SubroutinePar_star_opt, _),
+              [ Noeud ((Terminal E, _), []) ] );
+          Noeud ((Terminal RParenthesis, _), []);
+        ] ->
+          ()
+      | _ ->
+          n2 :=
+            [
+              convert_to_abstract
+                (Noeud ((NonTerminal BodyConstruct_star, s2), l2));
+            ]);
+      Noeud
+        ( ToFlatten,
+          flatten
+            (Noeud (ToFlatten, !n))
+            (convert_to_abstract (Noeud ((Terminal EOS, s1), l1))
+            :: flatten
+                 (Noeud (ToFlatten, !n2))
+                 [
+                   convert_to_abstract
+                     (Noeud ((NonTerminal EndSubroutineStmt, s3), l3));
+                 ]) )
+  | Noeud
+      ( (NonTerminal SubroutineParList_opt, _),
+        [
+          Noeud ((Terminal LParenthesis, _), []);
+          Noeud ((NonTerminal SubroutinePar_Comma_SubroutinePar_star_opt, s), l);
+          Noeud ((Terminal RParenthesis, _), []);
+        ] ) ->
+      convert_to_abstract
+        (Noeud ((NonTerminal SubroutinePar_Comma_SubroutinePar_star_opt, s), l))
+  | Noeud
+      ( (NonTerminal SubroutinePar_Comma_SubroutinePar_star_opt, _),
+        [
+          Noeud ((NonTerminal SubroutinePar, s), l);
+          Noeud
+            ( (NonTerminal Comma_SubroutinePar_star, _),
+              [ Noeud ((Terminal E, _), []) ] );
+        ] ) ->
+      convert_to_abstract (Noeud ((NonTerminal SubroutinePar, s), l))
+  | Noeud
+      ( (NonTerminal SubroutinePar_Comma_SubroutinePar_star_opt, _),
+        [
+          Noeud ((NonTerminal SubroutinePar, s), l);
+          Noeud ((NonTerminal Comma_SubroutinePar_star, s1), l1);
+        ] ) ->
+      Noeud
+        ( ToFlatten,
+          [
+            convert_to_abstract (Noeud ((NonTerminal SubroutinePar, s), l));
+            convert_to_abstract
+              (Noeud ((NonTerminal Comma_SubroutinePar_star, s1), l1));
+          ] )
+  | Noeud
+      ( (NonTerminal Comma_SubroutinePar_star, _),
+        [
+          Noeud ((Terminal Comma, _), []);
+          Noeud ((NonTerminal SubroutinePar, s), l);
+          Noeud
+            ( (NonTerminal Comma_SubroutinePar_star, _),
+              [ Noeud ((Terminal E, _), []) ] );
+        ] ) ->
+      convert_to_abstract (Noeud ((NonTerminal SubroutinePar, s), l))
+  | Noeud
+      ( (NonTerminal Comma_SubroutinePar_star, _),
+        [
+          Noeud ((Terminal Comma, _), []);
+          Noeud ((NonTerminal SubroutinePar, s), l);
+          Noeud ((NonTerminal Comma_SubroutinePar_star, s1), l1);
+        ] ) ->
+      Noeud
+        ( ToFlatten,
+          [
+            convert_to_abstract (Noeud ((NonTerminal SubroutinePar, s), l));
+            convert_to_abstract
+              (Noeud ((NonTerminal Comma_SubroutinePar_star, s1), l1));
+          ] )
+  | Noeud
+      ( (NonTerminal SubroutinePar, _),
+        [ Noeud ((NonTerminal DummyArgName, s), l) ] ) ->
+      convert_to_abstract (Noeud ((NonTerminal DummyArgName, s), l))
+  (* EndSubroutineStmt -> EndSubroutine EndName_opt EOS *)
+  | Noeud
+      ( (NonTerminal EndSubroutineStmt, _),
+        [
+          Noeud ((Terminal EndSubroutine, _), []);
+          Noeud ((NonTerminal EndName_opt, _), _);
+          Noeud ((Terminal EOS, s), l);
+        ] ) ->
+      convert_to_abstract (Noeud ((Terminal EOS, s), l))
   | Noeud
       ( (NonTerminal MainProgram, _),
         [
@@ -201,12 +563,23 @@ let rec convert_to_abstract (t : at) : ast =
       ( (NonTerminal TypeDeclarationStmt, _),
         [
           Noeud ((NonTerminal TypeSpec, _), [ Noeud ((Terminal Double, _), []) ]);
-          Noeud
-            ( (NonTerminal Comma_AttrSpec_star, _),
-              [ Noeud ((Terminal E, _), []) ] );
+          Noeud ((NonTerminal Comma_AttrSpec_star, _), l1);
           Noeud ((NonTerminal TypeDecl_Assignment, s), l);
           Noeud ((Terminal EOS, s2), []);
         ] ) ->
+      (match l1 with
+      | [ Noeud ((Terminal E, _), []) ]
+      | [
+          Noeud ((Terminal Comma, _), []);
+          Noeud
+            ( (NonTerminal AttrSpec, _),
+              [ Noeud ((NonTerminal Intent_in_out, _), _) ] );
+          Noeud
+            ( (NonTerminal Comma_AttrSpec_star, _),
+              [ Noeud ((Terminal E, _), []) ] );
+        ] ->
+          ()
+      | _ -> failwith "TypeDeclarationStmt 1");
       Noeud
         ( ToFlatten,
           [
@@ -229,12 +602,23 @@ let rec convert_to_abstract (t : at) : ast =
                   ( (NonTerminal KindSelector_opt, _),
                     [ Noeud ((Terminal E, _), []) ] );
               ] );
-          Noeud
-            ( (NonTerminal Comma_AttrSpec_star, _),
-              [ Noeud ((Terminal E, _), []) ] );
+          Noeud ((NonTerminal Comma_AttrSpec_star, _), l1);
           Noeud ((NonTerminal TypeDecl_Assignment, s), l);
           Noeud ((Terminal EOS, s2), []);
         ] ) ->
+      (match l1 with
+      | [ Noeud ((Terminal E, _), []) ]
+      | [
+          Noeud ((Terminal Comma, _), []);
+          Noeud
+            ( (NonTerminal AttrSpec, _),
+              [ Noeud ((NonTerminal Intent_in_out, _), _) ] );
+          Noeud
+            ( (NonTerminal Comma_AttrSpec_star, _),
+              [ Noeud ((Terminal E, _), []) ] );
+        ] ->
+          ()
+      | _ -> failwith "TypeDeclarationStmt 2");
       Noeud
         ( ToFlatten,
           [
@@ -251,57 +635,57 @@ let rec convert_to_abstract (t : at) : ast =
         [
           Noeud
             ((NonTerminal TypeSpec, _), [ Noeud ((Terminal Character, _), []) ]);
+          Noeud ((NonTerminal Comma_AttrSpec_star, s1), l1);
+          Noeud ((NonTerminal TypeDecl_Assignment, s), l);
+          Noeud ((Terminal EOS, s2), []);
+        ] ) ->
+      let n1 = ref [] in
+      (match l1 with
+      | [ Noeud ((Terminal E, _), []) ]
+      | [
+          Noeud ((Terminal Comma, _), []);
+          Noeud
+            ( (NonTerminal AttrSpec, _),
+              [ Noeud ((NonTerminal Intent_in_out, _), _) ] );
           Noeud
             ( (NonTerminal Comma_AttrSpec_star, _),
               [ Noeud ((Terminal E, _), []) ] );
-          Noeud ((NonTerminal TypeDecl_Assignment, s), l);
-          Noeud ((Terminal EOS, s2), []);
-        ] ) ->
+        ] ->
+          ()
+      | _ ->
+          n1 :=
+            [
+              convert_to_abstract
+                (Noeud ((NonTerminal Comma_AttrSpec_star, s1), l1));
+            ]);
       Noeud
         ( ToFlatten,
           [
             Noeud
               ( Syntax Character,
                 flatten
-                  (convert_to_abstract
-                     (Noeud ((NonTerminal TypeDecl_Assignment, s), l)))
-                  [] );
+                  (Noeud (ToFlatten, !n1))
+                  (flatten
+                     (convert_to_abstract
+                        (Noeud ((NonTerminal TypeDecl_Assignment, s), l)))
+                     []) );
             convert_to_abstract (Noeud ((Terminal EOS, s2), []));
           ] )
   | Noeud
-      ( (NonTerminal TypeDeclarationStmt, _),
+      ( (NonTerminal Comma_AttrSpec_star, _),
         [
-          Noeud
-            ((NonTerminal TypeSpec, _), [ Noeud ((Terminal Character, _), []) ]);
-          Noeud
-            ( (NonTerminal Comma_AttrSpec_star, _),
-              [
-                Noeud ((Terminal Comma, _), []);
-                Noeud ((NonTerminal AttrSpec, s1), l1);
-                Noeud
-                  ( (NonTerminal Comma_AttrSpec_star, _),
-                    [ Noeud ((Terminal E, _), []) ] );
-              ] );
-          Noeud ((NonTerminal TypeDecl_Assignment, s), l);
-          Noeud ((Terminal EOS, s2), []);
+          Noeud ((NonTerminal Intent_in_out, _), _);
+          Noeud ((NonTerminal Comma_AttrSpec_star, s), l);
         ] ) ->
-      Noeud
-        ( ToFlatten,
-          [
-            Noeud
-              ( Syntax Character,
-                flatten
-                  (Noeud
-                     ( ToFlatten,
-                       convert_to_abstract
-                         (Noeud ((NonTerminal AttrSpec, s1), l1))
-                       :: flatten
-                            (convert_to_abstract
-                               (Noeud ((NonTerminal TypeDecl_Assignment, s), l)))
-                            [] ))
-                  [] );
-            convert_to_abstract (Noeud ((Terminal EOS, s2), []));
-          ] )
+      convert_to_abstract (Noeud ((NonTerminal Comma_AttrSpec_star, s), l))
+  | Noeud
+      ( (NonTerminal Comma_AttrSpec_star, _),
+        [
+          Noeud ((Terminal Parameter, _), []);
+          Noeud ((NonTerminal Comma_AttrSpec_star, _), _);
+          (* the rest must be intent_in_out if not empty. either way, nothing to be done *)
+        ] ) ->
+      Noeud (Syntax Constant, [])
   | Noeud
       ( (NonTerminal TypeDeclarationStmt, _),
         [
@@ -313,12 +697,23 @@ let rec convert_to_abstract (t : at) : ast =
                   ( (NonTerminal KindSelector_opt, _),
                     [ Noeud ((Terminal E, _), []) ] );
               ] );
-          Noeud
-            ( (NonTerminal Comma_AttrSpec_star, _),
-              [ Noeud ((Terminal E, _), []) ] );
+          Noeud ((NonTerminal Comma_AttrSpec_star, _), l1);
           Noeud ((NonTerminal TypeDecl_Assignment, s), l);
           Noeud ((Terminal EOS, s2), []);
         ] ) ->
+      (match l1 with
+      | [ Noeud ((Terminal E, _), []) ]
+      | [
+          Noeud ((Terminal Comma, _), []);
+          Noeud
+            ( (NonTerminal AttrSpec, _),
+              [ Noeud ((NonTerminal Intent_in_out, _), _) ] );
+          Noeud
+            ( (NonTerminal Comma_AttrSpec_star, _),
+              [ Noeud ((Terminal E, _), []) ] );
+        ] ->
+          ()
+      | _ -> failwith "TypeDeclarationStmt 3");
       Noeud
         ( ToFlatten,
           [
@@ -341,12 +736,23 @@ let rec convert_to_abstract (t : at) : ast =
                   ( (NonTerminal KindSelector_opt, _),
                     [ Noeud ((Terminal E, _), []) ] );
               ] );
-          Noeud
-            ( (NonTerminal Comma_AttrSpec_star, _),
-              [ Noeud ((Terminal E, _), []) ] );
+          Noeud ((NonTerminal Comma_AttrSpec_star, _), l1);
           Noeud ((NonTerminal TypeDecl_Assignment, s), l);
           Noeud ((Terminal EOS, s2), []);
         ] ) ->
+      (match l1 with
+      | [ Noeud ((Terminal E, _), []) ]
+      | [
+          Noeud ((Terminal Comma, _), []);
+          Noeud
+            ( (NonTerminal AttrSpec, _),
+              [ Noeud ((NonTerminal Intent_in_out, _), _) ] );
+          Noeud
+            ( (NonTerminal Comma_AttrSpec_star, _),
+              [ Noeud ((Terminal E, _), []) ] );
+        ] ->
+          ()
+      | _ -> failwith "TypeDeclarationStmt 4");
       Noeud
         ( ToFlatten,
           [
@@ -369,12 +775,23 @@ let rec convert_to_abstract (t : at) : ast =
                   ( (NonTerminal KindSelector_opt, _),
                     [ Noeud ((Terminal E, _), []) ] );
               ] );
-          Noeud
-            ( (NonTerminal Comma_AttrSpec_star, _),
-              [ Noeud ((Terminal E, _), []) ] );
+          Noeud ((NonTerminal Comma_AttrSpec_star, _), l1);
           Noeud ((NonTerminal TypeDecl_Assignment, s), l);
           Noeud ((Terminal EOS, s2), []);
         ] ) ->
+      (match l1 with
+      | [ Noeud ((Terminal E, _), []) ]
+      | [
+          Noeud ((Terminal Comma, _), []);
+          Noeud
+            ( (NonTerminal AttrSpec, _),
+              [ Noeud ((NonTerminal Intent_in_out, _), _) ] );
+          Noeud
+            ( (NonTerminal Comma_AttrSpec_star, _),
+              [ Noeud ((Terminal E, _), []) ] );
+        ] ->
+          ()
+      | _ -> failwith "TypeDeclarationStmt 5");
       Noeud
         ( ToFlatten,
           [
@@ -395,12 +812,23 @@ let rec convert_to_abstract (t : at) : ast =
                 Noeud ((Terminal Integer, _), []);
                 Noeud ((NonTerminal KindSelector_opt, s1), l1);
               ] );
-          Noeud
-            ( (NonTerminal Comma_AttrSpec_star, _),
-              [ Noeud ((Terminal E, _), []) ] );
+          Noeud ((NonTerminal Comma_AttrSpec_star, _), l3);
           Noeud ((NonTerminal TypeDecl_Assignment, s), l);
           Noeud ((Terminal EOS, s2), []);
         ] ) ->
+      (match l3 with
+      | [ Noeud ((Terminal E, _), []) ]
+      | [
+          Noeud ((Terminal Comma, _), []);
+          Noeud
+            ( (NonTerminal AttrSpec, _),
+              [ Noeud ((NonTerminal Intent_in_out, _), _) ] );
+          Noeud
+            ( (NonTerminal Comma_AttrSpec_star, _),
+              [ Noeud ((Terminal E, _), []) ] );
+        ] ->
+          ()
+      | _ -> failwith "TypeDeclarationStmt 6");
       Noeud
         ( ToFlatten,
           [
@@ -427,12 +855,23 @@ let rec convert_to_abstract (t : at) : ast =
                 Noeud ((Terminal Complex, _), []);
                 Noeud ((NonTerminal KindSelector_opt, s1), l1);
               ] );
-          Noeud
-            ( (NonTerminal Comma_AttrSpec_star, _),
-              [ Noeud ((Terminal E, _), []) ] );
+          Noeud ((NonTerminal Comma_AttrSpec_star, _), l3);
           Noeud ((NonTerminal TypeDecl_Assignment, s), l);
           Noeud ((Terminal EOS, s2), []);
         ] ) ->
+      (match l3 with
+      | [ Noeud ((Terminal E, _), []) ]
+      | [
+          Noeud ((Terminal Comma, _), []);
+          Noeud
+            ( (NonTerminal AttrSpec, _),
+              [ Noeud ((NonTerminal Intent_in_out, _), _) ] );
+          Noeud
+            ( (NonTerminal Comma_AttrSpec_star, _),
+              [ Noeud ((Terminal E, _), []) ] );
+        ] ->
+          ()
+      | _ -> failwith "TypeDeclarationStmt 7");
       Noeud
         ( ToFlatten,
           [
@@ -459,12 +898,23 @@ let rec convert_to_abstract (t : at) : ast =
                 Noeud ((Terminal Logical, _), []);
                 Noeud ((NonTerminal KindSelector_opt, s1), l1);
               ] );
-          Noeud
-            ( (NonTerminal Comma_AttrSpec_star, _),
-              [ Noeud ((Terminal E, _), []) ] );
+          Noeud ((NonTerminal Comma_AttrSpec_star, _), l3);
           Noeud ((NonTerminal TypeDecl_Assignment, s), l);
           Noeud ((Terminal EOS, s2), []);
         ] ) ->
+      (match l3 with
+      | [ Noeud ((Terminal E, _), []) ]
+      | [
+          Noeud ((Terminal Comma, _), []);
+          Noeud
+            ( (NonTerminal AttrSpec, _),
+              [ Noeud ((NonTerminal Intent_in_out, _), _) ] );
+          Noeud
+            ( (NonTerminal Comma_AttrSpec_star, _),
+              [ Noeud ((Terminal E, _), []) ] );
+        ] ->
+          ()
+      | _ -> failwith "TypeDeclarationStmt 8");
       Noeud
         ( ToFlatten,
           [
@@ -491,12 +941,23 @@ let rec convert_to_abstract (t : at) : ast =
                 Noeud ((Terminal Real, _), []);
                 Noeud ((NonTerminal KindSelector_opt, s1), l1);
               ] );
-          Noeud
-            ( (NonTerminal Comma_AttrSpec_star, _),
-              [ Noeud ((Terminal E, _), []) ] );
+          Noeud ((NonTerminal Comma_AttrSpec_star, _), l3);
           Noeud ((NonTerminal TypeDecl_Assignment, s), l);
           Noeud ((Terminal EOS, s2), []);
         ] ) ->
+      (match l3 with
+      | [ Noeud ((Terminal E, _), []) ]
+      | [
+          Noeud ((Terminal Comma, _), []);
+          Noeud
+            ( (NonTerminal AttrSpec, _),
+              [ Noeud ((NonTerminal Intent_in_out, _), _) ] );
+          Noeud
+            ( (NonTerminal Comma_AttrSpec_star, _),
+              [ Noeud ((Terminal E, _), []) ] );
+        ] ->
+          ()
+      | _ -> failwith "TypeDeclarationStmt 9");
       Noeud
         ( ToFlatten,
           [
@@ -737,7 +1198,7 @@ let rec convert_to_abstract (t : at) : ast =
               [
                 convert_to_abstract (Noeud ((NonTerminal IfConstruct, s1), l1));
               ] )
-      | _ -> failwith "")
+      | _ -> failwith "ExecutableConstruct")
   | Noeud
       ( (NonTerminal ActionStmt, _),
         [ Noeud ((NonTerminal AssignmentStmt, s), l) ] ) ->
@@ -892,8 +1353,8 @@ let rec convert_to_abstract (t : at) : ast =
                     (convert_to_abstract
                        (Noeud ((NonTerminal LoopControl, s1), l1)))
                     [ convert_to_abstract (Noeud ((Terminal EOS, s), [])) ] )
-          | _ -> failwith "")
-      | _ -> failwith "")
+          | _ -> failwith "BlockDoConstruct 1")
+      | _ -> failwith "BlockDoConstruct 2")
   | Noeud
       ( (NonTerminal BlockDoConstruct, _),
         [
@@ -960,8 +1421,8 @@ let rec convert_to_abstract (t : at) : ast =
                                  [] );
                          ] ))
                     [] )
-          | _ -> failwith "")
-      | _ -> failwith "")
+          | _ -> failwith "BlockDoConstruct 3")
+      | _ -> failwith "BlockDoConstruct 4")
   | Noeud
       ( (NonTerminal LoopControl, _),
         [
@@ -1022,7 +1483,7 @@ let rec convert_to_abstract (t : at) : ast =
                         (Noeud ((NonTerminal IntRealDpExpression, s4), l4));
                     ] );
               ] )
-      | _ -> failwith "")
+      | _ -> failwith "LoopControl")
   | Noeud
       ( (NonTerminal IntRealDpExpression, _),
         [ Noeud ((NonTerminal Expr, s), l) ] ) ->
@@ -1087,7 +1548,7 @@ let rec convert_to_abstract (t : at) : ast =
                        (convert_to_abstract (Noeud ((Terminal EOS, s5), [])))
                        !inner )
               :: !next )
-      | _ -> failwith "")
+      | _ -> failwith "IfConstruct")
   | Noeud
       ( (NonTerminal ElseIfStmt_ExecutionPartConstruct_star_star, _),
         [
@@ -1119,7 +1580,7 @@ let rec convert_to_abstract (t : at) : ast =
                 (Noeud ((NonTerminal ScalarLogicalExpr, s1), l1))
               :: convert_to_abstract (Noeud ((Terminal EOS, s2), []))
               :: !inner )
-      | _ -> failwith "")
+      | _ -> failwith "ElseIfStmt_ExecutionPartConstruct_star_star")
   | Noeud
       ( (NonTerminal ExecutionPartConstruct_star, _),
         [
@@ -1162,7 +1623,7 @@ let rec convert_to_abstract (t : at) : ast =
           Noeud
             ( Syntax Else,
               convert_to_abstract (Noeud ((Terminal EOS, s2), [])) :: !inner )
-      | _ -> failwith "")
+      | _ -> failwith "ElseStmt_ExecutionPartConstruct_star_opt")
   | Noeud
       ( (NonTerminal ExecutionPartConstruct, _),
         [ Noeud ((NonTerminal ExecutableConstruct, s), l) ] ) ->
@@ -1234,7 +1695,7 @@ let rec convert_to_abstract (t : at) : ast =
                 convert_to_abstract
                   (Noeud ((NonTerminal EquivOp_EquivOperand_star, s1), l1));
               ] )
-      | _ -> failwith "")
+      | _ -> failwith "Level5Expr")
   | Noeud
       ( (NonTerminal OrOp_OrOperand_star, _),
         [
@@ -1417,7 +1878,7 @@ let rec convert_to_abstract (t : at) : ast =
                 convert_to_abstract
                   (Noeud ((NonTerminal RelOp_Level3Expr_star, s1), l1));
               ] )
-      | _ -> failwith "")
+      | _ -> failwith "Level4Expr")
   | Noeud
       ((NonTerminal Level3Expr, _), [ Noeud ((NonTerminal Level2Expr, s), l) ])
     ->
@@ -1482,7 +1943,7 @@ let rec convert_to_abstract (t : at) : ast =
                 convert_to_abstract
                   (Noeud ((NonTerminal AddOp_Sign_opt_AddOperand_star, s2), l2));
               ] )
-      | _ -> failwith "")
+      | _ -> failwith "Level2Expr")
   | Noeud
       ( (NonTerminal Sign_opt_AddOperand, _),
         [
@@ -1567,7 +2028,7 @@ let rec convert_to_abstract (t : at) : ast =
                 convert_to_abstract
                   (Noeud ((NonTerminal MultOp_MultOperand_star, s2), l2));
               ] )
-      | _ -> failwith "")
+      | _ -> failwith "AddOperand")
   | Noeud
       ( (NonTerminal PowerOp_Level1Expr_star, _),
         [
@@ -1647,7 +2108,7 @@ let rec convert_to_abstract (t : at) : ast =
                 convert_to_abstract (Noeud ((NonTerminal Expr, s), l));
                 Noeud (Parenthesefermante, []);
               ] )
-      | _ -> failwith "")
+      | _ -> failwith "Primary")
   | Noeud ((NonTerminal Name, _), [ Noeud ((Terminal Ident, s), []) ])
   | Noeud ((NonTerminal ArrayName, _), [ Noeud ((Terminal Ident, s), []) ])
   | Noeud ((NonTerminal ComponentName, _), [ Noeud ((Terminal Ident, s), []) ])
@@ -1677,5 +2138,7 @@ let rec convert_to_abstract (t : at) : ast =
            prerr_char ' ';
            prerr_string (string_of_symbol x);
            prerr_newline ()
-       | Noeud ((s, _), _) -> prerr_string (string_of_symbol s));
+       | Noeud ((s, _), _) ->
+           prerr_string (string_of_symbol s);
+           prerr_newline ());
       failwith "is not implemented yet"

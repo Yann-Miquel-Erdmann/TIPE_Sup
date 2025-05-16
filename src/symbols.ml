@@ -66,7 +66,6 @@ type non_terminal =
   | Function_or_Subroutine_star_MainProgram
   | Function_or_Subroutine_star
   | Function_or_Subroutine
-  | Comment_MainProgram
   | MainProgram
   | MainRange
   | BodyConstruct_star
@@ -313,7 +312,6 @@ let string_of_non_terminal (nt : non_terminal) : string =
   | Function_or_Subroutine_star_MainProgram -> "Function_or_Subroutine_star_MainProgram"
   | Function_or_Subroutine_star -> "Function_or_Subroutine_star"
   | Function_or_Subroutine -> "Function_or_Subroutine"
-  | Comment_MainProgram -> "Comment_MainProgram"
   | MainProgram -> "MainProgram"
   | MainRange -> "MainRange"
   | BodyConstruct_star -> "BodyConstruct_star"
