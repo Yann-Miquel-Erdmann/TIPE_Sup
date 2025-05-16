@@ -8,7 +8,7 @@ type grammar = { rules_htbl : rule_hashtable; start_symbol : Symbols.symbol }
 (** pour un symbole [s], renvoie sa représentation sous forme de chaîne *)
 let string_of_symbol (s : symbol) : string =
   match s with
-  | Terminal t -> repr_of_terminal t
+  | Terminal t -> string_of_terminal t
   | NonTerminal nt -> string_of_non_terminal nt
 
 (** affiche le symbole [s] *)
