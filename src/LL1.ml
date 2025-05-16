@@ -47,6 +47,7 @@ let first (g : grammar) : symbol_SS_Htbl =
              if SymbolSet.disjoint f acc then SymbolSet.union f acc
              else (
                print_symbol s;
+
                failwith "the first set is not disjoined"))
            SymbolSet.empty patterns)
     else ()
@@ -61,7 +62,7 @@ let first (g : grammar) : symbol_SS_Htbl =
           && q <> []
         then
           SymbolSet.union (first_of_pattern s q)
-            (Hashtbl.find first_h fst_symbol)
+            (SymbolSet.remove (Terminal E) (Hashtbl.find first_h fst_symbol))
         else Hashtbl.find first_h fst_symbol
   in
   Hashtbl.iter (fun name pattern -> first_of_rule (name, pattern)) g.rules_htbl;
@@ -80,7 +81,7 @@ let rec first_of_pattern (fst_ss_htbl : symbol_SS_Htbl) (p : pattern) :
       then
         SymbolSet.union
           (first_of_pattern fst_ss_htbl q)
-          (Hashtbl.find fst_ss_htbl (NonTerminal nt))
+          (SymbolSet.remove (Terminal E) (Hashtbl.find fst_ss_htbl (NonTerminal nt)))
       else Hashtbl.find fst_ss_htbl (NonTerminal nt)
 
 (* returns a hashtable containing the follow set of every non terminal (all the terminals that can occur after a rule) *)
