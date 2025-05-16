@@ -49,24 +49,20 @@ let rec convert_to_abstract (t : at) : ast =
   | Noeud ((NonTerminal ExecutableProgram, s0), l) -> (
       match l with
       | [
-       Noeud ((Terminal EOS, s1), []); Noeud ((NonTerminal ProgramUnit, s), l);
+       Noeud ((Terminal EOS, s1), []); Noeud ((NonTerminal MainProgram, s), l);
       ] ->
           Noeud
             ( ProgramRoot,
               [
                 convert_to_abstract (Noeud ((Terminal EOS, s1), []));
-                convert_to_abstract (Noeud ((NonTerminal ProgramUnit, s), l));
+                convert_to_abstract (Noeud ((NonTerminal MainProgram, s), l));
               ] )
-      | [ Noeud ((NonTerminal ProgramUnit, s), l) ] ->
+      | [ Noeud ((NonTerminal MainProgram, s), l) ] ->
           Noeud
             ( ProgramRoot,
-              [ convert_to_abstract (Noeud ((NonTerminal ProgramUnit, s), l)) ]
+              [ convert_to_abstract (Noeud ((NonTerminal MainProgram, s), l)) ]
             )
       | _ -> failwith "")
-  | Noeud
-      ((NonTerminal ProgramUnit, _), [ Noeud ((NonTerminal MainProgram, s), l) ])
-    ->
-      convert_to_abstract (Noeud ((NonTerminal MainProgram, s), l))
   | Noeud
       ( (NonTerminal MainProgram, _),
         [

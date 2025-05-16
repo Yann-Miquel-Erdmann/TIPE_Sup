@@ -1,8 +1,11 @@
-ExecutableProgram -> ProgramUnit | StartCommentBlock ProgramUnit
+ExecutableProgram -> StartCommentBlock Function_or_Subroutine_star_MainProgram | Function_or_Subroutine_star_MainProgram
 
 StartCommentBlock -> EOS
 
-ProgramUnit -> MainProgram
+Function_or_Subroutine_star_MainProgram -> Function_or_Subroutine Function_or_Subroutine_star_MainProgram | MainProgram Function_or_Subroutine_star
+Function_or_Subroutine_star -> Function_or_Subroutine Function_or_Subroutine_star | E
+
+Function_or_Subroutine -> FunctionSubprogram | SubroutineSubprogram
 
 MainProgram -> ProgramStmt MainRange
 
@@ -12,6 +15,31 @@ BodyConstruct_star -> BodyConstruct BodyConstruct_star | E
 
 ProgramStmt -> Program ProgramName EOS
 EndProgramStmt -> EndProgram EndName_opt EOS
+
+FunctionSubprogram -> FunctionPrefix FunctionName FunctionRange 
+
+FunctionPrefix -> TypeSpec Function | Function
+
+FunctionRange -> FunctionParList EOS BodyConstruct_star EndFunctionStmt 
+FunctionParList -> LParenthesis FunctionPar_Comma_FunctionPar_star_opt RParenthesis 
+FunctionPar_Comma_FunctionPar_star_opt -> FunctionPar Comma_FunctionPar_star | E
+Comma_FunctionPar_star -> Comma FunctionPar Comma_FunctionPar_star | E
+FunctionPar -> DummyArgName
+
+EndFunctionStmt -> EndFunction EndName_opt EOS
+
+
+SubroutineSubprogram -> Recursive Subroutine SubroutineName SubroutineRange | Subroutine SubroutineName SubroutineRange
+
+SubroutineRange -> SubroutineParList_opt EOS BodyConstruct_star EndSubroutineStmt
+SubroutineParList_opt -> LParenthesis SubroutinePar_Comma_SubroutinePar_star_opt RParenthesis | E
+SubroutinePar_Comma_SubroutinePar_star_opt -> SubroutinePar Comma_SubroutinePar_star | E
+Comma_SubroutinePar_star -> Comma SubroutinePar Comma_SubroutinePar_star | E
+SubroutinePar -> DummyArgName
+
+
+EndSubroutineStmt -> EndSubroutine EndName_opt EOS
+
 
 EndName_opt -> EndName | E
 
@@ -24,7 +52,9 @@ TypeDeclarationStmt -> TypeSpec Comma_AttrSpec_star TypeDecl_Assignment EOS
 
 Comma_AttrSpec_star -> Comma AttrSpec Comma_AttrSpec_star | E
 
-AttrSpec -> Parameter
+AttrSpec -> Parameter | Intent_in_out
+Intent_in_out -> Intent LParenthesis In_out RParenthesis
+In_out -> In | Out | InOut
 
 TypeDecl_Assignment -> Colon Colon EntityDecl Comma_EntityDecl_star | ObjectName Comma_ObjectName_star
 
@@ -169,7 +199,11 @@ EOS -> r'((!~[\n]*)?\n[ ]*)+'
 True -> '\.true\.'
 False -> '\.false\.'
 Program -> 'program'
+Function -> 'function'
+Subroutine -> 'subroutine'
 EndProgram -> 'end program'
+EndFunction -> 'end function'
+EndSubroutine -> 'end subroutine'
 EndDo -> 'end do'
 EndIf -> 'end if'
 Colon -> ':'
@@ -185,6 +219,10 @@ Complex -> 'complex'
 Character -> 'character'
 Logical -> 'logical'
 Parameter -> 'parameter'
+Intent -> 'intent'
+In -> 'in'
+Out -> 'out'
+InOut -> 'inout'
 Call -> 'call'
 Print -> 'print'
 Do -> 'do'
@@ -204,3 +242,4 @@ GreaterEqual -> '(>=)|(\.ge\.)'
 Equivalent -> '\.eqv\.' 
 NotEquivalent -> '\.neqv\.'
 Space -> _' '
+Recursive -> 'recursive'

@@ -15,7 +15,11 @@ type terminal =
   | True
   | False
   | Program
+  | Function
+  | Subroutine
   | EndProgram
+  | EndFunction
+  | EndSubroutine
   | EndDo
   | EndIf
   | Colon
@@ -31,6 +35,10 @@ type terminal =
   | Character
   | Logical
   | Parameter
+  | Intent
+  | In
+  | Out
+  | InOut
   | Call
   | Print
   | Do
@@ -50,16 +58,35 @@ type terminal =
   | Equivalent
   | NotEquivalent
   | Space
+  | Recursive
 
 type non_terminal =
   | ExecutableProgram
   | StartCommentBlock
-  | ProgramUnit
+  | Function_or_Subroutine_star_MainProgram
+  | Function_or_Subroutine_star
+  | Function_or_Subroutine
+  | Comment_MainProgram
   | MainProgram
   | MainRange
   | BodyConstruct_star
   | ProgramStmt
   | EndProgramStmt
+  | FunctionSubprogram
+  | FunctionPrefix
+  | FunctionRange
+  | FunctionParList
+  | FunctionPar_Comma_FunctionPar_star_opt
+  | Comma_FunctionPar_star
+  | FunctionPar
+  | EndFunctionStmt
+  | SubroutineSubprogram
+  | SubroutineRange
+  | SubroutineParList_opt
+  | SubroutinePar_Comma_SubroutinePar_star_opt
+  | Comma_SubroutinePar_star
+  | SubroutinePar
+  | EndSubroutineStmt
   | EndName_opt
   | BodyConstruct
   | SpecificationPartConstruct
@@ -67,6 +94,8 @@ type non_terminal =
   | TypeDeclarationStmt
   | Comma_AttrSpec_star
   | AttrSpec
+  | Intent_in_out
+  | In_out
   | TypeDecl_Assignment
   | Comma_ObjectName_star
   | Comma_EntityDecl_star
@@ -169,7 +198,11 @@ let repr_of_terminal (t : terminal) : string =
   | True -> "\\.true\\."
   | False -> "\\.false\\."
   | Program -> "program"
+  | Function -> "function"
+  | Subroutine -> "subroutine"
   | EndProgram -> "end program"
+  | EndFunction -> "end function"
+  | EndSubroutine -> "end subroutine"
   | EndDo -> "end do"
   | EndIf -> "end if"
   | Colon -> ":"
@@ -185,6 +218,10 @@ let repr_of_terminal (t : terminal) : string =
   | Character -> "character"
   | Logical -> "logical"
   | Parameter -> "parameter"
+  | Intent -> "intent"
+  | In -> "in"
+  | Out -> "out"
+  | InOut -> "inout"
   | Call -> "call"
   | Print -> "print"
   | Do -> "do"
@@ -204,6 +241,7 @@ let repr_of_terminal (t : terminal) : string =
   | Equivalent -> "\\.eqv\\."
   | NotEquivalent -> "\\.neqv\\."
   | Space -> " "
+  | Recursive -> "recursive"
 
 let string_of_terminal (t : terminal) : string =
 	match t with
@@ -223,7 +261,11 @@ let string_of_terminal (t : terminal) : string =
 	| True -> "True"
 	| False -> "False"
 	| Program -> "Program"
+	| Function -> "Function"
+	| Subroutine -> "Subroutine"
 	| EndProgram -> "EndProgram"
+	| EndFunction -> "EndFunction"
+	| EndSubroutine -> "EndSubroutine"
 	| EndDo -> "EndDo"
 	| EndIf -> "EndIf"
 	| Colon -> "Colon"
@@ -239,6 +281,10 @@ let string_of_terminal (t : terminal) : string =
 	| Character -> "Character"
 	| Logical -> "Logical"
 	| Parameter -> "Parameter"
+	| Intent -> "Intent"
+	| In -> "In"
+	| Out -> "Out"
+	| InOut -> "InOut"
 	| Call -> "Call"
 	| Print -> "Print"
 	| Do -> "Do"
@@ -258,17 +304,36 @@ let string_of_terminal (t : terminal) : string =
 	| Equivalent -> "Equivalent"
 	| NotEquivalent -> "NotEquivalent"
 	| Space -> "Space"
+	| Recursive -> "Recursive"
 
 let string_of_non_terminal (nt : non_terminal) : string =
   match nt with
   | ExecutableProgram -> "ExecutableProgram"
   | StartCommentBlock -> "StartCommentBlock"
-  | ProgramUnit -> "ProgramUnit"
+  | Function_or_Subroutine_star_MainProgram -> "Function_or_Subroutine_star_MainProgram"
+  | Function_or_Subroutine_star -> "Function_or_Subroutine_star"
+  | Function_or_Subroutine -> "Function_or_Subroutine"
+  | Comment_MainProgram -> "Comment_MainProgram"
   | MainProgram -> "MainProgram"
   | MainRange -> "MainRange"
   | BodyConstruct_star -> "BodyConstruct_star"
   | ProgramStmt -> "ProgramStmt"
   | EndProgramStmt -> "EndProgramStmt"
+  | FunctionSubprogram -> "FunctionSubprogram"
+  | FunctionPrefix -> "FunctionPrefix"
+  | FunctionRange -> "FunctionRange"
+  | FunctionParList -> "FunctionParList"
+  | FunctionPar_Comma_FunctionPar_star_opt -> "FunctionPar_Comma_FunctionPar_star_opt"
+  | Comma_FunctionPar_star -> "Comma_FunctionPar_star"
+  | FunctionPar -> "FunctionPar"
+  | EndFunctionStmt -> "EndFunctionStmt"
+  | SubroutineSubprogram -> "SubroutineSubprogram"
+  | SubroutineRange -> "SubroutineRange"
+  | SubroutineParList_opt -> "SubroutineParList_opt"
+  | SubroutinePar_Comma_SubroutinePar_star_opt -> "SubroutinePar_Comma_SubroutinePar_star_opt"
+  | Comma_SubroutinePar_star -> "Comma_SubroutinePar_star"
+  | SubroutinePar -> "SubroutinePar"
+  | EndSubroutineStmt -> "EndSubroutineStmt"
   | EndName_opt -> "EndName_opt"
   | BodyConstruct -> "BodyConstruct"
   | SpecificationPartConstruct -> "SpecificationPartConstruct"
@@ -276,6 +341,8 @@ let string_of_non_terminal (nt : non_terminal) : string =
   | TypeDeclarationStmt -> "TypeDeclarationStmt"
   | Comma_AttrSpec_star -> "Comma_AttrSpec_star"
   | AttrSpec -> "AttrSpec"
+  | Intent_in_out -> "Intent_in_out"
+  | In_out -> "In_out"
   | TypeDecl_Assignment -> "TypeDecl_Assignment"
   | Comma_ObjectName_star -> "Comma_ObjectName_star"
   | Comma_EntityDecl_star -> "Comma_EntityDecl_star"

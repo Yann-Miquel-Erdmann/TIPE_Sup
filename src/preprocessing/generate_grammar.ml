@@ -57,8 +57,9 @@ let get_derivations (s : char list) : pattern list =
       match s with
       | [] ->
           [ String.trim (String.of_seq (List.to_seq (List.rev rev_rule_name))) ]
-      | c1 :: ' ' :: c2 :: q when alphanumerical_min c1 && alphanumerical_maj c2
-        ->
+      | c1 :: ' ' :: c2 :: q
+        when (alphanumerical_min c1 || alphanumerical_maj c1)
+             && alphanumerical_maj c2 ->
           String.trim
             (String.of_seq (List.to_seq (List.rev (c1 :: rev_rule_name))))
           :: split_derivation_aux (c2 :: q) []
