@@ -11,3 +11,10 @@ src/prebuild/*.cm[aio]
 _build
 
 research_docs
+
+# pour le Tex
+Presentation/Yann/*
+!Presentation/Yann/*.tex
+!Presentation/Yann/*.md
+!Presentation/Yann/tikz/
+!Presentation/Yann/static/
