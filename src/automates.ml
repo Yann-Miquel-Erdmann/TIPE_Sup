@@ -499,9 +499,9 @@ let execution_mot (a : automate_det) (texte : char list) :
   (!last_found, !text_as_last, !last_read)
 
 (** exécute l'automate [a] en boucle sur le texte [txt] pour créer une liste de
-    léxèmes *)
+    lexèmes *)
 let exec (a : automate_det) (txt : string) : (symbol * string) list =
-  (** éxecute l'automate [a] en boucl sur le texte [texte] et concatène le
+  (** exécute l'automate [a] en boucle sur le texte [texte] et concatène le
       résultat dans [out] *)
   let rec exec_aux (a : automate_det) (texte : char list)
       (out : (terminal * string) list) : (terminal * string) list =
