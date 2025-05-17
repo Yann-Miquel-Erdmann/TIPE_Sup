@@ -47,7 +47,11 @@ let first (g : grammar) : symbol_SS_Htbl =
              if SymbolSet.disjoint f acc then SymbolSet.union f acc
              else (
                print_symbol s;
-
+               print_newline ();
+               print_SymbolSet f;
+               prerr_newline ();
+               print_SymbolSet acc;
+               print_newline ();
                failwith "the first set is not disjoined"))
            SymbolSet.empty patterns)
     else ()
@@ -81,7 +85,8 @@ let rec first_of_pattern (fst_ss_htbl : symbol_SS_Htbl) (p : pattern) :
       then
         SymbolSet.union
           (first_of_pattern fst_ss_htbl q)
-          (SymbolSet.remove (Terminal E) (Hashtbl.find fst_ss_htbl (NonTerminal nt)))
+          (SymbolSet.remove (Terminal E)
+             (Hashtbl.find fst_ss_htbl (NonTerminal nt)))
       else Hashtbl.find fst_ss_htbl (NonTerminal nt)
 
 (* returns a hashtable containing the follow set of every non terminal (all the terminals that can occur after a rule) *)
@@ -188,7 +193,7 @@ let analyse_LL1_of_symbol (g : grammar) (text : (symbol * string) list)
       (t, !txt)
   and analyse_LL1_of_symbol_aux (text : (symbol * string) list) (s : symbol) :
       at * (symbol * string) list =
-    (*print_endline ("analyse_LL1_of_symbol_aux " ^ string_of_symbol s);*)
+    print_endline ("analyse_LL1_of_symbol_aux " ^ string_of_symbol s);
     (*print_patterns [ List.map fst text ];
     print_newline ();*)
     if is_terminal (s, []) then
@@ -247,10 +252,10 @@ let analyse_LL1_of_symbol (g : grammar) (text : (symbol * string) list)
               failwith "error 2")
             else ();
             analyse_LL1_of_pattern text s (List.nth l 0))
-          else
-            (*print_endline "cas 2";
+          else (
+            print_endline "cas 2";
             print_symbol (fst (List.nth text 0));
-            print_newline ();*)
+            print_newline ();
             let l =
               List.filter
                 (fun p ->
@@ -267,7 +272,7 @@ let analyse_LL1_of_symbol (g : grammar) (text : (symbol * string) list)
               print_SymbolSet (Hashtbl.find first_sshtbl s);
               failwith "error 3")
             else ();
-            analyse_LL1_of_pattern text s (List.nth l 0)
+            analyse_LL1_of_pattern text s (List.nth l 0))
   in
   analyse_LL1_of_symbol_aux text s
 

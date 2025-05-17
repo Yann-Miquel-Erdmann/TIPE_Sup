@@ -43,20 +43,12 @@ let rec generate_function_parameter_string (params : ast list)
     (env : environnement_v2) : string =
   match params with
   | [] -> ""
-  | Noeud (Identificateur nom, []) :: [] -> str_of_env_type env nom ^ " " ^ nom
-  | Noeud (Identificateur nom, []) :: Noeud (Virgule, []) :: q
-  | Noeud (Identificateur nom, []) :: q ->
+  | Noeud (Name nom, []) :: [] -> str_of_env_type env nom ^ " " ^ nom
+  | Noeud (Name nom, []) :: Noeud (Virgule, []) :: q | Noeud (Name nom, []) :: q
+    ->
       str_of_env_type env nom ^ " " ^ nom ^ ", "
       ^ generate_function_parameter_string q env
   | _ -> failwith "paramètres de la fonction invalides dans la sa définition"
-
-(** convertis en chaîne la donnée constante [t] *)
-let string_of_data_type (t : data_type) : string =
-  match t with
-  | Entier s | Flottant s | Commentaire s -> s
-  | Caractere s -> "\"" ^ s ^ "\""
-  | Booleen b -> if b then "true" else "false"
-  | Imaginaire _ -> failwith "non pris en charge"
 
 (** crée une chaîne de [n] tabulations *)
 let tabs_to_string (n : int) : string = String.make n '\t'

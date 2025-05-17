@@ -12,6 +12,9 @@ type terminal =
   | SconDouble
   | Ident
   | EOS
+  | Return
+  | Result
+  | Contains
   | True
   | False
   | Program
@@ -68,6 +71,9 @@ type non_terminal =
   | Function_or_Subroutine
   | MainProgram
   | MainRange
+  | Contains_Function_opt_EndProgramStmt
+  | Contains_Function_opt
+  | FunctionSubprogram_star
   | BodyConstruct_star
   | ProgramStmt
   | EndProgramStmt
@@ -78,6 +84,7 @@ type non_terminal =
   | FunctionPar_Comma_FunctionPar_star_opt
   | Comma_FunctionPar_star
   | FunctionPar
+  | FunctionResult_opt
   | EndFunctionStmt
   | SubroutineSubprogram
   | SubroutineRange
@@ -107,6 +114,7 @@ type non_terminal =
   | TypeSpec
   | KindSelector_opt
   | ExecutableConstruct
+  | ReturnStmt
   | ActionStmt
   | AssignmentStmt
   | PrintStmt
@@ -155,6 +163,10 @@ type non_terminal =
   | PowerOp_Level1Expr_star
   | Level1Expr
   | Primary
+  | FunctionReference_opt
+  | FunctionArg_Comma_FunctionArg_star_opt_RParenthesis
+  | Comma_FunctionArg_star
+  | FunctionArg
   | Name
   | ArrayName
   | ComponentName
@@ -194,6 +206,9 @@ let repr_of_terminal (t : terminal) : string =
   | SconDouble -> "[\"](~[\"]|\"\")*[\"]"
   | Ident -> "[A-Za-z][A-Za-z0-9_]*"
   | EOS -> "((!~[\\n]*)?\\n[ ]*)+"
+  | Return -> "return"
+  | Result -> "result"
+  | Contains -> "contains"
   | True -> "\\.true\\."
   | False -> "\\.false\\."
   | Program -> "program"
@@ -257,6 +272,9 @@ let string_of_terminal (t : terminal) : string =
 	| SconDouble -> "SconDouble"
 	| Ident -> "Ident"
 	| EOS -> "EOS"
+	| Return -> "Return"
+	| Result -> "Result"
+	| Contains -> "Contains"
 	| True -> "True"
 	| False -> "False"
 	| Program -> "Program"
@@ -314,6 +332,9 @@ let string_of_non_terminal (nt : non_terminal) : string =
   | Function_or_Subroutine -> "Function_or_Subroutine"
   | MainProgram -> "MainProgram"
   | MainRange -> "MainRange"
+  | Contains_Function_opt_EndProgramStmt -> "Contains_Function_opt_EndProgramStmt"
+  | Contains_Function_opt -> "Contains_Function_opt"
+  | FunctionSubprogram_star -> "FunctionSubprogram_star"
   | BodyConstruct_star -> "BodyConstruct_star"
   | ProgramStmt -> "ProgramStmt"
   | EndProgramStmt -> "EndProgramStmt"
@@ -324,6 +345,7 @@ let string_of_non_terminal (nt : non_terminal) : string =
   | FunctionPar_Comma_FunctionPar_star_opt -> "FunctionPar_Comma_FunctionPar_star_opt"
   | Comma_FunctionPar_star -> "Comma_FunctionPar_star"
   | FunctionPar -> "FunctionPar"
+  | FunctionResult_opt -> "FunctionResult_opt"
   | EndFunctionStmt -> "EndFunctionStmt"
   | SubroutineSubprogram -> "SubroutineSubprogram"
   | SubroutineRange -> "SubroutineRange"
@@ -353,6 +375,7 @@ let string_of_non_terminal (nt : non_terminal) : string =
   | TypeSpec -> "TypeSpec"
   | KindSelector_opt -> "KindSelector_opt"
   | ExecutableConstruct -> "ExecutableConstruct"
+  | ReturnStmt -> "ReturnStmt"
   | ActionStmt -> "ActionStmt"
   | AssignmentStmt -> "AssignmentStmt"
   | PrintStmt -> "PrintStmt"
@@ -401,6 +424,10 @@ let string_of_non_terminal (nt : non_terminal) : string =
   | PowerOp_Level1Expr_star -> "PowerOp_Level1Expr_star"
   | Level1Expr -> "Level1Expr"
   | Primary -> "Primary"
+  | FunctionReference_opt -> "FunctionReference_opt"
+  | FunctionArg_Comma_FunctionArg_star_opt_RParenthesis -> "FunctionArg_Comma_FunctionArg_star_opt_RParenthesis"
+  | Comma_FunctionArg_star -> "Comma_FunctionArg_star"
+  | FunctionArg -> "FunctionArg"
   | Name -> "Name"
   | ArrayName -> "ArrayName"
   | ComponentName -> "ComponentName"

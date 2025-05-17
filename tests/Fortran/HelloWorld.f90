@@ -15,5 +15,18 @@ program hello
   ! This is a comment line; it is ignored by the compiler
   print *, "Hello, World!"
   
+  print *, test (0)
+  print *, test (1)
 
+contains
+  function test(a) result(b)
+    integer :: a
+    integer :: b
+    if (a == 0) then
+      b = -1
+      return
+    end if
+    b = a
+
+  end function
 end program hello

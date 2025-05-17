@@ -16,9 +16,12 @@
 
 #load "environnement.cmo"
 
-#use "det_automaton.ml"
-
 #use "generateC.ml"
+
+#use "det_automaton.ml"
+(*let l = exec_of_file syntax_automate_det "tests/Fortran/HelloWorld.f90"
+let a = analyse_LL1 Grammar.grammar l
+let t = convert_to_abstract a*)
 (* #load "dictionnaire.cmo"
 #load "environnement.cmo";;
 #load "bibliotheques.cmo"

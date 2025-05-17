@@ -9,7 +9,12 @@ Function_or_Subroutine -> FunctionSubprogram | SubroutineSubprogram
 
 MainProgram -> ProgramStmt MainRange
 
-MainRange -> BodyConstruct BodyConstruct_star EndProgramStmt | EndProgramStmt
+MainRange -> BodyConstruct BodyConstruct_star Contains_Function_opt_EndProgramStmt | Contains_Function_opt_EndProgramStmt
+Contains_Function_opt_EndProgramStmt -> Contains_Function_opt EndProgramStmt
+
+Contains_Function_opt -> Contains EOS FunctionSubprogram_star
+
+FunctionSubprogram_star -> FunctionSubprogram FunctionSubprogram_star | E
 
 BodyConstruct_star -> BodyConstruct BodyConstruct_star | E
 
@@ -20,11 +25,13 @@ FunctionSubprogram -> FunctionPrefix FunctionName FunctionRange
 
 FunctionPrefix -> TypeSpec Function | Function
 
-FunctionRange -> FunctionParList EOS BodyConstruct_star EndFunctionStmt 
+FunctionRange -> FunctionParList FunctionResult_opt EOS BodyConstruct_star EndFunctionStmt 
 FunctionParList -> LParenthesis FunctionPar_Comma_FunctionPar_star_opt RParenthesis 
 FunctionPar_Comma_FunctionPar_star_opt -> FunctionPar Comma_FunctionPar_star | E
 Comma_FunctionPar_star -> Comma FunctionPar Comma_FunctionPar_star | E
 FunctionPar -> DummyArgName
+
+FunctionResult_opt -> Result LParenthesis VariableName RParenthesis | E
 
 EndFunctionStmt -> EndFunction EndName_opt EOS
 
@@ -77,7 +84,9 @@ TypeSpec -> Integer KindSelector_opt | Double | Complex KindSelector_opt | Logic
 
 KindSelector_opt -> LParenthesis Expr RParenthesis | E
 
-ExecutableConstruct -> ActionStmt | DoConstruct | IfConstruct 
+ExecutableConstruct -> ActionStmt | DoConstruct | IfConstruct | ReturnStmt
+
+ReturnStmt -> Return EOS
 
 
 ActionStmt -> AssignmentStmt | PrintStmt
@@ -151,7 +160,16 @@ MultOperand -> Level1Expr PowerOp_Level1Expr_star
 PowerOp_Level1Expr_star -> PowerOp Level1Expr PowerOp_Level1Expr_star | E
 
 Level1Expr -> Primary
-Primary -> Icon | Rcon | Dcon | Name | Scon | LogicalConstant | LParenthesis Expr RParenthesis
+Primary -> Icon | Rcon | Dcon | Name FunctionReference_opt | Scon | LogicalConstant | LParenthesis Expr RParenthesis 
+
+FunctionReference_opt -> LParenthesis FunctionArg_Comma_FunctionArg_star_opt_RParenthesis | E
+
+FunctionArg_Comma_FunctionArg_star_opt_RParenthesis -> FunctionArg Comma_FunctionArg_star RParenthesis | RParenthesis
+Comma_FunctionArg_star -> Comma FunctionArg Comma_FunctionArg_star | E
+
+FunctionArg -> Expr
+
+// Expr -> Expr _
 
 Name -> Ident
 ArrayName -> Ident
@@ -196,6 +214,9 @@ Ident -> s'[A-Za-z][A-Za-z0-9_]*'
 
 EOS -> r'((!~[\n]*)?\n[ ]*)+'
 
+Return -> 'return'
+Result -> 'result'
+Contains -> 'contains'
 True -> '\.true\.'
 False -> '\.false\.'
 Program -> 'program'
