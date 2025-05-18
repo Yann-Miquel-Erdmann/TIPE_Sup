@@ -68,11 +68,12 @@ type non_terminal =
   | StartCommentBlock
   | Function_or_Subroutine_star_MainProgram
   | Function_or_Subroutine_star
+  | Recursive_opt_Function_or_Subroutine
   | Function_or_Subroutine
   | MainProgram
   | MainRange
   | Contains_Function_opt_EndProgramStmt
-  | Contains_Function_opt
+  | Contains_Function
   | FunctionSubprogram_star
   | BodyConstruct_star
   | ProgramStmt
@@ -329,11 +330,12 @@ let string_of_non_terminal (nt : non_terminal) : string =
   | StartCommentBlock -> "StartCommentBlock"
   | Function_or_Subroutine_star_MainProgram -> "Function_or_Subroutine_star_MainProgram"
   | Function_or_Subroutine_star -> "Function_or_Subroutine_star"
+  | Recursive_opt_Function_or_Subroutine -> "Recursive_opt_Function_or_Subroutine"
   | Function_or_Subroutine -> "Function_or_Subroutine"
   | MainProgram -> "MainProgram"
   | MainRange -> "MainRange"
   | Contains_Function_opt_EndProgramStmt -> "Contains_Function_opt_EndProgramStmt"
-  | Contains_Function_opt -> "Contains_Function_opt"
+  | Contains_Function -> "Contains_Function"
   | FunctionSubprogram_star -> "FunctionSubprogram_star"
   | BodyConstruct_star -> "BodyConstruct_star"
   | ProgramStmt -> "ProgramStmt"

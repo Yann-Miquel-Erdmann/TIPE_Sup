@@ -11,11 +11,11 @@ Function_or_Subroutine -> FunctionSubprogram | SubroutineSubprogram
 MainProgram -> ProgramStmt MainRange
 
 MainRange -> BodyConstruct BodyConstruct_star Contains_Function_opt_EndProgramStmt | Contains_Function_opt_EndProgramStmt
-Contains_Function_opt_EndProgramStmt -> Contains_Function_opt EndProgramStmt
+Contains_Function_opt_EndProgramStmt -> Contains_Function EndProgramStmt | EndProgramStmt
 
-Contains_Function_opt -> Contains EOS FunctionSubprogram_star
+Contains_Function -> Contains EOS FunctionSubprogram_star
 
-FunctionSubprogram_star -> FunctionSubprogram FunctionSubprogram_star | E
+FunctionSubprogram_star -> Recursive FunctionSubprogram FunctionSubprogram_star | FunctionSubprogram FunctionSubprogram_star | E
 
 BodyConstruct_star -> BodyConstruct BodyConstruct_star | E
 

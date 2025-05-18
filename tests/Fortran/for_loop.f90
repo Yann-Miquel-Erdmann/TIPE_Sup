@@ -5,8 +5,6 @@ program printNum
    
    if (n == 2) then
       n = 7
-   else if 
-
    end if 
 
    ! if (.true.) print *, "Hello"
