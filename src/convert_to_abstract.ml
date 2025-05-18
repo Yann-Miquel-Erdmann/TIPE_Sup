@@ -108,14 +108,15 @@ let rec convert_to_abstract (t : at) : ast =
   | Noeud ((NonTerminal Function_or_Subroutine_star_MainProgram, _), l) -> (
       match l with
       | [
-       Noeud ((NonTerminal Function_or_Subroutine, s), l);
+       Noeud ((NonTerminal Recursive_opt_Function_or_Subroutine, s), l);
        Noeud ((NonTerminal Function_or_Subroutine_star_MainProgram, s1), l1);
       ] ->
           Noeud
             ( ToFlatten,
               [
                 convert_to_abstract
-                  (Noeud ((NonTerminal Function_or_Subroutine, s), l));
+                  (Noeud
+                     ((NonTerminal Recursive_opt_Function_or_Subroutine, s), l));
                 convert_to_abstract
                   (Noeud
                      ( (NonTerminal Function_or_Subroutine_star_MainProgram, s1),
@@ -143,26 +144,37 @@ let rec convert_to_abstract (t : at) : ast =
   | Noeud ((NonTerminal Function_or_Subroutine_star, _), l) -> (
       match l with
       | [
-       Noeud ((NonTerminal Function_or_Subroutine, s), l);
+       Noeud ((NonTerminal Recursive_opt_Function_or_Subroutine, s), l);
        Noeud
          ( (NonTerminal Function_or_Subroutine_star, _),
            [ Noeud ((Terminal E, _), []) ] );
       ] ->
           convert_to_abstract
-            (Noeud ((NonTerminal Function_or_Subroutine, s), l))
+            (Noeud ((NonTerminal Recursive_opt_Function_or_Subroutine, s), l))
       | [
-       Noeud ((NonTerminal Function_or_Subroutine, s), l);
+       Noeud ((NonTerminal Recursive_opt_Function_or_Subroutine, s), l);
        Noeud ((NonTerminal Function_or_Subroutine_star, s1), l1);
       ] ->
           Noeud
             ( ToFlatten,
               [
                 convert_to_abstract
-                  (Noeud ((NonTerminal Function_or_Subroutine, s), l));
+                  (Noeud
+                     ((NonTerminal Recursive_opt_Function_or_Subroutine, s), l));
                 convert_to_abstract
                   (Noeud ((NonTerminal Function_or_Subroutine_star, s1), l1));
               ] )
       | _ -> failwith "Function_or_Subroutine_star")
+  | Noeud
+      ( (NonTerminal Recursive_opt_Function_or_Subroutine, _),
+        [
+          Noeud ((Terminal Recursive, _), []);
+          Noeud ((NonTerminal Function_or_Subroutine, s), l);
+        ] )
+  | Noeud
+      ( (NonTerminal Recursive_opt_Function_or_Subroutine, _),
+        [ Noeud ((NonTerminal Function_or_Subroutine, s), l) ] ) ->
+      convert_to_abstract (Noeud ((NonTerminal Function_or_Subroutine, s), l))
   | Noeud
       ( (NonTerminal Function_or_Subroutine, _),
         [ Noeud ((NonTerminal FunctionSubprogram, s), l) ] ) ->
@@ -347,27 +359,20 @@ let rec convert_to_abstract (t : at) : ast =
           Noeud ((Terminal EOS, s), l);
         ] ) ->
       convert_to_abstract (Noeud ((Terminal EOS, s), l))
-  | Noeud ((NonTerminal SubroutineSubprogram, _), l) -> (
-      match l with
-      | [
-          Noeud ((Terminal Recursive, _), []);
+  | Noeud
+      ( (NonTerminal SubroutineSubprogram, _),
+        [
           Noeud ((Terminal Subroutine, _), []);
           Noeud ((NonTerminal SubroutineName, s), l);
           Noeud ((NonTerminal SubroutineRange, s1), l1);
-        ]
-      | [
-          Noeud ((Terminal Subroutine, _), []);
-          Noeud ((NonTerminal SubroutineName, s), l);
-          Noeud ((NonTerminal SubroutineRange, s1), l1);
-        ] ->
-          Noeud
-            ( Syntax Subroutine,
-              convert_to_abstract (Noeud ((NonTerminal SubroutineName, s), l))
-              :: flatten
-                   (convert_to_abstract
-                      (Noeud ((NonTerminal SubroutineRange, s1), l1)))
-                   [] )
-      | _ -> failwith "SubroutineSubprogram")
+        ] ) ->
+      Noeud
+        ( Syntax Subroutine,
+          convert_to_abstract (Noeud ((NonTerminal SubroutineName, s), l))
+          :: flatten
+               (convert_to_abstract
+                  (Noeud ((NonTerminal SubroutineRange, s1), l1)))
+               [] )
   | Noeud
       ( (NonTerminal SubroutineRange, _),
         [
@@ -625,7 +630,6 @@ let rec convert_to_abstract (t : at) : ast =
                     (Noeud ((NonTerminal BodyConstruct_star, s1), l1));
                 ] );
           ] )
-  (* Contains_Function_opt_EndProgramStmt -> Contains_Function_opt EndProgramStmt *)
   | Noeud
       ( (NonTerminal Contains_Function_opt_EndProgramStmt, _),
         [

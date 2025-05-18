@@ -2,9 +2,10 @@ ExecutableProgram -> StartCommentBlock Function_or_Subroutine_star_MainProgram |
 
 StartCommentBlock -> EOS
 
-Function_or_Subroutine_star_MainProgram -> Function_or_Subroutine Function_or_Subroutine_star_MainProgram | MainProgram Function_or_Subroutine_star
-Function_or_Subroutine_star -> Function_or_Subroutine Function_or_Subroutine_star | E
+Function_or_Subroutine_star_MainProgram -> Recursive_opt_Function_or_Subroutine Function_or_Subroutine_star_MainProgram | MainProgram Function_or_Subroutine_star
+Function_or_Subroutine_star -> Recursive_opt_Function_or_Subroutine Function_or_Subroutine_star | E
 
+Recursive_opt_Function_or_Subroutine -> Recursive Function_or_Subroutine | Function_or_Subroutine
 Function_or_Subroutine -> FunctionSubprogram | SubroutineSubprogram
 
 MainProgram -> ProgramStmt MainRange
@@ -36,7 +37,7 @@ FunctionResult_opt -> Result LParenthesis VariableName RParenthesis | E
 EndFunctionStmt -> EndFunction EndName_opt EOS
 
 
-SubroutineSubprogram -> Recursive Subroutine SubroutineName SubroutineRange | Subroutine SubroutineName SubroutineRange
+SubroutineSubprogram -> Subroutine SubroutineName SubroutineRange
 
 SubroutineRange -> SubroutineParList_opt EOS BodyConstruct_star EndSubroutineStmt
 SubroutineParList_opt -> LParenthesis SubroutinePar_Comma_SubroutinePar_star_opt RParenthesis | E
