@@ -502,7 +502,7 @@ let rec convert_to_abstract (t : at) : ast =
                  ] ))
             [] )
   | Noeud
-      ( (NonTerminal Contains_Function_opt, _),
+      ( (NonTerminal Contains_Function, _),
         [
           Noeud ((Terminal Contains, _), []);
           Noeud ((Terminal EOS, s), l);
@@ -512,7 +512,7 @@ let rec convert_to_abstract (t : at) : ast =
         ] ) ->
       convert_to_abstract (Noeud ((Terminal EOS, s), l))
   | Noeud
-      ( (NonTerminal Contains_Function_opt, _),
+      ( (NonTerminal Contains_Function, _),
         [
           Noeud ((Terminal Contains, _), []);
           Noeud ((Terminal EOS, s), l);
@@ -528,6 +528,15 @@ let rec convert_to_abstract (t : at) : ast =
   | Noeud
       ( (NonTerminal FunctionSubprogram_star, _),
         [
+          Noeud ((Terminal Recursive, _), []);
+          Noeud ((NonTerminal FunctionSubprogram, s), l);
+          Noeud
+            ( (NonTerminal FunctionSubprogram_star, _),
+              [ Noeud ((Terminal E, _), []) ] );
+        ] )
+  | Noeud
+      ( (NonTerminal FunctionSubprogram_star, _),
+        [
           Noeud ((NonTerminal FunctionSubprogram, s), l);
           Noeud
             ( (NonTerminal FunctionSubprogram_star, _),
@@ -537,6 +546,13 @@ let rec convert_to_abstract (t : at) : ast =
   | Noeud
       ( (NonTerminal FunctionSubprogram_star, _),
         [
+          Noeud ((NonTerminal FunctionSubprogram, s), l);
+          Noeud ((NonTerminal FunctionSubprogram_star, s1), l1);
+        ] )
+  | Noeud
+      ( (NonTerminal FunctionSubprogram_star, _),
+        [
+          Noeud ((Terminal Recursive, _), []);
           Noeud ((NonTerminal FunctionSubprogram, s), l);
           Noeud ((NonTerminal FunctionSubprogram_star, s1), l1);
         ] ) ->
@@ -632,24 +648,19 @@ let rec convert_to_abstract (t : at) : ast =
           ] )
   | Noeud
       ( (NonTerminal Contains_Function_opt_EndProgramStmt, _),
-        [
-          Noeud
-            ( (NonTerminal Contains_Function_opt, _),
-              [ Noeud ((Terminal E, _), []) ] );
-          Noeud ((NonTerminal EndProgramStmt, s), l);
-        ] ) ->
+        [ Noeud ((NonTerminal EndProgramStmt, s), l) ] ) ->
       convert_to_abstract (Noeud ((NonTerminal EndProgramStmt, s), l))
   | Noeud
       ( (NonTerminal Contains_Function_opt_EndProgramStmt, _),
         [
-          Noeud ((NonTerminal Contains_Function_opt, s1), l1);
+          Noeud ((NonTerminal Contains_Function, s1), l1);
           Noeud ((NonTerminal EndProgramStmt, s), l);
         ] ) ->
       Noeud
         ( ToFlatten,
           [
             convert_to_abstract
-              (Noeud ((NonTerminal Contains_Function_opt, s1), l1));
+              (Noeud ((NonTerminal Contains_Function, s1), l1));
             convert_to_abstract (Noeud ((NonTerminal EndProgramStmt, s), l));
           ] )
   | Noeud

@@ -19,14 +19,14 @@ program hello
   print *, test (1)
 
 contains
-  function test(a) result(b)
+  recursive function test(a) result(b)
     integer :: a
     integer :: b
     if (a == 0) then
       b = -1
       return
     end if
-    b = a
+    b = test(a-1)
 
   end function
 end program hello

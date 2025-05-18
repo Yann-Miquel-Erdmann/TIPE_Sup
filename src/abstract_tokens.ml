@@ -22,13 +22,10 @@ type syntax =
   | Function
   | If
   | End_if
-  | Out
   | Integer
   | Logical
   | Program
   | Real
-  | Subroutine
-  | Then
   | While
   | Call
   | Print
@@ -36,6 +33,9 @@ type syntax =
   | Size
   | For
   | Step
+  (* v---only for post-processing---v *)
+  | Out
+  | Subroutine
 
 type token =
   | Operateur of operateur
@@ -43,7 +43,6 @@ type token =
   | OperateurLogique of operateur_logique
   | Syntax of syntax
   | NewLine
-  | Space
   | Name of string
   | Integer of string
   | Floating of string
@@ -51,7 +50,6 @@ type token =
   | Chaine of string
   | Commentaire of string
   | Booleen of bool
-  | Virgule
   | Parentheseouvrante
   | Parenthesefermante
   | ProgramRoot

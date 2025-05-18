@@ -44,8 +44,7 @@ let rec generate_function_parameter_string (params : ast list)
   match params with
   | [] -> ""
   | Noeud (Name nom, []) :: [] -> str_of_env_type env nom ^ " " ^ nom
-  | Noeud (Name nom, []) :: Noeud (Virgule, []) :: q | Noeud (Name nom, []) :: q
-    ->
+  | Noeud (Name nom, []) :: q ->
       str_of_env_type env nom ^ " " ^ nom ^ ", "
       ^ generate_function_parameter_string q env
   | _ -> failwith "paramètres de la fonction invalides dans la sa définition"
