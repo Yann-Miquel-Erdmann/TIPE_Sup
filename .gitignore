@@ -1,4 +1,6 @@
 *.out
+out.c
+out.f90
 
 src/*.o
 src/*.cm[aio]
