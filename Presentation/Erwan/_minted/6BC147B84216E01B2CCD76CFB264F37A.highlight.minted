@@ -1,0 +1,538 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{open} \PYG{n+nc}{Regex}
+\PYG{k}{open} \PYG{n+nc}{Symbols}
+\PYG{k}{open} \PYG{n+nc}{Vector}
+\PYG{k}{module} \PYG{n+nc}{IntSet} \PYG{o}{=} \PYG{n+nn}{Set}\PYG{p}{.}\PYG{n+nc}{Make} \PYG{o}{(}\PYG{n+nc}{Int}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{ différentes représentations d\PYGZsq{}automates utiles lors de sa transformation en automate déterministe }\PYG{c}{*)}
+\PYG{k}{type} \PYG{n}{automate} \PYG{o}{=} \PYG{o}{\PYGZob{}}
+  \PYG{n}{nodes} \PYG{o}{:} \PYG{k+kt}{int} \PYG{k+kt}{list}\PYG{o}{;}
+  \PYG{n}{debut\PYGZus{}l} \PYG{o}{:} \PYG{k+kt}{int} \PYG{k+kt}{list}\PYG{o}{;}
+  \PYG{n}{fin} \PYG{o}{:} \PYG{o}{(}\PYG{k+kt}{int} \PYG{o}{*} \PYG{n}{terminal}\PYG{o}{)} \PYG{k+kt}{list}\PYG{o}{;}
+  \PYG{n}{transitions} \PYG{o}{:} \PYG{o}{(}\PYG{k+kt}{char} \PYG{n}{option} \PYG{o}{*} \PYG{k+kt}{int}\PYG{o}{)} \PYG{k+kt}{list} \PYG{k+kt}{array}\PYG{o}{;}
+\PYG{o}{\PYGZcb{}}
+
+\PYG{k}{type} \PYG{n}{automate\PYGZus{}sans\PYGZus{}eps} \PYG{o}{=} \PYG{o}{\PYGZob{}}
+  \PYG{n}{nodes} \PYG{o}{:} \PYG{k+kt}{int} \PYG{k+kt}{list}\PYG{o}{;}
+  \PYG{n}{debut\PYGZus{}l} \PYG{o}{:} \PYG{k+kt}{int} \PYG{k+kt}{list}\PYG{o}{;}
+  \PYG{n}{fin} \PYG{o}{:} \PYG{o}{(}\PYG{k+kt}{int} \PYG{o}{*} \PYG{n}{terminal}\PYG{o}{)} \PYG{k+kt}{list}\PYG{o}{;}
+  \PYG{n}{transitions\PYGZus{}sans\PYGZus{}eps} \PYG{o}{:} \PYG{o}{(}\PYG{k+kt}{char} \PYG{o}{*} \PYG{k+kt}{int}\PYG{o}{)} \PYG{k+kt}{list} \PYG{k+kt}{array}\PYG{o}{;}
+\PYG{o}{\PYGZcb{}}
+
+\PYG{k}{type} \PYG{n}{pre\PYGZus{}automate\PYGZus{}det} \PYG{o}{=} \PYG{o}{\PYGZob{}}
+  \PYG{k}{mutable} \PYG{n}{nodes} \PYG{o}{:} \PYG{k+kt}{int} \PYG{k+kt}{list}\PYG{o}{;}
+  \PYG{n}{debut} \PYG{o}{:} \PYG{k+kt}{int}\PYG{o}{;}
+  \PYG{k}{mutable} \PYG{n}{fin} \PYG{o}{:} \PYG{n}{terminal} \PYG{n}{option} \PYG{k+kt}{array}\PYG{o}{;}
+  \PYG{k}{mutable} \PYG{n}{pre\PYGZus{}transitions} \PYG{o}{:} \PYG{k+kt}{int} \PYG{k+kt}{array} \PYG{n+nn}{Vector}\PYG{p}{.}\PYG{n}{t}\PYG{o}{;}
+\PYG{o}{\PYGZcb{}}
+
+\PYG{c}{(*}\PYG{c}{ automate de sortie utile pour la transpilation }\PYG{c}{*)}
+\PYG{k}{type} \PYG{n}{automate\PYGZus{}det} \PYG{o}{=} \PYG{o}{\PYGZob{}}
+  \PYG{n}{nodes} \PYG{o}{:} \PYG{k+kt}{int} \PYG{k+kt}{list}\PYG{o}{;}
+  \PYG{n}{debut} \PYG{o}{:} \PYG{k+kt}{int}\PYG{o}{;}
+  \PYG{n}{fin} \PYG{o}{:} \PYG{n}{terminal} \PYG{n}{option} \PYG{k+kt}{array}\PYG{o}{;}
+  \PYG{n}{transitions} \PYG{o}{:} \PYG{k+kt}{int} \PYG{k+kt}{array} \PYG{k+kt}{array}\PYG{o}{;}
+\PYG{o}{\PYGZcb{}}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ Renvoie la liste de toutes les lignes dans le fichier [file\PYGZus{}name]. }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{read\PYGZus{}file} \PYG{o}{(}\PYG{n}{file\PYGZus{}name} \PYG{o}{:} \PYG{k+kt}{string}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{string} \PYG{k+kt}{list} \PYG{o}{=}
+  \PYG{k}{let} \PYG{k}{rec} \PYG{n}{lire} \PYG{n}{file} \PYG{n}{liste} \PYG{o}{=}
+    \PYG{k}{let} \PYG{n}{line} \PYG{o}{=} \PYG{n}{input\PYGZus{}line} \PYG{n}{file} \PYG{k}{in}
+    \PYG{n+nb+bp}{()}\PYG{o}{;}
+    \PYG{k}{try} \PYG{n}{lire} \PYG{n}{file} \PYG{o}{(}\PYG{n}{line} \PYG{o}{::} \PYG{n}{liste}\PYG{o}{)}
+    \PYG{k}{with} \PYG{n+nc}{End\PYGZus{}of\PYGZus{}file} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n}{close\PYGZus{}in} \PYG{n}{file}\PYG{o}{;}
+      \PYG{n}{line} \PYG{o}{::} \PYG{n}{liste}
+  \PYG{k}{in}
+  \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{rev} \PYG{o}{(}\PYG{n}{lire} \PYG{o}{(}\PYG{n}{open\PYGZus{}in} \PYG{n}{file\PYGZus{}name}\PYG{o}{)} \PYG{n+nb+bp}{[]}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ Renvoie la liste [[0...n\PYGZhy{}1]]}\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{range\PYGZus{}list} \PYG{o}{(}\PYG{n}{n} \PYG{o}{:} \PYG{k+kt}{int}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{int} \PYG{k+kt}{list} \PYG{o}{=}
+  \PYG{k}{let} \PYG{n}{l} \PYG{o}{=} \PYG{n}{ref} \PYG{n+nb+bp}{[]} \PYG{k}{in}
+  \PYG{k}{for} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0} \PYG{k}{to} \PYG{n}{n} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1} \PYG{k}{do}
+    \PYG{n}{l} \PYG{o}{:=} \PYG{n}{i} \PYG{o}{::} \PYG{o}{!}\PYG{n}{l}
+  \PYG{k}{done}\PYG{o}{;}
+  \PYG{o}{!}\PYG{n}{l}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ crée l\PYGZsq{}automate de stage 1 à partir d\PYGZsq{}une expression régulière [reg] et d\PYGZsq{}un}
+\PYG{c}{    terminal [t] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{automate\PYGZus{}gen} \PYG{o}{(}\PYG{n}{reg} \PYG{o}{:} \PYG{n}{regex}\PYG{o}{)} \PYG{o}{(}\PYG{n}{t} \PYG{o}{:} \PYG{n}{terminal}\PYG{o}{)} \PYG{o}{:} \PYG{n}{automate} \PYG{o}{=}
+  \PYG{k}{let} \PYG{n}{dico} \PYG{o}{=} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{create} \PYG{l+m+mi}{0} \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{a} \PYG{o}{=}
+    \PYG{n}{ref} \PYG{o}{\PYGZob{}} \PYG{n}{nodes} \PYG{o}{=} \PYG{n+nb+bp}{[]}\PYG{o}{;} \PYG{n}{debut\PYGZus{}l} \PYG{o}{=} \PYG{o}{[} \PYG{l+m+mi}{0} \PYG{o}{]}\PYG{o}{;} \PYG{n}{fin} \PYG{o}{=} \PYG{o}{[} \PYG{o}{(}\PYG{l+m+mi}{1}\PYG{o}{,} \PYG{n}{t}\PYG{o}{)} \PYG{o}{]}\PYG{o}{;} \PYG{n}{transitions} \PYG{o}{=} \PYG{o}{[|}\PYG{o}{|]} \PYG{o}{\PYGZcb{}}
+  \PYG{k}{in}
+
+  \PYG{c}{(*}\PYG{c}{*}\PYG{c}{ ajoute la transition [n1 \PYGZhy{}\PYGZgt{} n2] étiquetée par [c] à l\PYGZsq{}automate }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{n}{add\PYGZus{}transition} \PYG{o}{(}\PYG{o}{(}\PYG{n}{n1}\PYG{o}{,} \PYG{n}{c}\PYG{o}{,} \PYG{n}{n2}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{int} \PYG{o}{*} \PYG{k+kt}{char} \PYG{n}{option} \PYG{o}{*} \PYG{k+kt}{int}\PYG{o}{)} \PYG{o}{=}
+    \PYG{k}{if} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{mem} \PYG{n}{dico} \PYG{n}{n1} \PYG{k}{then}
+      \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{replace} \PYG{n}{dico} \PYG{n}{n1} \PYG{o}{(}\PYG{o}{(}\PYG{n}{c}\PYG{o}{,} \PYG{n}{n2}\PYG{o}{)} \PYG{o}{::} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{dico} \PYG{n}{n1}\PYG{o}{)}
+    \PYG{k}{else} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{add} \PYG{n}{dico} \PYG{n}{n1} \PYG{o}{[} \PYG{o}{(}\PYG{n}{c}\PYG{o}{,} \PYG{n}{n2}\PYG{o}{)} \PYG{o}{]}
+  \PYG{k}{in}
+
+  \PYG{k}{let} \PYG{n}{next\PYGZus{}node} \PYG{o}{=} \PYG{n}{ref} \PYG{l+m+mi}{2} \PYG{k}{in}
+
+  \PYG{k}{let} \PYG{k}{rec} \PYG{n}{automate\PYGZus{}gen\PYGZus{}aux} \PYG{o}{(}\PYG{n}{reg} \PYG{o}{:} \PYG{n}{regex}\PYG{o}{)} \PYG{o}{(}\PYG{o}{(}\PYG{n}{node\PYGZus{}before}\PYG{o}{,} \PYG{n}{node\PYGZus{}after}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{int} \PYG{o}{*} \PYG{k+kt}{int}\PYG{o}{)}
+      \PYG{o}{:} \PYG{k+kt}{unit} \PYG{o}{=}
+    \PYG{k}{match} \PYG{n}{reg} \PYG{k}{with}
+    \PYG{o}{|} \PYG{n+nc}{Vide} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb+bp}{()}
+    \PYG{o}{|} \PYG{n+nc}{Epsilon} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{add\PYGZus{}transition} \PYG{o}{(}\PYG{n}{node\PYGZus{}before}\PYG{o}{,} \PYG{n+nc}{None}\PYG{o}{,} \PYG{n}{node\PYGZus{}after}\PYG{o}{)}
+    \PYG{o}{|} \PYG{n+nc}{AllChars} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{k}{for} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{32} \PYG{k}{to} \PYG{l+m+mi}{127} \PYG{k}{do}
+          \PYG{n}{add\PYGZus{}transition} \PYG{o}{(}\PYG{n}{node\PYGZus{}before}\PYG{o}{,} \PYG{n+nc}{Some} \PYG{o}{(}\PYG{n}{char\PYGZus{}of\PYGZus{}int} \PYG{n}{i}\PYG{o}{)}\PYG{o}{,} \PYG{n}{node\PYGZus{}after}\PYG{o}{)}
+        \PYG{k}{done}
+    \PYG{o}{|} \PYG{n+nc}{Caractere} \PYG{n}{x} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{add\PYGZus{}transition} \PYG{o}{(}\PYG{n}{node\PYGZus{}before}\PYG{o}{,} \PYG{n+nc}{Some} \PYG{n}{x}\PYG{o}{,} \PYG{n}{node\PYGZus{}after}\PYG{o}{)}
+    \PYG{o}{|} \PYG{n+nc}{Concat} \PYG{o}{(}\PYG{n}{g}\PYG{o}{,} \PYG{n}{d}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{k}{let} \PYG{n}{node} \PYG{o}{=} \PYG{o}{!}\PYG{n}{next\PYGZus{}node} \PYG{k}{in}
+        \PYG{n}{next\PYGZus{}node} \PYG{o}{:=} \PYG{o}{!}\PYG{n}{next\PYGZus{}node} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{o}{;}
+        \PYG{n}{automate\PYGZus{}gen\PYGZus{}aux} \PYG{n}{g} \PYG{o}{(}\PYG{n}{node\PYGZus{}before}\PYG{o}{,} \PYG{n}{node}\PYG{o}{)}\PYG{o}{;}
+        \PYG{n}{automate\PYGZus{}gen\PYGZus{}aux} \PYG{n}{d} \PYG{o}{(}\PYG{n}{node}\PYG{o}{,} \PYG{n}{node\PYGZus{}after}\PYG{o}{)}
+    \PYG{o}{|} \PYG{n+nc}{Ou} \PYG{o}{(}\PYG{n}{g}\PYG{o}{,} \PYG{n}{d}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{automate\PYGZus{}gen\PYGZus{}aux} \PYG{n}{g} \PYG{o}{(}\PYG{n}{node\PYGZus{}before}\PYG{o}{,} \PYG{n}{node\PYGZus{}after}\PYG{o}{)}\PYG{o}{;}
+        \PYG{n}{automate\PYGZus{}gen\PYGZus{}aux} \PYG{n}{d} \PYG{o}{(}\PYG{n}{node\PYGZus{}before}\PYG{o}{,} \PYG{n}{node\PYGZus{}after}\PYG{o}{)}
+    \PYG{o}{|} \PYG{n+nc}{Range} \PYG{o}{(}\PYG{n}{a1}\PYG{o}{,} \PYG{n}{a2}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{k}{for} \PYG{n}{i} \PYG{o}{=} \PYG{n}{int\PYGZus{}of\PYGZus{}char} \PYG{n}{a1} \PYG{k}{to} \PYG{n}{int\PYGZus{}of\PYGZus{}char} \PYG{n}{a2} \PYG{k}{do}
+          \PYG{n}{automate\PYGZus{}gen\PYGZus{}aux} \PYG{o}{(}\PYG{n+nc}{Caractere} \PYG{o}{(}\PYG{n}{char\PYGZus{}of\PYGZus{}int} \PYG{n}{i}\PYG{o}{)}\PYG{o}{)} \PYG{o}{(}\PYG{n}{node\PYGZus{}before}\PYG{o}{,} \PYG{n}{node\PYGZus{}after}\PYG{o}{)}
+        \PYG{k}{done}
+    \PYG{o}{|} \PYG{n+nc}{ZeroPlus} \PYG{n}{e} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{automate\PYGZus{}gen\PYGZus{}aux} \PYG{n}{e} \PYG{o}{(}\PYG{n}{node\PYGZus{}before}\PYG{o}{,} \PYG{n}{node\PYGZus{}before}\PYG{o}{)}\PYG{o}{;}
+        \PYG{n}{automate\PYGZus{}gen\PYGZus{}aux} \PYG{n+nc}{Epsilon} \PYG{o}{(}\PYG{n}{node\PYGZus{}before}\PYG{o}{,} \PYG{n}{node\PYGZus{}after}\PYG{o}{)}
+    \PYG{o}{|} \PYG{n+nc}{UnPlus} \PYG{n}{e} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{automate\PYGZus{}gen\PYGZus{}aux} \PYG{n}{e} \PYG{o}{(}\PYG{n}{node\PYGZus{}before}\PYG{o}{,} \PYG{n}{node\PYGZus{}before}\PYG{o}{)}\PYG{o}{;}
+        \PYG{n}{automate\PYGZus{}gen\PYGZus{}aux} \PYG{n}{e} \PYG{o}{(}\PYG{n}{node\PYGZus{}before}\PYG{o}{,} \PYG{n}{node\PYGZus{}after}\PYG{o}{)}
+    \PYG{o}{|} \PYG{n+nc}{Facultatif} \PYG{n}{e} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{automate\PYGZus{}gen\PYGZus{}aux} \PYG{n}{e} \PYG{o}{(}\PYG{n}{node\PYGZus{}before}\PYG{o}{,} \PYG{n}{node\PYGZus{}after}\PYG{o}{)}\PYG{o}{;}
+        \PYG{n}{automate\PYGZus{}gen\PYGZus{}aux} \PYG{n+nc}{Epsilon} \PYG{o}{(}\PYG{n}{node\PYGZus{}before}\PYG{o}{,} \PYG{n}{node\PYGZus{}after}\PYG{o}{)}
+    \PYG{o}{|} \PYG{n+nc}{AllBut} \PYG{n}{e} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{k}{for} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0} \PYG{k}{to} \PYG{l+m+mi}{127} \PYG{k}{do}
+          \PYG{k}{if} \PYG{n}{e}\PYG{o}{.}\PYG{o}{(}\PYG{n}{i}\PYG{o}{)} \PYG{k}{then}
+            \PYG{n}{add\PYGZus{}transition} \PYG{o}{(}\PYG{n}{node\PYGZus{}before}\PYG{o}{,} \PYG{n+nc}{Some} \PYG{o}{(}\PYG{n}{char\PYGZus{}of\PYGZus{}int} \PYG{n}{i}\PYG{o}{)}\PYG{o}{,} \PYG{n}{node\PYGZus{}after}\PYG{o}{)}
+        \PYG{k}{done}
+  \PYG{k}{in}
+  \PYG{n}{automate\PYGZus{}gen\PYGZus{}aux} \PYG{n}{reg} \PYG{o}{(}\PYG{l+m+mi}{0}\PYG{o}{,} \PYG{l+m+mi}{1}\PYG{o}{)}\PYG{o}{;}
+
+  \PYG{k}{let} \PYG{n}{l1} \PYG{o}{=} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{of\PYGZus{}seq} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{to\PYGZus{}seq\PYGZus{}keys} \PYG{n}{dico}\PYG{o}{)} \PYG{k}{in}
+  \PYG{k}{let} \PYG{k}{rec} \PYG{n}{build\PYGZus{}trans} \PYG{o}{(}\PYG{n}{l} \PYG{o}{:} \PYG{k+kt}{int} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{(}\PYG{n}{arr} \PYG{o}{:} \PYG{o}{(}\PYG{k+kt}{char} \PYG{n}{option} \PYG{o}{*} \PYG{k+kt}{int}\PYG{o}{)} \PYG{k+kt}{list} \PYG{k+kt}{array}\PYG{o}{)} \PYG{o}{:}
+      \PYG{k+kt}{unit} \PYG{o}{=}
+    \PYG{k}{match} \PYG{n}{l} \PYG{k}{with}
+    \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb+bp}{()}
+    \PYG{o}{|} \PYG{n}{x} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{arr}\PYG{o}{.}\PYG{o}{(}\PYG{n}{x}\PYG{o}{)} \PYG{o}{\PYGZlt{}\PYGZhy{}} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{dico} \PYG{n}{x}\PYG{o}{;}
+        \PYG{n}{build\PYGZus{}trans} \PYG{n}{q} \PYG{n}{arr}
+  \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{arr} \PYG{o}{=} \PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{make} \PYG{o}{!}\PYG{n}{next\PYGZus{}node} \PYG{n+nb+bp}{[]} \PYG{k}{in}
+  \PYG{n}{build\PYGZus{}trans} \PYG{n}{l1} \PYG{n}{arr}\PYG{o}{;}
+  \PYG{o}{\PYGZob{}}
+    \PYG{n}{nodes} \PYG{o}{=} \PYG{n}{range\PYGZus{}list} \PYG{o}{!}\PYG{n}{next\PYGZus{}node}\PYG{o}{;}
+    \PYG{n}{debut\PYGZus{}l} \PYG{o}{=} \PYG{o}{!}\PYG{n}{a}\PYG{o}{.}\PYG{n}{debut\PYGZus{}l}\PYG{o}{;}
+    \PYG{n}{fin} \PYG{o}{=} \PYG{o}{!}\PYG{n}{a}\PYG{o}{.}\PYG{n}{fin}\PYG{o}{;}
+    \PYG{n}{transitions} \PYG{o}{=} \PYG{n}{arr}\PYG{o}{;}
+  \PYG{o}{\PYGZcb{}}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ construit la disjonction des automates de [l\PYGZus{}a], qui reconnait donc l\PYGZsq{}union}
+\PYG{c}{    des language des automates de [l\PYGZus{}a] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{ou\PYGZus{}automates} \PYG{o}{(}\PYG{n}{l\PYGZus{}a} \PYG{o}{:} \PYG{n}{automate} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:} \PYG{n}{automate} \PYG{o}{=}
+  \PYG{c}{(*}\PYG{c}{*}\PYG{c}{ construit la disjonction de la liste [l] avec un automate [out] }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{k}{rec} \PYG{n}{ou\PYGZus{}automate\PYGZus{}aux} \PYG{o}{(}\PYG{n}{l} \PYG{o}{:} \PYG{n}{automate} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{(}\PYG{n}{out} \PYG{o}{:} \PYG{n}{automate}\PYG{o}{)} \PYG{o}{=}
+    \PYG{k}{match} \PYG{n}{l} \PYG{k}{with}
+    \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{out}
+    \PYG{o}{|} \PYG{n}{x} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{k}{let} \PYG{n}{inc} \PYG{o}{=} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{length} \PYG{n}{out}\PYG{o}{.}\PYG{n}{nodes} \PYG{k}{in}
+        \PYG{k}{let} \PYG{n}{x2} \PYG{o}{=}
+          \PYG{o}{\PYGZob{}}
+            \PYG{n}{nodes} \PYG{o}{=} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{map} \PYG{o}{(}\PYG{o}{(} \PYG{o}{+} \PYG{o}{)} \PYG{n}{inc}\PYG{o}{)} \PYG{n}{x}\PYG{o}{.}\PYG{n}{nodes}\PYG{o}{;}
+            \PYG{n}{debut\PYGZus{}l} \PYG{o}{=} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{map} \PYG{o}{(}\PYG{o}{(} \PYG{o}{+} \PYG{o}{)} \PYG{n}{inc}\PYG{o}{)} \PYG{n}{x}\PYG{o}{.}\PYG{n}{debut\PYGZus{}l}\PYG{o}{;}
+            \PYG{n}{fin} \PYG{o}{=} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{map} \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{x}\PYG{o}{,} \PYG{n}{y}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}\PYG{n}{x} \PYG{o}{+} \PYG{n}{inc}\PYG{o}{,} \PYG{n}{y}\PYG{o}{)}\PYG{o}{)} \PYG{n}{x}\PYG{o}{.}\PYG{n}{fin}\PYG{o}{;}
+            \PYG{n}{transitions} \PYG{o}{=} \PYG{o}{[|}\PYG{o}{|]}\PYG{o}{;}
+          \PYG{o}{\PYGZcb{}}
+        \PYG{k}{in}
+        \PYG{n}{ou\PYGZus{}automate\PYGZus{}aux} \PYG{n}{q}
+          \PYG{o}{\PYGZob{}}
+            \PYG{n}{nodes} \PYG{o}{=} \PYG{n}{out}\PYG{o}{.}\PYG{n}{nodes} \PYG{o}{@} \PYG{n}{x2}\PYG{o}{.}\PYG{n}{nodes}\PYG{o}{;}
+            \PYG{n}{debut\PYGZus{}l} \PYG{o}{=} \PYG{n}{out}\PYG{o}{.}\PYG{n}{debut\PYGZus{}l} \PYG{o}{@} \PYG{n}{x2}\PYG{o}{.}\PYG{n}{debut\PYGZus{}l}\PYG{o}{;}
+            \PYG{n}{fin} \PYG{o}{=} \PYG{n}{out}\PYG{o}{.}\PYG{n}{fin} \PYG{o}{@} \PYG{n}{x2}\PYG{o}{.}\PYG{n}{fin}\PYG{o}{;}
+            \PYG{n}{transitions} \PYG{o}{=}
+              \PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{init}
+                \PYG{o}{(}\PYG{n}{inc} \PYG{o}{+} \PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{length} \PYG{n}{x}\PYG{o}{.}\PYG{n}{transitions}\PYG{o}{)}
+                \PYG{o}{(}\PYG{k}{fun} \PYG{n}{i} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                  \PYG{k}{if} \PYG{n}{i} \PYG{o}{\PYGZlt{}} \PYG{n}{inc} \PYG{k}{then} \PYG{n}{out}\PYG{o}{.}\PYG{n}{transitions}\PYG{o}{.}\PYG{o}{(}\PYG{n}{i}\PYG{o}{)}
+                  \PYG{k}{else}
+                    \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{map}
+                      \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{c}\PYG{o}{,} \PYG{n}{x}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}\PYG{n}{c}\PYG{o}{,} \PYG{n}{x} \PYG{o}{+} \PYG{n}{inc}\PYG{o}{)}\PYG{o}{)}
+                      \PYG{n}{x}\PYG{o}{.}\PYG{n}{transitions}\PYG{o}{.}\PYG{o}{(}\PYG{n}{i} \PYG{o}{\PYGZhy{}} \PYG{n}{inc}\PYG{o}{)}\PYG{o}{)}\PYG{o}{;}
+          \PYG{o}{\PYGZcb{}}
+  \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{a} \PYG{o}{=}
+    \PYG{n}{ou\PYGZus{}automate\PYGZus{}aux} \PYG{n}{l\PYGZus{}a}
+      \PYG{o}{\PYGZob{}} \PYG{n}{nodes} \PYG{o}{=} \PYG{n+nb+bp}{[]}\PYG{o}{;} \PYG{n}{debut\PYGZus{}l} \PYG{o}{=} \PYG{n+nb+bp}{[]}\PYG{o}{;} \PYG{n}{fin} \PYG{o}{=} \PYG{n+nb+bp}{[]}\PYG{o}{;} \PYG{n}{transitions} \PYG{o}{=} \PYG{o}{[|}\PYG{o}{|]} \PYG{o}{\PYGZcb{}}
+  \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{nouv\PYGZus{}d} \PYG{o}{=} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{length} \PYG{n}{a}\PYG{o}{.}\PYG{n}{nodes} \PYG{k}{in}
+
+  \PYG{c}{(*}\PYG{c}{*}\PYG{c}{ Ajoute le début unique à l\PYGZsq{}automate par une transition [k \PYGZhy{}\PYGZgt{} x] étiquetée}
+\PYG{c}{      par epsilon }\PYG{c}{(}\PYG{c}{où k est l\PYGZsq{}état de départ, x est un ancien départ d\PYGZsq{}un}
+\PYG{c}{      élément de [l]}\PYG{c}{)}\PYG{c}{ à out }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{k}{rec} \PYG{n}{ajouter\PYGZus{}debut} \PYG{o}{(}\PYG{n}{l} \PYG{o}{:} \PYG{k+kt}{int} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{(}\PYG{n}{out} \PYG{o}{:} \PYG{o}{(}\PYG{k+kt}{char} \PYG{n}{option} \PYG{o}{*} \PYG{k+kt}{int}\PYG{o}{)} \PYG{k+kt}{list} \PYG{k+kt}{array}\PYG{o}{)} \PYG{o}{:}
+      \PYG{o}{(}\PYG{k+kt}{char} \PYG{n}{option} \PYG{o}{*} \PYG{k+kt}{int}\PYG{o}{)} \PYG{k+kt}{list} \PYG{k+kt}{array} \PYG{o}{=}
+    \PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{append} \PYG{n}{out} \PYG{o}{[|} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{map} \PYG{o}{(}\PYG{k}{fun} \PYG{n}{x} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}\PYG{n+nc}{None}\PYG{o}{,} \PYG{n}{x}\PYG{o}{)}\PYG{o}{)} \PYG{n}{l} \PYG{o}{|]}
+  \PYG{k}{in}
+  \PYG{o}{\PYGZob{}}
+    \PYG{n}{nodes} \PYG{o}{=} \PYG{n}{nouv\PYGZus{}d} \PYG{o}{::} \PYG{n}{a}\PYG{o}{.}\PYG{n}{nodes}\PYG{o}{;}
+    \PYG{n}{debut\PYGZus{}l} \PYG{o}{=} \PYG{o}{[} \PYG{n}{nouv\PYGZus{}d} \PYG{o}{]}\PYG{o}{;}
+    \PYG{n}{fin} \PYG{o}{=} \PYG{n}{a}\PYG{o}{.}\PYG{n}{fin}\PYG{o}{;}
+    \PYG{n}{transitions} \PYG{o}{=} \PYG{n}{ajouter\PYGZus{}debut} \PYG{n}{a}\PYG{o}{.}\PYG{n}{debut\PYGZus{}l} \PYG{n}{a}\PYG{o}{.}\PYG{n}{transitions}\PYG{o}{;}
+  \PYG{o}{\PYGZcb{}}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ enlève les doublons dans la liste [l] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{remove\PYGZus{}duplicates} \PYG{o}{(}\PYG{n}{l} \PYG{o}{:} \PYG{k}{\PYGZsq{}}\PYG{n}{a} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:} \PYG{k}{\PYGZsq{}}\PYG{n}{a} \PYG{k+kt}{list} \PYG{o}{=}
+  \PYG{k}{let} \PYG{n}{tbl} \PYG{o}{=} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{create} \PYG{l+m+mi}{0} \PYG{k}{in}
+  \PYG{k}{let} \PYG{k}{rec} \PYG{n}{aux} \PYG{o}{(}\PYG{n}{l} \PYG{o}{:} \PYG{k}{\PYGZsq{}}\PYG{n}{a} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{(}\PYG{n}{out} \PYG{o}{:} \PYG{k}{\PYGZsq{}}\PYG{n}{a} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:} \PYG{k}{\PYGZsq{}}\PYG{n}{a} \PYG{k+kt}{list} \PYG{o}{=}
+    \PYG{k}{match} \PYG{n}{l} \PYG{k}{with}
+    \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{out}
+    \PYG{o}{|} \PYG{n}{x} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{k}{if} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{mem} \PYG{n}{tbl} \PYG{n}{x} \PYG{k}{then} \PYG{n}{aux} \PYG{n}{q} \PYG{n}{out}
+        \PYG{k}{else} \PYG{o}{(}
+          \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{add} \PYG{n}{tbl} \PYG{n}{x} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n}{aux} \PYG{n}{q} \PYG{o}{(}\PYG{n}{x} \PYG{o}{::} \PYG{n}{out}\PYG{o}{)}\PYG{o}{)}
+  \PYG{k}{in}
+  \PYG{n}{aux} \PYG{n}{l} \PYG{n+nb+bp}{[]}
+
+\PYG{c}{(*}
+\PYG{c}{  Étapes pour enlever les epsilon\PYGZhy{}transitions:}
+\PYG{c}{  \PYGZhy{} On prend un sommet}
+\PYG{c}{  \PYGZhy{} On regarde toutes les epsilon\PYGZhy{}transitions sortantes }\PYG{c}{(}\PYG{c}{pas les boucles}\PYG{c}{)}
+\PYG{c}{  \PYGZhy{} On regarde tous les transitions entrantes}
+\PYG{c}{  \PYGZhy{} On ajoute des nouvelles transitons des entrantes vers les sortantes}
+\PYG{c}{  \PYGZhy{} On supprime l\PYGZsq{}epsilon\PYGZhy{}transition}
+
+\PYG{c}{  Requis:}
+\PYG{c}{  \PYGZhy{} transitions entrantes de chaque sommet =\PYGZgt{} précalculé}
+\PYG{c}{*)}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ enlève les epsilon\PYGZhy{}transitions dans l\PYGZsq{}automate [a] en effectuant les étapes}
+\PYG{c}{    ci\PYGZhy{}dessus }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{enleve\PYGZus{}epsilon\PYGZus{}trans} \PYG{o}{(}\PYG{n}{a} \PYG{o}{:} \PYG{n}{automate}\PYG{o}{)} \PYG{o}{:} \PYG{n}{automate\PYGZus{}sans\PYGZus{}eps} \PYG{o}{=}
+  \PYG{k}{let} \PYG{n}{len} \PYG{o}{=} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{length} \PYG{n}{a}\PYG{o}{.}\PYG{n}{nodes} \PYG{k}{in}
+  \PYG{c}{(*}\PYG{c}{ on stocke les degrés entrants et sortants de chaque sommet }\PYG{c}{*)}
+  \PYG{c}{(*}\PYG{c}{ les éléments stockés ne sont pas linéarisés }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{n}{entrants} \PYG{o}{=} \PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{make} \PYG{n}{len} \PYG{n+nb+bp}{[]} \PYG{k}{in}
+
+  \PYG{c}{(*}\PYG{c}{ degré entrant de chaque sommet }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{n}{degres} \PYG{o}{=} \PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{make} \PYG{n}{len} \PYG{l+m+mi}{0} \PYG{k}{in}
+
+  \PYG{k}{let} \PYG{n}{trans\PYGZus{}temp} \PYG{o}{=} \PYG{n}{ref} \PYG{n}{a}\PYG{o}{.}\PYG{n}{transitions} \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{fin\PYGZus{}temp} \PYG{o}{=} \PYG{n}{ref} \PYG{n}{a}\PYG{o}{.}\PYG{n}{fin} \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{deg\PYGZus{}traite} \PYG{o}{=} \PYG{n}{ref} \PYG{l+m+mi}{0} \PYG{k}{in}
+
+  \PYG{c}{(*}\PYG{c}{*}\PYG{c}{ trouve le premier sommet de degré zéro }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{k}{rec} \PYG{n}{find\PYGZus{}premier\PYGZus{}deg\PYGZus{}zero} \PYG{n+nb+bp}{()} \PYG{o}{:} \PYG{k+kt}{int} \PYG{o}{=}
+    \PYG{k}{let} \PYG{n}{deg} \PYG{o}{=} \PYG{o}{!}\PYG{n}{deg\PYGZus{}traite} \PYG{k}{in}
+    \PYG{k}{if} \PYG{n}{degres}\PYG{o}{.}\PYG{o}{(}\PYG{o}{!}\PYG{n}{deg\PYGZus{}traite}\PYG{o}{)} \PYG{o}{\PYGZlt{}}\PYG{o}{=} \PYG{l+m+mi}{0} \PYG{k}{then} \PYG{n}{incr} \PYG{n}{deg\PYGZus{}traite}\PYG{o}{;}
+    \PYG{k}{while} \PYG{o}{!}\PYG{n}{deg\PYGZus{}traite} \PYG{o}{\PYGZlt{}} \PYG{n}{len} \PYG{o}{\PYGZam{}\PYGZam{}} \PYG{n}{degres}\PYG{o}{.}\PYG{o}{(}\PYG{o}{!}\PYG{n}{deg\PYGZus{}traite}\PYG{o}{)} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0} \PYG{k}{do}
+      \PYG{n}{incr} \PYG{n}{deg\PYGZus{}traite}
+    \PYG{k}{done}\PYG{o}{;}
+    \PYG{k}{if} \PYG{n}{deg} \PYG{o}{=}\PYG{o}{=} \PYG{o}{!}\PYG{n}{deg\PYGZus{}traite} \PYG{k}{then} \PYG{o}{(}
+      \PYG{n}{incr} \PYG{n}{deg\PYGZus{}traite}\PYG{o}{;}
+      \PYG{n}{find\PYGZus{}premier\PYGZus{}deg\PYGZus{}zero} \PYG{n+nb+bp}{()}\PYG{o}{)}
+    \PYG{k}{else} \PYG{k}{if} \PYG{o}{!}\PYG{n}{deg\PYGZus{}traite} \PYG{o}{\PYGZgt{}}\PYG{o}{=} \PYG{n}{len} \PYG{k}{then} \PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}
+    \PYG{k}{else} \PYG{o}{!}\PYG{n}{deg\PYGZus{}traite}
+  \PYG{k}{in}
+
+  \PYG{c}{(*}\PYG{c}{ construit les listes d\PYGZsq{}entrants de chaque sommet }\PYG{c}{*)}
+  \PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{iteri}
+    \PYG{o}{(}\PYG{k}{fun} \PYG{n}{e} \PYG{n}{l} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter}
+        \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{c}\PYG{o}{,} \PYG{n}{s}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+          \PYG{n}{entrants}\PYG{o}{.}\PYG{o}{(}\PYG{n}{s}\PYG{o}{)} \PYG{o}{\PYGZlt{}\PYGZhy{}} \PYG{o}{(}\PYG{n}{e}\PYG{o}{,} \PYG{n}{c}\PYG{o}{)} \PYG{o}{::} \PYG{n}{entrants}\PYG{o}{.}\PYG{o}{(}\PYG{n}{s}\PYG{o}{)}\PYG{o}{;}
+          \PYG{n}{degres}\PYG{o}{.}\PYG{o}{(}\PYG{n}{s}\PYG{o}{)} \PYG{o}{\PYGZlt{}\PYGZhy{}} \PYG{n}{degres}\PYG{o}{.}\PYG{o}{(}\PYG{n}{s}\PYG{o}{)} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{o}{)}
+        \PYG{n}{l}\PYG{o}{)}
+    \PYG{n}{a}\PYG{o}{.}\PYG{n}{transitions}\PYG{o}{;}
+  \PYG{c}{(*}\PYG{c}{ ajouter un de degré entrant pour chaque entrée }\PYG{c}{*)}
+  \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter} \PYG{o}{(}\PYG{k}{fun} \PYG{n}{x} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{degres}\PYG{o}{.}\PYG{o}{(}\PYG{n}{x}\PYG{o}{)} \PYG{o}{\PYGZlt{}\PYGZhy{}} \PYG{n}{degres}\PYG{o}{.}\PYG{o}{(}\PYG{n}{x}\PYG{o}{)} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{o}{)} \PYG{n}{a}\PYG{o}{.}\PYG{n}{debut\PYGZus{}l}\PYG{o}{;}
+
+  \PYG{c}{(*}\PYG{c}{ applique l\PYGZsq{}algorithme de suppression des epsilon transitions sur chacun des sommets }\PYG{c}{*)}
+  \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter}
+    \PYG{o}{(}\PYG{k}{fun} \PYG{n}{node\PYGZus{}i} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{c}{(*}\PYG{c}{ récupération les transitions entrantes avec epsilon transitions qui ne sont pas des boucles + enlever du degré entrant pour chaque epsilon transition }\PYG{c}{*)}
+      \PYG{k}{let} \PYG{n}{res} \PYG{o}{=}
+        \PYG{n}{remove\PYGZus{}duplicates}
+          \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{fold\PYGZus{}left}
+             \PYG{o}{(}\PYG{k}{fun} \PYG{n}{acc} \PYG{n}{x} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+               \PYG{k}{match} \PYG{n}{x} \PYG{k}{with}
+               \PYG{o}{|} \PYG{o}{\PYGZus{}}\PYG{o}{,} \PYG{n+nc}{Some} \PYG{n}{x} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{acc}
+               \PYG{o}{|} \PYG{n}{node}\PYG{o}{,} \PYG{n+nc}{None} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                   \PYG{n}{degres}\PYG{o}{.}\PYG{o}{(}\PYG{n}{node\PYGZus{}i}\PYG{o}{)} \PYG{o}{\PYGZlt{}\PYGZhy{}} \PYG{n}{degres}\PYG{o}{.}\PYG{o}{(}\PYG{n}{node\PYGZus{}i}\PYG{o}{)} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{o}{;}
+                   \PYG{k}{if} \PYG{n}{node} \PYG{o}{=}\PYG{o}{=} \PYG{n}{node\PYGZus{}i} \PYG{k}{then} \PYG{n}{acc} \PYG{k}{else} \PYG{n}{node} \PYG{o}{::} \PYG{n}{acc}\PYG{o}{)}
+             \PYG{n+nb+bp}{[]} \PYG{n}{entrants}\PYG{o}{.}\PYG{o}{(}\PYG{n}{node\PYGZus{}i}\PYG{o}{)}\PYG{o}{)}
+      \PYG{k}{in}
+      \PYG{c}{(*}\PYG{c}{ on enlève les epsilon entrants de chaque epsilon transition }\PYG{c}{*)}
+      \PYG{n}{entrants}\PYG{o}{.}\PYG{o}{(}\PYG{n}{node\PYGZus{}i}\PYG{o}{)} \PYG{o}{\PYGZlt{}\PYGZhy{}}
+        \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{filter} \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{o}{\PYGZus{}}\PYG{o}{,} \PYG{n}{c}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{c} \PYG{o}{!=} \PYG{n+nc}{None}\PYG{o}{)} \PYG{n}{entrants}\PYG{o}{.}\PYG{o}{(}\PYG{n}{node\PYGZus{}i}\PYG{o}{)}\PYG{o}{;}
+      \PYG{c}{(*}\PYG{c}{ on enlève les sortants de chaque epsilon transition }\PYG{c}{*)}
+      \PYG{o}{!}\PYG{n}{trans\PYGZus{}temp}\PYG{o}{.}\PYG{o}{(}\PYG{n}{node\PYGZus{}i}\PYG{o}{)} \PYG{o}{\PYGZlt{}\PYGZhy{}}
+        \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{filter}
+          \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{c}\PYG{o}{,} \PYG{n}{x}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{not} \PYG{o}{(}\PYG{n}{c} \PYG{o}{=}\PYG{o}{=} \PYG{n+nc}{None} \PYG{o}{\PYGZam{}\PYGZam{}} \PYG{n}{x} \PYG{o}{=}\PYG{o}{=} \PYG{n}{node\PYGZus{}i}\PYG{o}{)}\PYG{o}{)}
+          \PYG{o}{!}\PYG{n}{trans\PYGZus{}temp}\PYG{o}{.}\PYG{o}{(}\PYG{n}{node\PYGZus{}i}\PYG{o}{)}\PYG{o}{;}
+      \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter}
+        \PYG{o}{(}\PYG{k}{fun} \PYG{n}{x} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+          \PYG{o}{!}\PYG{n}{trans\PYGZus{}temp}\PYG{o}{.}\PYG{o}{(}\PYG{n}{x}\PYG{o}{)} \PYG{o}{\PYGZlt{}\PYGZhy{}}
+            \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{filter}
+              \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{c}\PYG{o}{,} \PYG{n}{x1}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{not} \PYG{o}{(}\PYG{n}{c} \PYG{o}{=}\PYG{o}{=} \PYG{n+nc}{None} \PYG{o}{\PYGZam{}\PYGZam{}} \PYG{n}{x1} \PYG{o}{=}\PYG{o}{=} \PYG{n}{node\PYGZus{}i}\PYG{o}{)}\PYG{o}{)}
+              \PYG{o}{!}\PYG{n}{trans\PYGZus{}temp}\PYG{o}{.}\PYG{o}{(}\PYG{n}{x}\PYG{o}{)}\PYG{o}{)}
+        \PYG{n}{res}\PYG{o}{;}
+      \PYG{c}{(*}\PYG{c}{ ajoute les transitions des entrants avec epsilon transitions vers les sortants et actualise les entrants/sortants/degré de deux sommets }\PYG{c}{*)}
+      \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter}
+        \PYG{o}{(}\PYG{k}{fun} \PYG{n}{x} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+          \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter}
+            \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{c}\PYG{o}{,} \PYG{n}{node}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+              \PYG{o}{!}\PYG{n}{trans\PYGZus{}temp}\PYG{o}{.}\PYG{o}{(}\PYG{n}{x}\PYG{o}{)} \PYG{o}{\PYGZlt{}\PYGZhy{}} \PYG{o}{(}\PYG{n}{c}\PYG{o}{,} \PYG{n}{node}\PYG{o}{)} \PYG{o}{::} \PYG{o}{!}\PYG{n}{trans\PYGZus{}temp}\PYG{o}{.}\PYG{o}{(}\PYG{n}{x}\PYG{o}{)}\PYG{o}{;}
+              \PYG{n}{entrants}\PYG{o}{.}\PYG{o}{(}\PYG{n}{node}\PYG{o}{)} \PYG{o}{\PYGZlt{}\PYGZhy{}} \PYG{o}{(}\PYG{n}{x}\PYG{o}{,} \PYG{n}{c}\PYG{o}{)} \PYG{o}{::} \PYG{n}{entrants}\PYG{o}{.}\PYG{o}{(}\PYG{n}{node}\PYG{o}{)}\PYG{o}{;}
+              \PYG{n}{degres}\PYG{o}{.}\PYG{o}{(}\PYG{n}{node}\PYG{o}{)} \PYG{o}{\PYGZlt{}\PYGZhy{}} \PYG{n}{degres}\PYG{o}{.}\PYG{o}{(}\PYG{n}{node}\PYG{o}{)} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{o}{)}
+            \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{filter}
+               \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{c}\PYG{o}{,} \PYG{n}{n}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{not} \PYG{o}{(}\PYG{n}{n} \PYG{o}{=}\PYG{o}{=} \PYG{n}{node\PYGZus{}i} \PYG{o}{\PYGZam{}\PYGZam{}} \PYG{n}{c} \PYG{o}{=} \PYG{n+nc}{None}\PYG{o}{)}\PYG{o}{)}
+               \PYG{o}{!}\PYG{n}{trans\PYGZus{}temp}\PYG{o}{.}\PYG{o}{(}\PYG{n}{node\PYGZus{}i}\PYG{o}{)}\PYG{o}{)}\PYG{o}{)}
+        \PYG{n}{res}\PYG{o}{;}
+
+      \PYG{c}{(*}\PYG{c}{ récupération des états de fin du sommet de départ }\PYG{c}{*)}
+      \PYG{k}{let} \PYG{n}{fins} \PYG{o}{=}
+        \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{fold\PYGZus{}left}
+          \PYG{o}{(}\PYG{k}{fun} \PYG{n}{acc} \PYG{o}{(}\PYG{n}{x}\PYG{o}{,} \PYG{n}{t}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{k}{if} \PYG{n}{x} \PYG{o}{=}\PYG{o}{=} \PYG{n}{node\PYGZus{}i} \PYG{k}{then} \PYG{n}{t} \PYG{o}{::} \PYG{n}{acc} \PYG{k}{else} \PYG{n}{acc}\PYG{o}{)}
+          \PYG{n+nb+bp}{[]} \PYG{n}{a}\PYG{o}{.}\PYG{n}{fin}
+      \PYG{k}{in}
+
+      \PYG{c}{(*}\PYG{c}{ applique l\PYGZsq{}ensemble des états de fin aux sommets qui avaient une epsilon transition }\PYG{c}{*)}
+      \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter}
+        \PYG{o}{(}\PYG{k}{fun} \PYG{n}{x} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter} \PYG{o}{(}\PYG{k}{fun} \PYG{n}{t} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{fin\PYGZus{}temp} \PYG{o}{:=} \PYG{o}{(}\PYG{n}{x}\PYG{o}{,} \PYG{n}{t}\PYG{o}{)} \PYG{o}{::} \PYG{o}{!}\PYG{n}{fin\PYGZus{}temp}\PYG{o}{)} \PYG{n}{fins}\PYG{o}{)}
+        \PYG{n}{res}\PYG{o}{)}
+    \PYG{n}{a}\PYG{o}{.}\PYG{n}{nodes}\PYG{o}{;}
+
+  \PYG{c}{(*}\PYG{c}{ enlever les nodes qui ne sont plus atteintes }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{n}{todo} \PYG{o}{=} \PYG{n}{ref} \PYG{o}{(}\PYG{n}{find\PYGZus{}premier\PYGZus{}deg\PYGZus{}zero} \PYG{n+nb+bp}{()}\PYG{o}{)} \PYG{k}{in}
+  \PYG{k}{while} \PYG{o}{!}\PYG{n}{todo} \PYG{o}{\PYGZlt{}}\PYG{o}{\PYGZgt{}} \PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1} \PYG{k}{do}
+    \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter} \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{o}{\PYGZus{}}\PYG{o}{,} \PYG{n}{x}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{degres}\PYG{o}{.}\PYG{o}{(}\PYG{n}{x}\PYG{o}{)} \PYG{o}{\PYGZlt{}\PYGZhy{}} \PYG{n}{degres}\PYG{o}{.}\PYG{o}{(}\PYG{n}{x}\PYG{o}{)} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{o}{)} \PYG{o}{!}\PYG{n}{trans\PYGZus{}temp}\PYG{o}{.}\PYG{o}{(}\PYG{o}{!}\PYG{n}{todo}\PYG{o}{)}\PYG{o}{;}
+    \PYG{n}{todo} \PYG{o}{:=} \PYG{n}{find\PYGZus{}premier\PYGZus{}deg\PYGZus{}zero} \PYG{n+nb+bp}{()}
+  \PYG{k}{done}\PYG{o}{;}
+
+  \PYG{c}{(*}\PYG{c}{ enlever les option car toutes les transition }\PYG{c}{(}\PYG{c}{devraient être}\PYG{c}{)}\PYG{c}{ sans epsilon transition }\PYG{c}{*)}
+  \PYG{o}{\PYGZob{}}
+    \PYG{n}{nodes} \PYG{o}{=} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{filter} \PYG{o}{(}\PYG{k}{fun} \PYG{n}{x} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{degres}\PYG{o}{.}\PYG{o}{(}\PYG{n}{x}\PYG{o}{)} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0}\PYG{o}{)} \PYG{n}{a}\PYG{o}{.}\PYG{n}{nodes}\PYG{o}{;}
+    \PYG{n}{debut\PYGZus{}l} \PYG{o}{=} \PYG{n}{a}\PYG{o}{.}\PYG{n}{debut\PYGZus{}l}\PYG{o}{;}
+    \PYG{n}{fin} \PYG{o}{=} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{filter} \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{x}\PYG{o}{,} \PYG{o}{\PYGZus{}}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{degres}\PYG{o}{.}\PYG{o}{(}\PYG{n}{x}\PYG{o}{)} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0}\PYG{o}{)} \PYG{o}{!}\PYG{n}{fin\PYGZus{}temp}\PYG{o}{;}
+    \PYG{n}{transitions\PYGZus{}sans\PYGZus{}eps} \PYG{o}{=}
+      \PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{map}
+        \PYG{o}{(}\PYG{k}{fun} \PYG{n}{x} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+          \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{map}
+            \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{c}\PYG{o}{,} \PYG{n}{n}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+              \PYG{k}{match} \PYG{n}{c} \PYG{k}{with} \PYG{n+nc}{None} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{pas correct}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{|} \PYG{n+nc}{Some} \PYG{n}{c1} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}\PYG{n}{c1}\PYG{o}{,} \PYG{n}{n}\PYG{o}{)}\PYG{o}{)}
+            \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{filter} \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{o}{\PYGZus{}}\PYG{o}{,} \PYG{n}{n}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{degres}\PYG{o}{.}\PYG{o}{(}\PYG{n}{n}\PYG{o}{)} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0}\PYG{o}{)} \PYG{n}{x}\PYG{o}{)}\PYG{o}{)}
+        \PYG{o}{!}\PYG{n}{trans\PYGZus{}temp}\PYG{o}{;}
+  \PYG{o}{\PYGZcb{}}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ Donne à chaque ensemble d\PYGZsq{}éléments [elem] un entier à partir de la table de}
+\PYG{c}{    linéarisation [lin\PYGZus{}tbl] et cette de délinéarisation [delin\PYGZus{}tbl] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{lin} \PYG{o}{(}\PYG{n}{elem} \PYG{o}{:} \PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{t}\PYG{o}{)} \PYG{o}{(}\PYG{n}{lin\PYGZus{}tbl} \PYG{o}{:} \PYG{o}{(}\PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{t}\PYG{o}{,} \PYG{k+kt}{int}\PYG{o}{)} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{t}\PYG{o}{)}
+    \PYG{o}{(}\PYG{n}{delin\PYGZus{}tbl} \PYG{o}{:} \PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{t} \PYG{n+nn}{Vector}\PYG{p}{.}\PYG{n}{t}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{int} \PYG{o}{=}
+  \PYG{k}{if} \PYG{n}{not} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{mem} \PYG{n}{lin\PYGZus{}tbl} \PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{empty}\PYG{o}{)} \PYG{k}{then}
+    \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{add} \PYG{n}{lin\PYGZus{}tbl} \PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{empty} \PYG{l+m+mi}{0}\PYG{o}{;}
+
+  \PYG{k}{if} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{lin\PYGZus{}tbl} \PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{empty} \PYG{o}{\PYGZlt{}}\PYG{o}{\PYGZgt{}} \PYG{n+nn}{Vector}\PYG{p}{.}\PYG{n}{length} \PYG{n}{delin\PYGZus{}tbl} \PYG{k}{then}
+    \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{La taille des deux tables n\PYGZsq{}est pas la même}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+
+  \PYG{k}{if} \PYG{n}{not} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{mem} \PYG{n}{lin\PYGZus{}tbl} \PYG{n}{elem}\PYG{o}{)} \PYG{k}{then} \PYG{o}{(}
+    \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{add} \PYG{n}{lin\PYGZus{}tbl} \PYG{n}{elem} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{lin\PYGZus{}tbl} \PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{empty}\PYG{o}{)}\PYG{o}{;}
+    \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{replace} \PYG{n}{lin\PYGZus{}tbl} \PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{empty} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{lin\PYGZus{}tbl} \PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{empty} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{o}{)}\PYG{o}{;}
+    \PYG{n+nn}{Vector}\PYG{p}{.}\PYG{n}{push} \PYG{n}{delin\PYGZus{}tbl} \PYG{n}{elem}\PYG{o}{)}\PYG{o}{;}
+  \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{lin\PYGZus{}tbl} \PYG{n}{elem}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ Pour chaque entier [elem], renvoie l\PYGZsq{}ensemble de sommets corrspondant, à}
+\PYG{c}{    l\PYGZsq{}aide de la table de délinéarisation [delin\PYGZus{}tbl] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{delin} \PYG{o}{(}\PYG{n}{elem} \PYG{o}{:} \PYG{k+kt}{int}\PYG{o}{)} \PYG{o}{(}\PYG{n}{delin\PYGZus{}tbl} \PYG{o}{:} \PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{t} \PYG{n+nn}{Vector}\PYG{p}{.}\PYG{n}{t}\PYG{o}{)} \PYG{o}{:} \PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{t} \PYG{o}{=}
+  \PYG{k}{if} \PYG{n}{elem} \PYG{o}{=} \PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1} \PYG{k}{then} \PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{empty}
+  \PYG{k}{else} \PYG{k}{if} \PYG{n}{elem} \PYG{o}{\PYGZgt{}}\PYG{o}{=} \PYG{n+nn}{Vector}\PYG{p}{.}\PYG{n}{length} \PYG{n}{delin\PYGZus{}tbl} \PYG{k}{then}
+    \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{L\PYGZsq{}élément demandé n\PYGZsq{}est pas dans la table}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{k}{else} \PYG{n+nn}{Vector}\PYG{p}{.}\PYG{n}{get} \PYG{n}{delin\PYGZus{}tbl} \PYG{n}{elem}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ déterminise l\PYGZsq{}automate [a] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{determinise} \PYG{o}{(}\PYG{n}{a} \PYG{o}{:} \PYG{n}{automate\PYGZus{}sans\PYGZus{}eps}\PYG{o}{)} \PYG{o}{:} \PYG{n}{automate\PYGZus{}det} \PYG{o}{=}
+  \PYG{c}{(*}\PYG{c}{ crée les deux table utiles pour la linéarisation / délinéarisation }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{n}{lin\PYGZus{}tbl} \PYG{o}{=} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{create} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{length} \PYG{n}{a}\PYG{o}{.}\PYG{n}{nodes}\PYG{o}{)} \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{delin\PYGZus{}tbl} \PYG{o}{=} \PYG{n+nn}{Vector}\PYG{p}{.}\PYG{n}{create} \PYG{o}{\PYGZti{}}\PYG{n}{dummy}\PYG{o}{:}\PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{empty} \PYG{k}{in}
+
+  \PYG{k}{let} \PYG{n}{start\PYGZus{}node} \PYG{o}{=} \PYG{n}{lin} \PYG{o}{(}\PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{of\PYGZus{}list} \PYG{n}{a}\PYG{o}{.}\PYG{n}{debut\PYGZus{}l}\PYG{o}{)} \PYG{n}{lin\PYGZus{}tbl} \PYG{n}{delin\PYGZus{}tbl} \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{todo} \PYG{o}{=} \PYG{n}{ref} \PYG{o}{[} \PYG{n}{start\PYGZus{}node} \PYG{o}{]} \PYG{k}{in}
+
+  \PYG{k}{let} \PYG{n}{a\PYGZus{}det} \PYG{o}{=}
+    \PYG{o}{\PYGZob{}}
+      \PYG{n}{nodes} \PYG{o}{=} \PYG{o}{[} \PYG{n}{start\PYGZus{}node} \PYG{o}{]}\PYG{o}{;}
+      \PYG{n}{debut} \PYG{o}{=} \PYG{n}{start\PYGZus{}node}\PYG{o}{;}
+      \PYG{n}{fin} \PYG{o}{=} \PYG{o}{[|}\PYG{o}{|]}\PYG{o}{;}
+      \PYG{n}{pre\PYGZus{}transitions} \PYG{o}{=} \PYG{n+nn}{Vector}\PYG{p}{.}\PYG{n}{create} \PYG{o}{\PYGZti{}}\PYG{n}{dummy}\PYG{o}{:}\PYG{o}{(}\PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{make} \PYG{l+m+mi}{1} \PYG{l+m+mi}{0}\PYG{o}{)}\PYG{o}{;}
+    \PYG{o}{\PYGZcb{}}
+  \PYG{k}{in}
+
+  \PYG{n+nn}{Vector}\PYG{p}{.}\PYG{n}{push} \PYG{n}{a\PYGZus{}det}\PYG{o}{.}\PYG{n}{pre\PYGZus{}transitions} \PYG{o}{(}\PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{make} \PYG{l+m+mi}{128} \PYG{o}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{o}{)}\PYG{o}{)}\PYG{o}{;}
+  \PYG{c}{(*}\PYG{c}{ pour le début }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{n}{fin} \PYG{o}{=} \PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{of\PYGZus{}list} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{map} \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{a}\PYG{o}{,} \PYG{n}{b}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{a}\PYG{o}{)} \PYG{n}{a}\PYG{o}{.}\PYG{n}{fin}\PYG{o}{)} \PYG{k}{in}
+
+  \PYG{c}{(*}\PYG{c}{*}\PYG{c}{ trouve les successeurs de tous les sommets de [l] et on les stocke dans}
+\PYG{c}{      [arr] }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{k}{rec} \PYG{n}{trouver\PYGZus{}suivants} \PYG{o}{(}\PYG{n}{l} \PYG{o}{:} \PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{t}\PYG{o}{)} \PYG{o}{(}\PYG{n}{arr} \PYG{o}{:} \PYG{k+kt}{int} \PYG{k+kt}{array}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{unit} \PYG{o}{=}
+    \PYG{k}{let} \PYG{n}{len} \PYG{o}{=} \PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{length} \PYG{n}{arr} \PYG{k}{in}
+
+    \PYG{c}{(*}\PYG{c}{ on rassemble les éléments accessibles depuis tous les sommets de l }\PYG{c}{*)}
+    \PYG{k}{let} \PYG{n}{storage} \PYG{o}{=} \PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{make} \PYG{n}{len} \PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{empty} \PYG{k}{in}
+    \PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{iter}
+      \PYG{o}{(}\PYG{k}{fun} \PYG{n}{x} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter}
+          \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{c}\PYG{o}{,} \PYG{n}{e}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+            \PYG{n}{storage}\PYG{o}{.}\PYG{o}{(}\PYG{n}{int\PYGZus{}of\PYGZus{}char} \PYG{n}{c}\PYG{o}{)} \PYG{o}{\PYGZlt{}\PYGZhy{}} \PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{add} \PYG{n}{e} \PYG{n}{storage}\PYG{o}{.}\PYG{o}{(}\PYG{n}{int\PYGZus{}of\PYGZus{}char} \PYG{n}{c}\PYG{o}{)}\PYG{o}{)}
+          \PYG{n}{a}\PYG{o}{.}\PYG{n}{transitions\PYGZus{}sans\PYGZus{}eps}\PYG{o}{.}\PYG{o}{(}\PYG{n}{x}\PYG{o}{)}\PYG{o}{)}
+      \PYG{n}{l}\PYG{o}{;}
+
+    \PYG{c}{(*}\PYG{c}{ on linéarise les sommets obtenus et on les stocke dans arr }\PYG{c}{*)}
+    \PYG{k}{for} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0} \PYG{k}{to} \PYG{n}{len} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1} \PYG{k}{do}
+      \PYG{k}{if} \PYG{n}{not} \PYG{o}{(}\PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{is\PYGZus{}empty} \PYG{n}{storage}\PYG{o}{.}\PYG{o}{(}\PYG{n}{i}\PYG{o}{)}\PYG{o}{)} \PYG{k}{then}
+        \PYG{n}{arr}\PYG{o}{.}\PYG{o}{(}\PYG{n}{i}\PYG{o}{)} \PYG{o}{\PYGZlt{}\PYGZhy{}} \PYG{n}{lin} \PYG{n}{storage}\PYG{o}{.}\PYG{o}{(}\PYG{n}{i}\PYG{o}{)} \PYG{n}{lin\PYGZus{}tbl} \PYG{n}{delin\PYGZus{}tbl}
+    \PYG{k}{done}
+  \PYG{k}{in}
+
+  \PYG{c}{(*}\PYG{c}{*}\PYG{c}{ teste si le sommet [elem] linéarisé contient des éléments finaux et}
+\PYG{c}{      l\PYGZsq{}ajoute aux finaux si c\PYGZsq{}est le cas }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{n}{ajouter\PYGZus{}fin} \PYG{o}{(}\PYG{n}{elem} \PYG{o}{:} \PYG{k+kt}{int}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{unit} \PYG{o}{=}
+    \PYG{k}{let} \PYG{n}{res} \PYG{o}{=}
+      \PYG{n}{remove\PYGZus{}duplicates}
+        \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{map}
+           \PYG{o}{(}\PYG{k}{fun} \PYG{n}{e} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{assoc} \PYG{n}{e} \PYG{n}{a}\PYG{o}{.}\PYG{n}{fin}\PYG{o}{)}
+           \PYG{o}{(}\PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{to\PYGZus{}list} \PYG{o}{(}\PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{inter} \PYG{n}{fin} \PYG{o}{(}\PYG{n}{delin} \PYG{n}{elem} \PYG{n}{delin\PYGZus{}tbl}\PYG{o}{)}\PYG{o}{)}\PYG{o}{)}\PYG{o}{)}
+    \PYG{k}{in}
+    \PYG{k}{match} \PYG{n}{res} \PYG{k}{with}
+    \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb+bp}{()}
+    \PYG{o}{|} \PYG{o}{[} \PYG{n}{e} \PYG{o}{]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{a\PYGZus{}det}\PYG{o}{.}\PYG{n}{fin}\PYG{o}{.}\PYG{o}{(}\PYG{n}{elem}\PYG{o}{)} \PYG{o}{\PYGZlt{}\PYGZhy{}} \PYG{n+nc}{Some} \PYG{n}{e}
+    \PYG{o}{|} \PYG{o}{[} \PYG{n}{e1}\PYG{o}{;} \PYG{n}{e2} \PYG{o}{]} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{c}{(*}\PYG{c}{ L\PYGZsq{}un des deux est un safe\PYGZus{}token, elle peut être vue autrement donc elle est ignorée }\PYG{c}{*)}
+        \PYG{k}{if} \PYG{n}{e1} \PYG{o}{=} \PYG{n}{safe\PYGZus{}token} \PYG{k}{then} \PYG{n}{a\PYGZus{}det}\PYG{o}{.}\PYG{n}{fin}\PYG{o}{.}\PYG{o}{(}\PYG{n}{elem}\PYG{o}{)} \PYG{o}{\PYGZlt{}\PYGZhy{}} \PYG{n+nc}{Some} \PYG{n}{e2}
+        \PYG{k}{else} \PYG{k}{if} \PYG{n}{e2} \PYG{o}{=} \PYG{n}{safe\PYGZus{}token} \PYG{k}{then} \PYG{n}{a\PYGZus{}det}\PYG{o}{.}\PYG{n}{fin}\PYG{o}{.}\PYG{o}{(}\PYG{n}{elem}\PYG{o}{)} \PYG{o}{\PYGZlt{}\PYGZhy{}} \PYG{n+nc}{Some} \PYG{n}{e1}
+        \PYG{k}{else} \PYG{o}{(}
+          \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}\PYGZdq{}\PYGZsq{}}\PYG{o}{;}
+          \PYG{n}{print\PYGZus{}string} \PYG{o}{(}\PYG{n}{repr\PYGZus{}of\PYGZus{}terminal} \PYG{n}{e1}\PYG{o}{)}\PYG{o}{;}
+          \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{ }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{print\PYGZus{}string} \PYG{o}{(}\PYG{n}{repr\PYGZus{}of\PYGZus{}terminal} \PYG{n}{e2}\PYG{o}{)}\PYG{o}{;}
+          \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}\PYGZdq{}\PYGZsq{}}\PYG{o}{;}
+          \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{on un état final commun}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{print\PYGZus{}newline} \PYG{n+nb+bp}{()}\PYG{o}{;}
+          \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}} \PYG{c}{(*}\PYG{c}{ il a plus d\PYGZsq{}un élément final }\PYG{c}{*)}\PYG{o}{)}
+    \PYG{o}{|} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{A syntax can\PYGZsq{}t have more than one output}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{k}{in}
+
+  \PYG{k}{let} \PYG{n}{finished} \PYG{o}{=} \PYG{n}{ref} \PYG{n+nb+bp}{false} \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{seen} \PYG{o}{=} \PYG{n}{ref} \PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{empty} \PYG{k}{in}
+  \PYG{c}{(*}\PYG{c}{ on construit l\PYGZsq{}automate déterministe }\PYG{c}{*)}
+  \PYG{k}{while} \PYG{n}{not} \PYG{o}{!}\PYG{n}{finished} \PYG{k}{do}
+    \PYG{k}{match} \PYG{o}{!}\PYG{n}{todo} \PYG{k}{with}
+    \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{finished} \PYG{o}{:=} \PYG{n+nb+bp}{true}
+    \PYG{o}{|} \PYG{n}{x} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{k}{let} \PYG{n}{init\PYGZus{}len} \PYG{o}{=} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{lin\PYGZus{}tbl} \PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{empty} \PYG{k}{in}
+        \PYG{n}{todo} \PYG{o}{:=} \PYG{n}{q}\PYG{o}{;}
+        \PYG{k}{let} \PYG{n}{suivants} \PYG{o}{=} \PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{make} \PYG{l+m+mi}{128} \PYG{o}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{o}{)} \PYG{k}{in}
+        \PYG{n}{trouver\PYGZus{}suivants} \PYG{o}{(}\PYG{n}{delin} \PYG{n}{x} \PYG{n}{delin\PYGZus{}tbl}\PYG{o}{)} \PYG{n}{suivants}\PYG{o}{;}
+
+        \PYG{k}{let} \PYG{n}{arr} \PYG{o}{=} \PYG{n+nn}{Vector}\PYG{p}{.}\PYG{n}{get} \PYG{n}{a\PYGZus{}det}\PYG{o}{.}\PYG{n}{pre\PYGZus{}transitions} \PYG{n}{x} \PYG{k}{in}
+        \PYG{k}{for} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0} \PYG{k}{to} \PYG{l+m+mi}{127} \PYG{k}{do}
+          \PYG{k}{if} \PYG{n}{suivants}\PYG{o}{.}\PYG{o}{(}\PYG{n}{i}\PYG{o}{)} \PYG{o}{\PYGZgt{}}\PYG{o}{=} \PYG{n}{init\PYGZus{}len} \PYG{k}{then}
+            \PYG{c}{(*}\PYG{c}{ si c\PYGZsq{}est un nouveau noeud, on l\PYGZsq{}ajoute a la liste de traitement,}
+\PYG{c}{            on l\PYGZsq{}ajoute dans l\PYGZsq{}automate et on vérifie s\PYGZsq{}il est final }\PYG{c}{*)}
+            \PYG{k}{if} \PYG{n}{not} \PYG{o}{(}\PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{mem} \PYG{n}{suivants}\PYG{o}{.}\PYG{o}{(}\PYG{n}{i}\PYG{o}{)} \PYG{o}{!}\PYG{n}{seen}\PYG{o}{)} \PYG{k}{then} \PYG{o}{(}
+              \PYG{n}{seen} \PYG{o}{:=} \PYG{n+nn}{IntSet}\PYG{p}{.}\PYG{n}{add} \PYG{n}{suivants}\PYG{o}{.}\PYG{o}{(}\PYG{n}{i}\PYG{o}{)} \PYG{o}{!}\PYG{n}{seen}\PYG{o}{;}
+              \PYG{n}{todo} \PYG{o}{:=} \PYG{n}{suivants}\PYG{o}{.}\PYG{o}{(}\PYG{n}{i}\PYG{o}{)} \PYG{o}{::} \PYG{o}{!}\PYG{n}{todo}\PYG{o}{;}
+              \PYG{n+nn}{Vector}\PYG{p}{.}\PYG{n}{push} \PYG{n}{a\PYGZus{}det}\PYG{o}{.}\PYG{n}{pre\PYGZus{}transitions} \PYG{o}{(}\PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{make} \PYG{l+m+mi}{128} \PYG{o}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{o}{)}\PYG{o}{)}\PYG{o}{;}
+              \PYG{n}{a\PYGZus{}det}\PYG{o}{.}\PYG{n}{nodes} \PYG{o}{\PYGZlt{}\PYGZhy{}} \PYG{n}{suivants}\PYG{o}{.}\PYG{o}{(}\PYG{n}{i}\PYG{o}{)} \PYG{o}{::} \PYG{n}{a\PYGZus{}det}\PYG{o}{.}\PYG{n}{nodes}\PYG{o}{)}\PYG{o}{;}
+          \PYG{c}{(*}\PYG{c}{ noeud déjà existant/complétion nouveau noeud, comme on ne traite qu\PYGZsq{}une fois chaque sommets,}
+\PYG{c}{          on sait que les sommets trouvé sont les bons, on les remplace }\PYG{c}{*)}
+          \PYG{k}{if} \PYG{n}{suivants}\PYG{o}{.}\PYG{o}{(}\PYG{n}{i}\PYG{o}{)} \PYG{o}{\PYGZlt{}}\PYG{o}{\PYGZgt{}} \PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1} \PYG{k}{then} \PYG{n}{arr}\PYG{o}{.}\PYG{o}{(}\PYG{n}{i}\PYG{o}{)} \PYG{o}{\PYGZlt{}\PYGZhy{}} \PYG{n}{suivants}\PYG{o}{.}\PYG{o}{(}\PYG{n}{i}\PYG{o}{)}
+        \PYG{k}{done}\PYG{o}{;}
+        \PYG{n+nn}{Vector}\PYG{p}{.}\PYG{n}{set} \PYG{n}{a\PYGZus{}det}\PYG{o}{.}\PYG{n}{pre\PYGZus{}transitions} \PYG{n}{x} \PYG{n}{arr}
+  \PYG{k}{done}\PYG{o}{;}
+
+  \PYG{c}{(*}\PYG{c}{ gérer le cas des mots vides, qui sont donc à la fois initiaux et finaux }\PYG{c}{*)}
+  \PYG{n}{a\PYGZus{}det}\PYG{o}{.}\PYG{n}{fin} \PYG{o}{\PYGZlt{}\PYGZhy{}} \PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{make} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{length} \PYG{n}{a\PYGZus{}det}\PYG{o}{.}\PYG{n}{nodes}\PYG{o}{)} \PYG{n+nc}{None}\PYG{o}{;}
+  \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter} \PYG{n}{ajouter\PYGZus{}fin} \PYG{n}{a\PYGZus{}det}\PYG{o}{.}\PYG{n}{nodes}\PYG{o}{;}
+  \PYG{o}{\PYGZob{}}
+    \PYG{n}{nodes} \PYG{o}{=} \PYG{n}{a\PYGZus{}det}\PYG{o}{.}\PYG{n}{nodes}\PYG{o}{;}
+    \PYG{n}{debut} \PYG{o}{=} \PYG{n}{a\PYGZus{}det}\PYG{o}{.}\PYG{n}{debut}\PYG{o}{;}
+    \PYG{n}{fin} \PYG{o}{=} \PYG{n}{a\PYGZus{}det}\PYG{o}{.}\PYG{n}{fin}\PYG{o}{;}
+    \PYG{n}{transitions} \PYG{o}{=} \PYG{n+nn}{Vector}\PYG{p}{.}\PYG{n}{to\PYGZus{}array} \PYG{n}{a\PYGZus{}det}\PYG{o}{.}\PYG{n}{pre\PYGZus{}transitions}\PYG{o}{;}
+  \PYG{o}{\PYGZcb{}}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ effectue le delta 1 sur l\PYGZsq{}automate [a] à partir de [node] avec l\PYGZsq{}étiquette}
+\PYG{c}{    [c] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{exec\PYGZus{}char} \PYG{o}{(}\PYG{n}{a} \PYG{o}{:} \PYG{n}{automate\PYGZus{}det}\PYG{o}{)} \PYG{o}{(}\PYG{n}{node} \PYG{o}{:} \PYG{k+kt}{int}\PYG{o}{)} \PYG{o}{(}\PYG{n}{c} \PYG{o}{:} \PYG{k+kt}{char}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{int} \PYG{o}{=}
+  \PYG{n}{a}\PYG{o}{.}\PYG{n}{transitions}\PYG{o}{.}\PYG{o}{(}\PYG{n}{node}\PYG{o}{)}\PYG{o}{.}\PYG{o}{(}\PYG{n}{int\PYGZus{}of\PYGZus{}char} \PYG{n}{c}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ effectue le delta étoile sur l\PYGZsq{}automate [a] avec le texte [texte] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{execution\PYGZus{}mot} \PYG{o}{(}\PYG{n}{a} \PYG{o}{:} \PYG{n}{automate\PYGZus{}det}\PYG{o}{)} \PYG{o}{(}\PYG{n}{texte} \PYG{o}{:} \PYG{k+kt}{char} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:}
+    \PYG{k+kt}{int} \PYG{o}{*} \PYG{k+kt}{char} \PYG{k+kt}{list} \PYG{o}{*} \PYG{k+kt}{char} \PYG{k+kt}{list} \PYG{o}{=}
+  \PYG{k}{let} \PYG{n}{node} \PYG{o}{=} \PYG{n}{ref} \PYG{n}{a}\PYG{o}{.}\PYG{n}{debut} \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{last\PYGZus{}found} \PYG{o}{=} \PYG{n}{ref} \PYG{o}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{o}{)} \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{text\PYGZus{}as\PYGZus{}last} \PYG{o}{=} \PYG{n}{ref} \PYG{n}{texte} \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{texte} \PYG{o}{=} \PYG{n}{ref} \PYG{n}{texte} \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{text\PYGZus{}read} \PYG{o}{=} \PYG{n}{ref} \PYG{n+nb+bp}{[]} \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{last\PYGZus{}read} \PYG{o}{=} \PYG{n}{ref} \PYG{n+nb+bp}{[]} \PYG{k}{in}
+
+  \PYG{c}{(*}\PYG{c}{ tant que l\PYGZsq{}on est pas dans le puit }\PYG{c}{*)}
+  \PYG{k}{while} \PYG{o}{!}\PYG{n}{node} \PYG{o}{!=} \PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1} \PYG{k}{do}
+    \PYG{k}{match} \PYG{o}{!}\PYG{n}{texte} \PYG{k}{with}
+    \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{node} \PYG{o}{:=} \PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1} \PYG{c}{(*}\PYG{c}{ forcer la fin de la boucle }\PYG{c}{*)}
+    \PYG{o}{|} \PYG{n}{c} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{c}{(*}\PYG{c}{ on effectue le delta 1 }\PYG{c}{*)}
+        \PYG{n}{text\PYGZus{}read} \PYG{o}{:=} \PYG{n}{c} \PYG{o}{::} \PYG{o}{!}\PYG{n}{text\PYGZus{}read}\PYG{o}{;}
+        \PYG{n}{node} \PYG{o}{:=} \PYG{n}{exec\PYGZus{}char} \PYG{n}{a} \PYG{o}{!}\PYG{n}{node} \PYG{n}{c}\PYG{o}{;}
+        \PYG{n}{texte} \PYG{o}{:=} \PYG{n}{q}\PYG{o}{;}
+        \PYG{c}{(*}\PYG{c}{ on note si on passe par un état final}\PYG{c}{*)}
+        \PYG{k}{if} \PYG{o}{!}\PYG{n}{node} \PYG{o}{=} \PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1} \PYG{k}{then} \PYG{o}{(}\PYG{k}{if} \PYG{o}{!}\PYG{n}{last\PYGZus{}found} \PYG{o}{=} \PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1} \PYG{k}{then} \PYG{n}{last\PYGZus{}read} \PYG{o}{:=} \PYG{o}{!}\PYG{n}{text\PYGZus{}read}\PYG{o}{)}
+        \PYG{k}{else} \PYG{o}{(}
+          \PYG{o}{(}\PYG{k}{match} \PYG{n}{a}\PYG{o}{.}\PYG{n}{fin}\PYG{o}{.}\PYG{o}{(}\PYG{o}{!}\PYG{n}{node}\PYG{o}{)} \PYG{k}{with}
+          \PYG{o}{|} \PYG{n+nc}{None} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb+bp}{()}
+          \PYG{o}{|} \PYG{n+nc}{Some} \PYG{n}{t} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+              \PYG{n}{last\PYGZus{}found} \PYG{o}{:=} \PYG{o}{!}\PYG{n}{node}\PYG{o}{;}
+              \PYG{n}{text\PYGZus{}as\PYGZus{}last} \PYG{o}{:=} \PYG{o}{!}\PYG{n}{texte}\PYG{o}{)}\PYG{o}{;}
+          \PYG{n}{last\PYGZus{}read} \PYG{o}{:=} \PYG{o}{!}\PYG{n}{text\PYGZus{}read}\PYG{o}{)}
+  \PYG{k}{done}\PYG{o}{;}
+  \PYG{c}{(*}\PYG{c}{ on renvoie le dernier état final trouvé}\PYG{c}{*)}
+  \PYG{o}{(}\PYG{o}{!}\PYG{n}{last\PYGZus{}found}\PYG{o}{,} \PYG{o}{!}\PYG{n}{text\PYGZus{}as\PYGZus{}last}\PYG{o}{,} \PYG{o}{!}\PYG{n}{last\PYGZus{}read}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ exécute l\PYGZsq{}automate [a] en boucle sur le texte [txt] pour créer une liste de}
+\PYG{c}{    lexèmes }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{exec} \PYG{o}{(}\PYG{n}{a} \PYG{o}{:} \PYG{n}{automate\PYGZus{}det}\PYG{o}{)} \PYG{o}{(}\PYG{n}{txt} \PYG{o}{:} \PYG{k+kt}{string}\PYG{o}{)} \PYG{o}{:} \PYG{o}{(}\PYG{n}{symbol} \PYG{o}{*} \PYG{k+kt}{string}\PYG{o}{)} \PYG{k+kt}{list} \PYG{o}{=}
+  \PYG{c}{(*}\PYG{c}{*}\PYG{c}{ exécute l\PYGZsq{}automate [a] en boucle sur le texte [texte] et concatène le}
+\PYG{c}{      résultat dans [out] }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{k}{rec} \PYG{n}{exec\PYGZus{}aux} \PYG{o}{(}\PYG{n}{a} \PYG{o}{:} \PYG{n}{automate\PYGZus{}det}\PYG{o}{)} \PYG{o}{(}\PYG{n}{texte} \PYG{o}{:} \PYG{k+kt}{char} \PYG{k+kt}{list}\PYG{o}{)}
+      \PYG{o}{(}\PYG{n}{out} \PYG{o}{:} \PYG{o}{(}\PYG{n}{terminal} \PYG{o}{*} \PYG{k+kt}{string}\PYG{o}{)} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:} \PYG{o}{(}\PYG{n}{terminal} \PYG{o}{*} \PYG{k+kt}{string}\PYG{o}{)} \PYG{k+kt}{list} \PYG{o}{=}
+    \PYG{k}{match} \PYG{n}{texte} \PYG{k}{with}
+    \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{rev} \PYG{n}{out}
+    \PYG{o}{|} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}
+        \PYG{k}{match} \PYG{n}{execution\PYGZus{}mot} \PYG{n}{a} \PYG{n}{texte} \PYG{k}{with}
+        \PYG{o}{|} \PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{o}{,} \PYG{o}{\PYGZus{}}\PYG{o}{,} \PYG{n}{s} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+            \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Le lexème \PYGZsq{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+            \PYG{n}{print\PYGZus{}string} \PYG{o}{(}\PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{of\PYGZus{}seq} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{to\PYGZus{}seq} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{rev} \PYG{n}{s}\PYG{o}{)}\PYG{o}{)}\PYG{o}{)}\PYG{o}{;}
+            \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZsq{} n\PYGZsq{}est pas un lexème reconnu}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+            \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}}
+        \PYG{o}{|} \PYG{n}{x}\PYG{o}{,} \PYG{n}{q}\PYG{o}{,} \PYG{n}{s} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}
+            \PYG{k}{let} \PYG{n}{s} \PYG{o}{=} \PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{of\PYGZus{}seq} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{to\PYGZus{}seq} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{rev} \PYG{n}{s}\PYG{o}{)}\PYG{o}{)} \PYG{k}{in}
+            \PYG{k}{match} \PYG{n}{a}\PYG{o}{.}\PYG{n}{fin}\PYG{o}{.}\PYG{o}{(}\PYG{n}{x}\PYG{o}{)} \PYG{k}{with}
+            \PYG{o}{|} \PYG{n+nc}{None} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Le lexème \PYGZsq{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+                \PYG{n}{print\PYGZus{}string} \PYG{n}{s}\PYG{o}{;}
+                \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZsq{} n\PYGZsq{}est pas un lexème reconnu}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+                \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}}
+            \PYG{o}{|} \PYG{n+nc}{Some} \PYG{n}{t} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{exec\PYGZus{}aux} \PYG{n}{a} \PYG{n}{q} \PYG{o}{(}\PYG{o}{(}\PYG{n}{t}\PYG{o}{,} \PYG{n}{s}\PYG{o}{)} \PYG{o}{::} \PYG{n}{out}\PYG{o}{)}\PYG{o}{)}\PYG{o}{)}
+  \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{res} \PYG{o}{=} \PYG{n}{exec\PYGZus{}aux} \PYG{n}{a} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{of\PYGZus{}seq} \PYG{o}{(}\PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{to\PYGZus{}seq} \PYG{n}{txt}\PYG{o}{)}\PYG{o}{)} \PYG{n+nb+bp}{[]} \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{tbl} \PYG{o}{=} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{create} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{length} \PYG{n}{unparsed\PYGZus{}tokens}\PYG{o}{)} \PYG{k}{in}
+  \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter} \PYG{o}{(}\PYG{k}{fun} \PYG{n}{x} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{add} \PYG{n}{tbl} \PYG{n}{x} \PYG{n+nb+bp}{()}\PYG{o}{)} \PYG{n}{unparsed\PYGZus{}tokens}\PYG{o}{;}
+  \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{map}
+    \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{t}\PYG{o}{,} \PYG{n}{s}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}\PYG{n+nc}{Terminal} \PYG{n}{t}\PYG{o}{,} \PYG{n}{s}\PYG{o}{)}\PYG{o}{)}
+    \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{filter} \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{x}\PYG{o}{,} \PYG{o}{\PYGZus{}}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{not} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{mem} \PYG{n}{tbl} \PYG{n}{x}\PYG{o}{)}\PYG{o}{)} \PYG{n}{res}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ exécute l\PYGZsq{}automate [a] sur le fichier [f\PYGZus{}name] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{exec\PYGZus{}of\PYGZus{}file} \PYG{o}{(}\PYG{n}{a} \PYG{o}{:} \PYG{n}{automate\PYGZus{}det}\PYG{o}{)} \PYG{o}{(}\PYG{n}{f\PYGZus{}name} \PYG{o}{:} \PYG{k+kt}{string}\PYG{o}{)} \PYG{o}{:} \PYG{o}{(}\PYG{n}{symbol} \PYG{o}{*} \PYG{k+kt}{string}\PYG{o}{)} \PYG{k+kt}{list} \PYG{o}{=}
+  \PYG{n}{exec} \PYG{n}{a}
+    \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{fold\PYGZus{}left} \PYG{o}{(}\PYG{k}{fun} \PYG{n}{acc} \PYG{n}{line} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{acc} \PYG{o}{\PYGZca{}} \PYG{n}{line} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{(}\PYG{n}{read\PYGZus{}file} \PYG{n}{f\PYGZus{}name}\PYG{o}{)}\PYG{o}{)}
+\end{MintedVerbatim}

@@ -8,19 +8,19 @@
 # détail important
 
 - on suppose que la syntaxe fortran utilisée est correcte, c'est-à-dire qu'elle compile et s'exécute correctement
-  => la grammaire n'est pas parfaite et ne prend pas en compte le nom des variabls par exemple
+  => la grammaire n'est pas parfaite et ne prend pas en compte le nom des variables par exemple
 
 ## définitions (à définir tout au long de la présentation?)
 
 - transpileur (comment ça fonctionne, les différentes étapes pour passer d'un langage à l'autre, dire que deux étapes disjointes avec début et fin interchangeables)
 
-- présenter le Fortran (rapidement, utilisations actuelles, montrer ue existe avant le C)
+- présenter le Fortran (rapidement, utilisations actuelles, montrer que ça existait avant le C)
 
 - expressions régulières (définition + comment ça fonctionne: les différents termes utilisés)
 
 - automates (définir les différents types + leur utilité dans le programme)
 
-- grammaire (définir => pas trop rentrer dans les détails, boulot de Yann + dire utilisé dans la construction qutomatique des automates pour trouver les terminaux)
+- grammaire (définir => pas trop rentrer dans les détails, boulot de Yann + dire utilisé dans la construction automatique des automates pour trouver les terminaux)
 
 - arbre de la syntaxe abstraite => abres qui peuvent représenter n'importe quel langage sans garder d'information qui lui est propre
 
@@ -29,6 +29,8 @@
 - syntaxe réduite de Fortran qui permet tout de même de créer de courts programmes
 
 - Sa transformation en C
+
+=> la création d'un transpileur de Frotran vers C
 
 ## éléments principaux à présenter
 
