@@ -11,14 +11,15 @@ let print_usage () =
   print_newline ()
 
 let output_file (len : int) : string =
-  if len == 5 then(
-    (* un nom de fichier de sortie est donné *)
-    if Sys.argv.(3) = "-o" then 
-      Sys.argv.(4)
+  if len == 5 then
+    if
+      (* un nom de fichier de sortie est donné *)
+      Sys.argv.(3) = "-o"
+    then Sys.argv.(4)
     else (
       print_usage ();
       raise (Invalid_argument ""))
-  )else
+  else
     (* un nom de fichier de sortie n'est pas donné, on en donne un par défaut*)
     match Sys.argv.(1) with
     | "-Fortran" -> "out.f90"
@@ -29,8 +30,7 @@ let output_file (len : int) : string =
 
 let main () =
   let len = Array.length Sys.argv in
-  if len <> 3 && len <> 5 then
-    print_usage()
+  if len <> 3 && len <> 5 then print_usage ()
   else
     let input_file_name = Sys.argv.(2) in
     let output_file_name = output_file len in
@@ -38,9 +38,7 @@ let main () =
     print_newline ();
     if Sys.argv.(1) = "-C" then
       transpile_Fortran_to_C input_file_name output_file_name
-    else(
-      transpile_Fortran_to_Fortran input_file_name output_file_name
-    );
+    else transpile_Fortran_to_Fortran input_file_name output_file_name;
     print_string ("Finished generating " ^ output_file_name);
     print_newline ()
 

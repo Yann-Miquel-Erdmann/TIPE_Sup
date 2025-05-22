@@ -193,7 +193,7 @@ let analyse_LL1_of_symbol (g : grammar) (text : (symbol * string) list)
       (t, !txt)
   and analyse_LL1_of_symbol_aux (text : (symbol * string) list) (s : symbol) :
       at * (symbol * string) list =
-    print_endline ("analyse_LL1_of_symbol_aux " ^ string_of_symbol s);
+    (* print_endline ("analyse_LL1_of_symbol_aux " ^ string_of_symbol s); *)
     (*print_patterns [ List.map fst text ];
     print_newline ();*)
     if is_terminal (s, []) then
@@ -253,9 +253,9 @@ let analyse_LL1_of_symbol (g : grammar) (text : (symbol * string) list)
             else ();
             analyse_LL1_of_pattern text s (List.nth l 0))
           else (
-            print_endline "cas 2";
+            (* print_endline "cas 2";
             print_symbol (fst (List.nth text 0));
-            print_newline ();
+            print_newline (); *)
             let l =
               List.filter
                 (fun p ->

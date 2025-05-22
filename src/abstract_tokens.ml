@@ -94,7 +94,6 @@ let string_of_token (t : token) : string =
   | Syntax Program -> "Syntax Program"
   | Syntax Real -> "Syntax Real"
   | Syntax Subroutine -> "Syntax Subroutine"
-  | Syntax Then -> "Syntax Then"
   | Syntax While -> "Syntax While"
   | Syntax Call -> "Syntax Call"
   | Syntax Print -> "Syntax Print"
@@ -103,7 +102,6 @@ let string_of_token (t : token) : string =
   | Syntax For -> "Syntax For"
   | Syntax Step -> "Syntax Step"
   | NewLine -> "NewLine"
-  | Space -> "Space"
   | Name s -> "Name " ^ s
   | Integer s -> "Integer " ^ s
   | Floating s -> "Floating " ^ s
@@ -111,7 +109,6 @@ let string_of_token (t : token) : string =
   | Chaine s -> "Chaine " ^ s
   | Commentaire s -> "Commentaire " ^ s
   | Booleen b -> "Booleen " ^ string_of_bool b
-  | Virgule -> "Virgule"
   | Parentheseouvrante -> "Parentheseouvrante"
   | Parenthesefermante -> "Parenthesefermante"
   | ProgramRoot -> "ProgramRoot"

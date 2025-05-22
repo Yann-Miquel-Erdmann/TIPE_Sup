@@ -1,6 +1,5 @@
-program hello
+program func
   ! This is a comment line; it is ignored by the compiler
-  print *, "Hello, World!"
   
   print *, test (0)
   print *, test (1)
@@ -18,5 +17,6 @@ contains
     b = test(a-1)
 
   end function
-end program hello
+  
+end program func
 
