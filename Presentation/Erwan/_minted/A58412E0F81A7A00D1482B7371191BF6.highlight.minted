@@ -1,0 +1,454 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{type} \PYG{n}{terminal} \PYG{o}{=}
+  \PYG{o}{|} \PYG{n+nc}{EOF}
+  \PYG{o}{|} \PYG{n+nc}{E}
+  \PYG{o}{|} \PYG{n+nc}{PowerOp}
+  \PYG{o}{|} \PYG{n+nc}{NotOp}
+  \PYG{o}{|} \PYG{n+nc}{AndOp}
+  \PYG{o}{|} \PYG{n+nc}{OrOp}
+  \PYG{o}{|} \PYG{n+nc}{Dcon}
+  \PYG{o}{|} \PYG{n+nc}{Rcon}
+  \PYG{o}{|} \PYG{n+nc}{Icon}
+  \PYG{o}{|} \PYG{n+nc}{SconSingle}
+  \PYG{o}{|} \PYG{n+nc}{SconDouble}
+  \PYG{o}{|} \PYG{n+nc}{Ident}
+  \PYG{o}{|} \PYG{n+nc}{EOS}
+  \PYG{o}{|} \PYG{n+nc}{Return}
+  \PYG{o}{|} \PYG{n+nc}{Result}
+  \PYG{o}{|} \PYG{n+nc}{Contains}
+  \PYG{o}{|} \PYG{n+nc}{True}
+  \PYG{o}{|} \PYG{n+nc}{False}
+  \PYG{o}{|} \PYG{n+nc}{Program}
+  \PYG{o}{|} \PYG{n+nc}{Function}
+  \PYG{o}{|} \PYG{n+nc}{Subroutine}
+  \PYG{o}{|} \PYG{n+nc}{EndProgram}
+  \PYG{o}{|} \PYG{n+nc}{EndFunction}
+  \PYG{o}{|} \PYG{n+nc}{EndSubroutine}
+  \PYG{o}{|} \PYG{n+nc}{EndDo}
+  \PYG{o}{|} \PYG{n+nc}{EndIf}
+  \PYG{o}{|} \PYG{n+nc}{Colon}
+  \PYG{o}{|} \PYG{n+nc}{Comma}
+  \PYG{o}{|} \PYG{n+nc}{Equal}
+  \PYG{o}{|} \PYG{n+nc}{Asterisk}
+  \PYG{o}{|} \PYG{n+nc}{LParenthesis}
+  \PYG{o}{|} \PYG{n+nc}{RParenthesis}
+  \PYG{o}{|} \PYG{n+nc}{Integer}
+  \PYG{o}{|} \PYG{n+nc}{Real}
+  \PYG{o}{|} \PYG{n+nc}{Double}
+  \PYG{o}{|} \PYG{n+nc}{Complex}
+  \PYG{o}{|} \PYG{n+nc}{Character}
+  \PYG{o}{|} \PYG{n+nc}{Logical}
+  \PYG{o}{|} \PYG{n+nc}{Parameter}
+  \PYG{o}{|} \PYG{n+nc}{Intent}
+  \PYG{o}{|} \PYG{n+nc}{In}
+  \PYG{o}{|} \PYG{n+nc}{Out}
+  \PYG{o}{|} \PYG{n+nc}{InOut}
+  \PYG{o}{|} \PYG{n+nc}{Call}
+  \PYG{o}{|} \PYG{n+nc}{Print}
+  \PYG{o}{|} \PYG{n+nc}{Do}
+  \PYG{o}{|} \PYG{n+nc}{While}
+  \PYG{o}{|} \PYG{n+nc}{If}
+  \PYG{o}{|} \PYG{n+nc}{Else}
+  \PYG{o}{|} \PYG{n+nc}{Then}
+  \PYG{o}{|} \PYG{n+nc}{Divise}
+  \PYG{o}{|} \PYG{n+nc}{Plus}
+  \PYG{o}{|} \PYG{n+nc}{Minus}
+  \PYG{o}{|} \PYG{n+nc}{IsEqual}
+  \PYG{o}{|} \PYG{n+nc}{NotEqual}
+  \PYG{o}{|} \PYG{n+nc}{StrictLess}
+  \PYG{o}{|} \PYG{n+nc}{LessEqual}
+  \PYG{o}{|} \PYG{n+nc}{StrictGreater}
+  \PYG{o}{|} \PYG{n+nc}{GreaterEqual}
+  \PYG{o}{|} \PYG{n+nc}{Equivalent}
+  \PYG{o}{|} \PYG{n+nc}{NotEquivalent}
+  \PYG{o}{|} \PYG{n+nc}{Space}
+  \PYG{o}{|} \PYG{n+nc}{Recursive}
+
+\PYG{k}{type} \PYG{n}{non\PYGZus{}terminal} \PYG{o}{=}
+  \PYG{o}{|} \PYG{n+nc}{ExecutableProgram}
+  \PYG{o}{|} \PYG{n+nc}{StartCommentBlock}
+  \PYG{o}{|} \PYG{n+nc}{Function\PYGZus{}or\PYGZus{}Subroutine\PYGZus{}star\PYGZus{}MainProgram}
+  \PYG{o}{|} \PYG{n+nc}{Function\PYGZus{}or\PYGZus{}Subroutine\PYGZus{}star}
+  \PYG{o}{|} \PYG{n+nc}{Recursive\PYGZus{}opt\PYGZus{}Function\PYGZus{}or\PYGZus{}Subroutine}
+  \PYG{o}{|} \PYG{n+nc}{Function\PYGZus{}or\PYGZus{}Subroutine}
+  \PYG{o}{|} \PYG{n+nc}{MainProgram}
+  \PYG{o}{|} \PYG{n+nc}{MainRange}
+  \PYG{o}{|} \PYG{n+nc}{Contains\PYGZus{}Function\PYGZus{}opt\PYGZus{}EndProgramStmt}
+  \PYG{o}{|} \PYG{n+nc}{Contains\PYGZus{}Function}
+  \PYG{o}{|} \PYG{n+nc}{FunctionSubprogram\PYGZus{}star}
+  \PYG{o}{|} \PYG{n+nc}{BodyConstruct\PYGZus{}star}
+  \PYG{o}{|} \PYG{n+nc}{ProgramStmt}
+  \PYG{o}{|} \PYG{n+nc}{EndProgramStmt}
+  \PYG{o}{|} \PYG{n+nc}{FunctionSubprogram}
+  \PYG{o}{|} \PYG{n+nc}{FunctionPrefix}
+  \PYG{o}{|} \PYG{n+nc}{FunctionRange}
+  \PYG{o}{|} \PYG{n+nc}{FunctionParList}
+  \PYG{o}{|} \PYG{n+nc}{FunctionPar\PYGZus{}Comma\PYGZus{}FunctionPar\PYGZus{}star\PYGZus{}opt}
+  \PYG{o}{|} \PYG{n+nc}{Comma\PYGZus{}FunctionPar\PYGZus{}star}
+  \PYG{o}{|} \PYG{n+nc}{FunctionPar}
+  \PYG{o}{|} \PYG{n+nc}{FunctionResult\PYGZus{}opt}
+  \PYG{o}{|} \PYG{n+nc}{EndFunctionStmt}
+  \PYG{o}{|} \PYG{n+nc}{SubroutineSubprogram}
+  \PYG{o}{|} \PYG{n+nc}{SubroutineRange}
+  \PYG{o}{|} \PYG{n+nc}{SubroutineParList\PYGZus{}opt}
+  \PYG{o}{|} \PYG{n+nc}{SubroutinePar\PYGZus{}Comma\PYGZus{}SubroutinePar\PYGZus{}star\PYGZus{}opt}
+  \PYG{o}{|} \PYG{n+nc}{Comma\PYGZus{}SubroutinePar\PYGZus{}star}
+  \PYG{o}{|} \PYG{n+nc}{SubroutinePar}
+  \PYG{o}{|} \PYG{n+nc}{EndSubroutineStmt}
+  \PYG{o}{|} \PYG{n+nc}{EndName\PYGZus{}opt}
+  \PYG{o}{|} \PYG{n+nc}{BodyConstruct}
+  \PYG{o}{|} \PYG{n+nc}{SpecificationPartConstruct}
+  \PYG{o}{|} \PYG{n+nc}{DeclarationConstruct}
+  \PYG{o}{|} \PYG{n+nc}{TypeDeclarationStmt}
+  \PYG{o}{|} \PYG{n+nc}{Comma\PYGZus{}AttrSpec\PYGZus{}star}
+  \PYG{o}{|} \PYG{n+nc}{AttrSpec}
+  \PYG{o}{|} \PYG{n+nc}{Intent\PYGZus{}in\PYGZus{}out}
+  \PYG{o}{|} \PYG{n+nc}{In\PYGZus{}out}
+  \PYG{o}{|} \PYG{n+nc}{TypeDecl\PYGZus{}Assignment}
+  \PYG{o}{|} \PYG{n+nc}{Comma\PYGZus{}ObjectName\PYGZus{}star}
+  \PYG{o}{|} \PYG{n+nc}{Comma\PYGZus{}EntityDecl\PYGZus{}star}
+  \PYG{o}{|} \PYG{n+nc}{EntityDecl}
+  \PYG{o}{|} \PYG{n+nc}{Equal\PYGZus{}Expr\PYGZus{}opt}
+  \PYG{o}{|} \PYG{n+nc}{Asterisk\PYGZus{}CharLength\PYGZus{}opt}
+  \PYG{o}{|} \PYG{n+nc}{CharLength}
+  \PYG{o}{|} \PYG{n+nc}{TypeParamValue}
+  \PYG{o}{|} \PYG{n+nc}{Expr\PYGZus{}Or\PYGZus{}Asterisk}
+  \PYG{o}{|} \PYG{n+nc}{TypeSpec}
+  \PYG{o}{|} \PYG{n+nc}{KindSelector\PYGZus{}opt}
+  \PYG{o}{|} \PYG{n+nc}{ExecutableConstruct}
+  \PYG{o}{|} \PYG{n+nc}{ReturnStmt}
+  \PYG{o}{|} \PYG{n+nc}{ActionStmt}
+  \PYG{o}{|} \PYG{n+nc}{AssignmentStmt}
+  \PYG{o}{|} \PYG{n+nc}{PrintStmt}
+  \PYG{o}{|} \PYG{n+nc}{Comma\PYGZus{}OutputItemList\PYGZus{}opt}
+  \PYG{o}{|} \PYG{n+nc}{FormatIdentifier}
+  \PYG{o}{|} \PYG{n+nc}{OutputItemList}
+  \PYG{o}{|} \PYG{n+nc}{Comma\PYGZus{}OutputItem\PYGZus{}star}
+  \PYG{o}{|} \PYG{n+nc}{OutputItem}
+  \PYG{o}{|} \PYG{n+nc}{DoConstruct}
+  \PYG{o}{|} \PYG{n+nc}{BlockDoConstruct}
+  \PYG{o}{|} \PYG{n+nc}{LoopControl\PYGZus{}opt}
+  \PYG{o}{|} \PYG{n+nc}{EndDoStmt}
+  \PYG{o}{|} \PYG{n+nc}{Name\PYGZus{}opt}
+  \PYG{o}{|} \PYG{n+nc}{LoopControl}
+  \PYG{o}{|} \PYG{n+nc}{Comma\PYGZus{}IntRealDpExpression\PYGZus{}opt}
+  \PYG{o}{|} \PYG{n+nc}{IntRealDpExpression}
+  \PYG{o}{|} \PYG{n+nc}{IfConstruct}
+  \PYG{o}{|} \PYG{n+nc}{ElseIfStmt\PYGZus{}ExecutionPartConstruct\PYGZus{}star\PYGZus{}star}
+  \PYG{o}{|} \PYG{n+nc}{ExecutionPartConstruct\PYGZus{}star}
+  \PYG{o}{|} \PYG{n+nc}{ElseStmt\PYGZus{}ExecutionPartConstruct\PYGZus{}star\PYGZus{}opt}
+  \PYG{o}{|} \PYG{n+nc}{IfThenStmt}
+  \PYG{o}{|} \PYG{n+nc}{ElseIfStmt}
+  \PYG{o}{|} \PYG{n+nc}{ElseStmt}
+  \PYG{o}{|} \PYG{n+nc}{EndIfStmt}
+  \PYG{o}{|} \PYG{n+nc}{ExecutionPartConstruct}
+  \PYG{o}{|} \PYG{n+nc}{ScalarLogicalExpr}
+  \PYG{o}{|} \PYG{n+nc}{Expr}
+  \PYG{o}{|} \PYG{n+nc}{Level5Expr}
+  \PYG{o}{|} \PYG{n+nc}{EquivOp\PYGZus{}EquivOperand\PYGZus{}star}
+  \PYG{o}{|} \PYG{n+nc}{EquivOperand}
+  \PYG{o}{|} \PYG{n+nc}{OrOp\PYGZus{}OrOperand\PYGZus{}star}
+  \PYG{o}{|} \PYG{n+nc}{OrOperand}
+  \PYG{o}{|} \PYG{n+nc}{AndOp\PYGZus{}AndOperand\PYGZus{}star}
+  \PYG{o}{|} \PYG{n+nc}{AndOperand}
+  \PYG{o}{|} \PYG{n+nc}{NotOp\PYGZus{}opt}
+  \PYG{o}{|} \PYG{n+nc}{Level4Expr}
+  \PYG{o}{|} \PYG{n+nc}{RelOp\PYGZus{}Level3Expr\PYGZus{}star}
+  \PYG{o}{|} \PYG{n+nc}{Level3Expr}
+  \PYG{o}{|} \PYG{n+nc}{Level2Expr}
+  \PYG{o}{|} \PYG{n+nc}{AddOp\PYGZus{}Sign\PYGZus{}opt\PYGZus{}AddOperand\PYGZus{}star}
+  \PYG{o}{|} \PYG{n+nc}{Sign\PYGZus{}opt\PYGZus{}AddOperand}
+  \PYG{o}{|} \PYG{n+nc}{Sign\PYGZus{}opt}
+  \PYG{o}{|} \PYG{n+nc}{AddOperand}
+  \PYG{o}{|} \PYG{n+nc}{MultOp\PYGZus{}MultOperand\PYGZus{}star}
+  \PYG{o}{|} \PYG{n+nc}{MultOperand}
+  \PYG{o}{|} \PYG{n+nc}{PowerOp\PYGZus{}Level1Expr\PYGZus{}star}
+  \PYG{o}{|} \PYG{n+nc}{Level1Expr}
+  \PYG{o}{|} \PYG{n+nc}{Primary}
+  \PYG{o}{|} \PYG{n+nc}{FunctionReference\PYGZus{}opt}
+  \PYG{o}{|} \PYG{n+nc}{FunctionArg\PYGZus{}Comma\PYGZus{}FunctionArg\PYGZus{}star\PYGZus{}opt\PYGZus{}RParenthesis}
+  \PYG{o}{|} \PYG{n+nc}{Comma\PYGZus{}FunctionArg\PYGZus{}star}
+  \PYG{o}{|} \PYG{n+nc}{FunctionArg}
+  \PYG{o}{|} \PYG{n+nc}{Name}
+  \PYG{o}{|} \PYG{n+nc}{ArrayName}
+  \PYG{o}{|} \PYG{n+nc}{ComponentName}
+  \PYG{o}{|} \PYG{n+nc}{EndName}
+  \PYG{o}{|} \PYG{n+nc}{DummyArgName}
+  \PYG{o}{|} \PYG{n+nc}{FunctionName}
+  \PYG{o}{|} \PYG{n+nc}{ImpliedDoVariable}
+  \PYG{o}{|} \PYG{n+nc}{ProgramName}
+  \PYG{o}{|} \PYG{n+nc}{SubroutineName}
+  \PYG{o}{|} \PYG{n+nc}{SubroutineNameUse}
+  \PYG{o}{|} \PYG{n+nc}{VariableName}
+  \PYG{o}{|} \PYG{n+nc}{ObjectName}
+  \PYG{o}{|} \PYG{n+nc}{LogicalConstant}
+  \PYG{o}{|} \PYG{n+nc}{MultOp}
+  \PYG{o}{|} \PYG{n+nc}{AddOp}
+  \PYG{o}{|} \PYG{n+nc}{Sign}
+  \PYG{o}{|} \PYG{n+nc}{RelOp}
+  \PYG{o}{|} \PYG{n+nc}{EquivOp}
+  \PYG{o}{|} \PYG{n+nc}{ScalarIntLiteralConstant}
+  \PYG{o}{|} \PYG{n+nc}{Scon}
+\PYG{k}{type} \PYG{n}{symbol} \PYG{o}{=} \PYG{o}{|} \PYG{n+nc}{Terminal} \PYG{k}{of} \PYG{n}{terminal} \PYG{o}{|} \PYG{n+nc}{NonTerminal} \PYG{k}{of} \PYG{n}{non\PYGZus{}terminal}
+\PYG{k}{let} \PYG{n}{safe\PYGZus{}token} \PYG{o}{=} \PYG{n+nc}{Ident}
+\PYG{k}{let} \PYG{n}{unparsed\PYGZus{}tokens} \PYG{o}{=} \PYG{o}{[}\PYG{n+nc}{Space}\PYG{o}{;} \PYG{o}{]}
+
+\PYG{k}{let} \PYG{n}{repr\PYGZus{}of\PYGZus{}terminal} \PYG{o}{(}\PYG{n}{t} \PYG{o}{:} \PYG{n}{terminal}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{string} \PYG{o}{=}
+  \PYG{k}{match} \PYG{n}{t} \PYG{k}{with}
+  \PYG{o}{|} \PYG{n+nc}{EOF} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{End of file}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{E} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Epsilon}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{PowerOp} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{*}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{*}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{NotOp} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.not}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{AndOp} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.and}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{OrOp} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.or}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Dcon} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{(([0\PYGZhy{}9]+}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.[0\PYGZhy{}9]*)|(}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.[0\PYGZhy{}9]+))(d(}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{+|\PYGZhy{})?[0\PYGZhy{}9]+)}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Rcon} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{(([0\PYGZhy{}9]+}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.[0\PYGZhy{}9]*)|(}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.[0\PYGZhy{}9]+))(e(}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{+|\PYGZhy{})?[0\PYGZhy{}9]+)?}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Icon} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{[0\PYGZhy{}9]+(e(}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{+|\PYGZhy{})?[0\PYGZhy{}9]+)?}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{SconSingle} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{[\PYGZsq{}](\PYGZti{}[\PYGZsq{}]|\PYGZsq{}\PYGZsq{})*[\PYGZsq{}]}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{SconDouble} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{[}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{](\PYGZti{}[}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{]|}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{)*[}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{]}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Ident} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{[A\PYGZhy{}Za\PYGZhy{}z][A\PYGZhy{}Za\PYGZhy{}z0\PYGZhy{}9\PYGZus{}]*}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{EOS} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{((!\PYGZti{}[}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{n]*)?}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{n[ ]*)+}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Return} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{return}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Result} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{result}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Contains} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{contains}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{True} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.true}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{False} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.false}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Program} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{program}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Function} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{function}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Subroutine} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{subroutine}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{EndProgram} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{end program}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{EndFunction} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{end function}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{EndSubroutine} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{end subroutine}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{EndDo} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{end do}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{EndIf} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{end if}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Colon} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{:}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Comma} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{,}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Equal} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{=}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Asterisk} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{*}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{LParenthesis} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{(}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{RParenthesis} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{)}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Integer} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{integer}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Real} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{real}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Double} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{double precision}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Complex} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{complex}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Character} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{character}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Logical} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{logical}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Parameter} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{parameter}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Intent} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{intent}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{In} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{in}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Out} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{out}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{InOut} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{inout}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Call} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{call}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Print} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{print}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Do} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{do}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{While} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{while}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{If} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{if}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Else} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{else}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Then} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{then}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Divise} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{/}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Plus} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{+}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Minus} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZhy{}}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{IsEqual} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{(==)|(}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.eq}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.)}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{NotEqual} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{(/=)|(}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.ne}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.)}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{StrictLess} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{(\PYGZlt{})|(}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.lt}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.)}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{LessEqual} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{(\PYGZlt{}=)|(}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.le}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.)}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{StrictGreater} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{(\PYGZgt{})|(}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.gt}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.)}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{GreaterEqual} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{(\PYGZgt{}=)|(}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.ge}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.)}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Equivalent} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.eqv}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{NotEquivalent} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.neqv}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{.}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Space} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ }\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Recursive} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{recursive}\PYG{l+s+s2}{\PYGZdq{}}
+
+\PYG{k}{let} \PYG{n}{string\PYGZus{}of\PYGZus{}terminal} \PYG{o}{(}\PYG{n}{t} \PYG{o}{:} \PYG{n}{terminal}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{string} \PYG{o}{=}
+	\PYG{k}{match} \PYG{n}{t} \PYG{k}{with}
+	\PYG{o}{|} \PYG{n+nc}{EOF} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{EOF}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{E} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{E}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{PowerOp} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{PowerOp}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{NotOp} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{NotOp}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{AndOp} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{AndOp}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{OrOp} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{OrOp}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Dcon} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Dcon}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Rcon} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Rcon}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Icon} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Icon}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{SconSingle} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{SconSingle}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{SconDouble} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{SconDouble}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Ident} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Ident}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{EOS} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{EOS}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Return} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Return}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Result} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Result}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Contains} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Contains}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{True} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{True}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{False} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{False}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Program} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Program}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Function} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Function}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Subroutine} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Subroutine}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{EndProgram} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{EndProgram}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{EndFunction} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{EndFunction}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{EndSubroutine} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{EndSubroutine}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{EndDo} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{EndDo}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{EndIf} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{EndIf}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Colon} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Colon}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Comma} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Comma}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Equal} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Equal}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Asterisk} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Asterisk}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{LParenthesis} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{LParenthesis}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{RParenthesis} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{RParenthesis}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Integer} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Integer}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Real} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Real}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Double} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Double}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Complex} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Complex}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Character} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Character}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Logical} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Logical}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Parameter} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Parameter}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Intent} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Intent}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{In} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{In}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Out} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Out}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{InOut} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{InOut}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Call} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Call}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Print} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Print}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Do} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Do}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{While} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{While}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{If} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{If}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Else} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Else}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Then} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Then}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Divise} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Divise}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Plus} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Plus}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Minus} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Minus}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{IsEqual} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{IsEqual}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{NotEqual} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{NotEqual}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{StrictLess} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{StrictLess}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{LessEqual} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{LessEqual}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{StrictGreater} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{StrictGreater}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{GreaterEqual} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{GreaterEqual}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Equivalent} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Equivalent}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{NotEquivalent} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{NotEquivalent}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Space} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Space}\PYG{l+s+s2}{\PYGZdq{}}
+	\PYG{o}{|} \PYG{n+nc}{Recursive} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Recursive}\PYG{l+s+s2}{\PYGZdq{}}
+
+\PYG{k}{let} \PYG{n}{string\PYGZus{}of\PYGZus{}non\PYGZus{}terminal} \PYG{o}{(}\PYG{n}{nt} \PYG{o}{:} \PYG{n}{non\PYGZus{}terminal}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{string} \PYG{o}{=}
+  \PYG{k}{match} \PYG{n}{nt} \PYG{k}{with}
+  \PYG{o}{|} \PYG{n+nc}{ExecutableProgram} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ExecutableProgram}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{StartCommentBlock} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{StartCommentBlock}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Function\PYGZus{}or\PYGZus{}Subroutine\PYGZus{}star\PYGZus{}MainProgram} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Function\PYGZus{}or\PYGZus{}Subroutine\PYGZus{}star\PYGZus{}MainProgram}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Function\PYGZus{}or\PYGZus{}Subroutine\PYGZus{}star} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Function\PYGZus{}or\PYGZus{}Subroutine\PYGZus{}star}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Recursive\PYGZus{}opt\PYGZus{}Function\PYGZus{}or\PYGZus{}Subroutine} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Recursive\PYGZus{}opt\PYGZus{}Function\PYGZus{}or\PYGZus{}Subroutine}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Function\PYGZus{}or\PYGZus{}Subroutine} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Function\PYGZus{}or\PYGZus{}Subroutine}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{MainProgram} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{MainProgram}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{MainRange} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{MainRange}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Contains\PYGZus{}Function\PYGZus{}opt\PYGZus{}EndProgramStmt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Contains\PYGZus{}Function\PYGZus{}opt\PYGZus{}EndProgramStmt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Contains\PYGZus{}Function} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Contains\PYGZus{}Function}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{FunctionSubprogram\PYGZus{}star} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{FunctionSubprogram\PYGZus{}star}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{BodyConstruct\PYGZus{}star} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{BodyConstruct\PYGZus{}star}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{ProgramStmt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ProgramStmt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{EndProgramStmt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{EndProgramStmt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{FunctionSubprogram} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{FunctionSubprogram}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{FunctionPrefix} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{FunctionPrefix}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{FunctionRange} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{FunctionRange}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{FunctionParList} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{FunctionParList}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{FunctionPar\PYGZus{}Comma\PYGZus{}FunctionPar\PYGZus{}star\PYGZus{}opt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{FunctionPar\PYGZus{}Comma\PYGZus{}FunctionPar\PYGZus{}star\PYGZus{}opt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Comma\PYGZus{}FunctionPar\PYGZus{}star} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Comma\PYGZus{}FunctionPar\PYGZus{}star}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{FunctionPar} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{FunctionPar}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{FunctionResult\PYGZus{}opt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{FunctionResult\PYGZus{}opt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{EndFunctionStmt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{EndFunctionStmt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{SubroutineSubprogram} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{SubroutineSubprogram}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{SubroutineRange} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{SubroutineRange}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{SubroutineParList\PYGZus{}opt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{SubroutineParList\PYGZus{}opt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{SubroutinePar\PYGZus{}Comma\PYGZus{}SubroutinePar\PYGZus{}star\PYGZus{}opt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{SubroutinePar\PYGZus{}Comma\PYGZus{}SubroutinePar\PYGZus{}star\PYGZus{}opt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Comma\PYGZus{}SubroutinePar\PYGZus{}star} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Comma\PYGZus{}SubroutinePar\PYGZus{}star}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{SubroutinePar} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{SubroutinePar}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{EndSubroutineStmt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{EndSubroutineStmt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{EndName\PYGZus{}opt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{EndName\PYGZus{}opt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{BodyConstruct} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{BodyConstruct}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{SpecificationPartConstruct} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{SpecificationPartConstruct}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{DeclarationConstruct} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{DeclarationConstruct}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{TypeDeclarationStmt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{TypeDeclarationStmt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Comma\PYGZus{}AttrSpec\PYGZus{}star} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Comma\PYGZus{}AttrSpec\PYGZus{}star}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{AttrSpec} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{AttrSpec}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Intent\PYGZus{}in\PYGZus{}out} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Intent\PYGZus{}in\PYGZus{}out}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{In\PYGZus{}out} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{In\PYGZus{}out}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{TypeDecl\PYGZus{}Assignment} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{TypeDecl\PYGZus{}Assignment}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Comma\PYGZus{}ObjectName\PYGZus{}star} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Comma\PYGZus{}ObjectName\PYGZus{}star}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Comma\PYGZus{}EntityDecl\PYGZus{}star} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Comma\PYGZus{}EntityDecl\PYGZus{}star}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{EntityDecl} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{EntityDecl}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Equal\PYGZus{}Expr\PYGZus{}opt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Equal\PYGZus{}Expr\PYGZus{}opt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Asterisk\PYGZus{}CharLength\PYGZus{}opt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Asterisk\PYGZus{}CharLength\PYGZus{}opt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{CharLength} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{CharLength}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{TypeParamValue} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{TypeParamValue}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Expr\PYGZus{}Or\PYGZus{}Asterisk} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Expr\PYGZus{}Or\PYGZus{}Asterisk}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{TypeSpec} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{TypeSpec}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{KindSelector\PYGZus{}opt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{KindSelector\PYGZus{}opt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{ExecutableConstruct} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ExecutableConstruct}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{ReturnStmt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ReturnStmt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{ActionStmt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ActionStmt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{AssignmentStmt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{AssignmentStmt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{PrintStmt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{PrintStmt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Comma\PYGZus{}OutputItemList\PYGZus{}opt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Comma\PYGZus{}OutputItemList\PYGZus{}opt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{FormatIdentifier} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{FormatIdentifier}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{OutputItemList} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{OutputItemList}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Comma\PYGZus{}OutputItem\PYGZus{}star} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Comma\PYGZus{}OutputItem\PYGZus{}star}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{OutputItem} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{OutputItem}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{DoConstruct} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{DoConstruct}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{BlockDoConstruct} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{BlockDoConstruct}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{LoopControl\PYGZus{}opt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{LoopControl\PYGZus{}opt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{EndDoStmt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{EndDoStmt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Name\PYGZus{}opt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Name\PYGZus{}opt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{LoopControl} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{LoopControl}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Comma\PYGZus{}IntRealDpExpression\PYGZus{}opt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Comma\PYGZus{}IntRealDpExpression\PYGZus{}opt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{IntRealDpExpression} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{IntRealDpExpression}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{IfConstruct} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{IfConstruct}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{ElseIfStmt\PYGZus{}ExecutionPartConstruct\PYGZus{}star\PYGZus{}star} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ElseIfStmt\PYGZus{}ExecutionPartConstruct\PYGZus{}star\PYGZus{}star}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{ExecutionPartConstruct\PYGZus{}star} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ExecutionPartConstruct\PYGZus{}star}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{ElseStmt\PYGZus{}ExecutionPartConstruct\PYGZus{}star\PYGZus{}opt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ElseStmt\PYGZus{}ExecutionPartConstruct\PYGZus{}star\PYGZus{}opt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{IfThenStmt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{IfThenStmt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{ElseIfStmt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ElseIfStmt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{ElseStmt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ElseStmt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{EndIfStmt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{EndIfStmt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{ExecutionPartConstruct} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ExecutionPartConstruct}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{ScalarLogicalExpr} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ScalarLogicalExpr}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Expr} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Expr}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Level5Expr} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Level5Expr}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{EquivOp\PYGZus{}EquivOperand\PYGZus{}star} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{EquivOp\PYGZus{}EquivOperand\PYGZus{}star}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{EquivOperand} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{EquivOperand}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{OrOp\PYGZus{}OrOperand\PYGZus{}star} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{OrOp\PYGZus{}OrOperand\PYGZus{}star}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{OrOperand} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{OrOperand}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{AndOp\PYGZus{}AndOperand\PYGZus{}star} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{AndOp\PYGZus{}AndOperand\PYGZus{}star}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{AndOperand} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{AndOperand}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{NotOp\PYGZus{}opt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{NotOp\PYGZus{}opt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Level4Expr} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Level4Expr}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{RelOp\PYGZus{}Level3Expr\PYGZus{}star} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{RelOp\PYGZus{}Level3Expr\PYGZus{}star}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Level3Expr} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Level3Expr}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Level2Expr} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Level2Expr}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{AddOp\PYGZus{}Sign\PYGZus{}opt\PYGZus{}AddOperand\PYGZus{}star} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{AddOp\PYGZus{}Sign\PYGZus{}opt\PYGZus{}AddOperand\PYGZus{}star}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Sign\PYGZus{}opt\PYGZus{}AddOperand} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Sign\PYGZus{}opt\PYGZus{}AddOperand}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Sign\PYGZus{}opt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Sign\PYGZus{}opt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{AddOperand} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{AddOperand}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{MultOp\PYGZus{}MultOperand\PYGZus{}star} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{MultOp\PYGZus{}MultOperand\PYGZus{}star}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{MultOperand} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{MultOperand}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{PowerOp\PYGZus{}Level1Expr\PYGZus{}star} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{PowerOp\PYGZus{}Level1Expr\PYGZus{}star}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Level1Expr} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Level1Expr}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Primary} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Primary}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{FunctionReference\PYGZus{}opt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{FunctionReference\PYGZus{}opt}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{FunctionArg\PYGZus{}Comma\PYGZus{}FunctionArg\PYGZus{}star\PYGZus{}opt\PYGZus{}RParenthesis} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{FunctionArg\PYGZus{}Comma\PYGZus{}FunctionArg\PYGZus{}star\PYGZus{}opt\PYGZus{}RParenthesis}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Comma\PYGZus{}FunctionArg\PYGZus{}star} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Comma\PYGZus{}FunctionArg\PYGZus{}star}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{FunctionArg} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{FunctionArg}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Name} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Name}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{ArrayName} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ArrayName}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{ComponentName} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ComponentName}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{EndName} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{EndName}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{DummyArgName} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{DummyArgName}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{FunctionName} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{FunctionName}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{ImpliedDoVariable} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ImpliedDoVariable}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{ProgramName} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ProgramName}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{SubroutineName} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{SubroutineName}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{SubroutineNameUse} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{SubroutineNameUse}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{VariableName} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{VariableName}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{ObjectName} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ObjectName}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{LogicalConstant} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{LogicalConstant}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{MultOp} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{MultOp}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{AddOp} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{AddOp}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Sign} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Sign}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{RelOp} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{RelOp}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{EquivOp} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{EquivOp}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{ScalarIntLiteralConstant} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ScalarIntLiteralConstant}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Scon} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Scon}\PYG{l+s+s2}{\PYGZdq{}}
+\end{MintedVerbatim}

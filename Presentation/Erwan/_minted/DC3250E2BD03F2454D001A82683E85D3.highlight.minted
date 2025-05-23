@@ -1,0 +1,493 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{open} \PYG{n+nc}{Environnement}
+\PYG{k}{open} \PYG{n+nc}{Abstract\PYGZus{}tokens}
+\PYG{k}{open} \PYG{n+nc}{Bibliotheques}
+\PYG{k}{open} \PYG{n+nc}{Convert\PYGZus{}to\PYGZus{}abstract}
+\PYG{k}{open} \PYG{n+nc}{LL1}
+\PYG{k}{open} \PYG{n+nc}{Traduction}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ Renvoie les imports nécessaires contenus dans [l] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{k}{rec} \PYG{n}{generate\PYGZus{}library\PYGZus{}imports} \PYG{o}{(}\PYG{n}{l} \PYG{o}{:} \PYG{n}{libs}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{string} \PYG{o}{=}
+  \PYG{k}{match} \PYG{n}{l} \PYG{k}{with}
+  \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n}{name} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZsh{}include \PYGZlt{}}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{name} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{.h\PYGZgt{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{generate\PYGZus{}library\PYGZus{}imports} \PYG{n}{q}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ Renvoie le format de string dans les printf pour afficher la variable ou la}
+\PYG{c}{    fonction [n] à l\PYGZsq{}aide de [env] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{generate\PYGZus{}format\PYGZus{}string\PYGZus{}of\PYGZus{}name} \PYG{o}{(}\PYG{n}{n} \PYG{o}{:} \PYG{k+kt}{string}\PYG{o}{)} \PYG{o}{(}\PYG{n}{env} \PYG{o}{:} \PYG{n}{environnement}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{string} \PYG{o}{=}
+  \PYG{k}{match} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find\PYGZus{}opt} \PYG{n}{env} \PYG{n}{n} \PYG{k}{with}
+  \PYG{o}{|} \PYG{n+nc}{Some} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Real}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZpc{}f }\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Some} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Integer}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZpc{}d }\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Some} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Logical}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZpc{}d }\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{La variable n\PYGZsq{}est pas dans l\PYGZsq{}environnement}\PYG{l+s+s2}{\PYGZdq{}}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ Renvoie le format de string dans les printf pour afficher les éléments de}
+\PYG{c}{    [l] en s\PYGZsq{}aidant des types dans [env] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{k}{rec} \PYG{n}{generate\PYGZus{}format\PYGZus{}string} \PYG{o}{(}\PYG{n}{l} \PYG{o}{:} \PYG{n}{ast} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{(}\PYG{n}{env} \PYG{o}{:} \PYG{n}{environnement}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{string} \PYG{o}{=}
+  \PYG{k}{match} \PYG{n}{l} \PYG{k}{with}
+  \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Chaine} \PYG{o}{\PYGZus{}}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZpc{}s }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{generate\PYGZus{}format\PYGZus{}string} \PYG{n}{q} \PYG{n}{env}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Integer} \PYG{o}{\PYGZus{}}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZpc{}d }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{generate\PYGZus{}format\PYGZus{}string} \PYG{n}{q} \PYG{n}{env}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Floating} \PYG{o}{\PYGZus{}}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZpc{}f }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{generate\PYGZus{}format\PYGZus{}string} \PYG{n}{q} \PYG{n}{env}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Booleen} \PYG{o}{\PYGZus{}}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZpc{}d }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{generate\PYGZus{}format\PYGZus{}string} \PYG{n}{q} \PYG{n}{env}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Name} \PYG{n}{n}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n}{generate\PYGZus{}format\PYGZus{}string\PYGZus{}of\PYGZus{}name} \PYG{n}{n} \PYG{n}{env} \PYG{o}{\PYGZca{}} \PYG{n}{generate\PYGZus{}format\PYGZus{}string} \PYG{n}{q} \PYG{n}{env}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Call}\PYG{o}{,} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Name} \PYG{n}{n}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{o}{\PYGZus{}}\PYG{o}{)} \PYG{o}{::} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n}{generate\PYGZus{}format\PYGZus{}string\PYGZus{}of\PYGZus{}name} \PYG{n}{n} \PYG{n}{env}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n}{s}\PYG{o}{,} \PYG{o}{\PYGZus{}}\PYG{o}{)} \PYG{o}{::} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n}{print\PYGZus{}token} \PYG{n}{s}\PYG{o}{;}
+      \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ type non def}\PYG{l+s+s2}{\PYGZdq{}}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ renvoie la chaîne associée au type de [var] dans [env] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{str\PYGZus{}of\PYGZus{}env\PYGZus{}type} \PYG{o}{(}\PYG{n}{env} \PYG{o}{:} \PYG{n}{environnement}\PYG{o}{)} \PYG{o}{(}\PYG{n}{var} \PYG{o}{:} \PYG{k+kt}{string}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{string} \PYG{o}{=}
+  \PYG{k}{match} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find\PYGZus{}opt} \PYG{n}{env} \PYG{n}{var} \PYG{k}{with}
+  \PYG{o}{|} \PYG{n+nc}{Some} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Integer}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{int}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Some} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Real}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{float}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Some} \PYG{n}{t} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n}{print\PYGZus{}token} \PYG{n}{t}\PYG{o}{;}
+      \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{type non supporté}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{None} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{var not found in environnement}\PYG{l+s+s2}{\PYGZdq{}}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ Applique la fonction [f] au dernier élément de la liste [l] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{k}{rec} \PYG{n}{map\PYGZus{}to\PYGZus{}last} \PYG{o}{(}\PYG{n}{f} \PYG{o}{:} \PYG{k}{\PYGZsq{}}\PYG{n}{a} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{k}{\PYGZsq{}}\PYG{n}{a}\PYG{o}{)} \PYG{o}{(}\PYG{n}{l} \PYG{o}{:} \PYG{k}{\PYGZsq{}}\PYG{n}{a} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:} \PYG{k}{\PYGZsq{}}\PYG{n}{a} \PYG{k+kt}{list} \PYG{o}{=}
+  \PYG{k}{match} \PYG{n}{l} \PYG{k}{with}
+  \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{impossible to map to last}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n}{e} \PYG{o}{::} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{k}{if} \PYG{n}{e} \PYG{o}{=} \PYG{n+nc}{L} \PYG{n+nb+bp}{[]} \PYG{k}{then} \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{e= []}\PYG{l+s+s2}{\PYGZdq{}} \PYG{k}{else} \PYG{o}{[} \PYG{n}{f} \PYG{n}{e} \PYG{o}{]}
+  \PYG{o}{|} \PYG{n}{e} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{e} \PYG{o}{::} \PYG{n}{map\PYGZus{}to\PYGZus{}last} \PYG{n}{f} \PYG{n}{q}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ ajoute un point\PYGZhy{}virgule à la fin de [s] si elle n\PYGZsq{}en a pas déjà }\PYG{c}{*)}
+\PYG{k}{let} \PYG{k}{rec} \PYG{n}{add\PYGZus{}semi\PYGZus{}colon} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{n}{string\PYGZus{}or\PYGZus{}string\PYGZus{}list}\PYG{o}{)} \PYG{o}{:} \PYG{n}{string\PYGZus{}or\PYGZus{}string\PYGZus{}list} \PYG{o}{=}
+  \PYG{k}{match} \PYG{n}{s} \PYG{k}{with}
+  \PYG{o}{|} \PYG{n+nc}{S} \PYG{n}{s} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{k}{if} \PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{ends\PYGZus{}with} \PYG{n}{s} \PYG{o}{\PYGZti{}}\PYG{n}{suffix}\PYG{o}{:}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{;}\PYG{l+s+s2}{\PYGZdq{}} \PYG{k}{then} \PYG{n+nc}{S} \PYG{n}{s} \PYG{k}{else} \PYG{n+nc}{S} \PYG{o}{(}\PYG{n}{s} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{;}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}
+  \PYG{o}{|} \PYG{n+nc}{L} \PYG{n}{l} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nc}{L} \PYG{o}{(}\PYG{n}{map\PYGZus{}to\PYGZus{}last} \PYG{n}{add\PYGZus{}semi\PYGZus{}colon} \PYG{n}{l}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ Renvoie le type de la fonction d\PYGZsq{}ast [a] à l\PYGZsq{}aide de l\PYGZsq{}environnement [env] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{get\PYGZus{}function\PYGZus{}return\PYGZus{}type} \PYG{o}{(}\PYG{n}{a} \PYG{o}{:} \PYG{n}{ast}\PYG{o}{)} \PYG{o}{(}\PYG{n}{env} \PYG{o}{:} \PYG{n}{environnement}\PYG{o}{)} \PYG{o}{:}
+    \PYG{n}{string\PYGZus{}or\PYGZus{}string\PYGZus{}list} \PYG{o}{=}
+  \PYG{k}{match} \PYG{n}{a} \PYG{k}{with}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Function}\PYG{o}{,} \PYG{n}{l}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}
+      \PYG{k}{let} \PYG{n}{ret} \PYG{o}{=} \PYG{n}{last\PYGZus{}of\PYGZus{}list} \PYG{n}{l} \PYG{k}{in}
+      \PYG{k}{match} \PYG{n}{ret} \PYG{k}{with}
+      \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Return}\PYG{o}{,} \PYG{o}{[} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Name} \PYG{n}{var\PYGZus{}name}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{]}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+          \PYG{n+nc}{S} \PYG{o}{(}\PYG{n}{str\PYGZus{}of\PYGZus{}env\PYGZus{}type} \PYG{n}{env} \PYG{n}{var\PYGZus{}name}\PYG{o}{)}
+      \PYG{o}{|} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{type de retour non pris en charge}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}
+  \PYG{o}{|} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Cette fonction prend en paramètre un Noeud(Function)}\PYG{l+s+s2}{\PYGZdq{}}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ parcourt la liste des fils pour trouver les définitions des paramètres }\PYG{c}{*)}
+\PYG{k}{let} \PYG{k}{rec} \PYG{n}{get\PYGZus{}function\PYGZus{}param\PYGZus{}list} \PYG{o}{(}\PYG{n}{l} \PYG{o}{:} \PYG{n}{ast} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{(}\PYG{n}{env} \PYG{o}{:} \PYG{n}{environnement}\PYG{o}{)} \PYG{o}{:}
+    \PYG{n}{string\PYGZus{}or\PYGZus{}string\PYGZus{}list} \PYG{o}{*} \PYG{n}{ast} \PYG{k+kt}{list} \PYG{o}{=}
+  \PYG{k}{match} \PYG{n}{l} \PYG{k}{with}
+
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Name} \PYG{n}{nom}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n+nc}{Noeud}\PYG{o}{(}\PYG{n+nc}{Name} \PYG{n}{n}\PYG{o}{,}\PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{k}{let} \PYG{n}{sosl}\PYG{o}{,} \PYG{n}{q2} \PYG{o}{=} \PYG{n}{get\PYGZus{}function\PYGZus{}param\PYGZus{}list} \PYG{o}{(}\PYG{n+nc}{Noeud}\PYG{o}{(}\PYG{n+nc}{Name} \PYG{n}{n}\PYG{o}{,}\PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q}\PYG{o}{)} \PYG{n}{env} \PYG{k}{in}
+      \PYG{o}{(}\PYG{n+nc}{L} \PYG{o}{[} \PYG{n+nc}{S} \PYG{o}{(}\PYG{n}{str\PYGZus{}of\PYGZus{}env\PYGZus{}type} \PYG{n}{env} \PYG{n}{nom}\PYG{o}{)}\PYG{o}{;} \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;} \PYG{n+nc}{S} \PYG{n}{nom}\PYG{o}{;} \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{, }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;} \PYG{n}{sosl} \PYG{o}{]}\PYG{o}{,} \PYG{n}{q}\PYG{o}{)}
+
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Name} \PYG{n}{nom}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::}  \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nc}{L} \PYG{o}{[} \PYG{n+nc}{S} \PYG{o}{(}\PYG{n}{str\PYGZus{}of\PYGZus{}env\PYGZus{}type} \PYG{n}{env} \PYG{n}{nom}\PYG{o}{)}\PYG{o}{;} \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;} \PYG{n+nc}{S} \PYG{n}{nom} \PYG{o}{]}\PYG{o}{,} \PYG{n}{q}
+  \PYG{o}{|} \PYG{n}{l1} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}\PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{,} \PYG{n}{l}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ convertit l\PYGZsq{}arbre de syntaxe abstrait [ast] à l\PYGZsq{}aide de l\PYGZsq{}environnement}
+\PYG{c}{    [env] et l\PYGZsq{}indente de [n\PYGZus{}tab] en un string\PYGZus{}or\PYGZus{}string\PYGZus{}list}\PYG{c}{*)}
+\PYG{k}{let} \PYG{k}{rec} \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{(}\PYG{n}{ast} \PYG{o}{:} \PYG{n}{ast} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{(}\PYG{n}{env} \PYG{o}{:} \PYG{n}{environnement}\PYG{o}{)}
+    \PYG{o}{(}\PYG{n}{nb\PYGZus{}tab} \PYG{o}{:} \PYG{k+kt}{int}\PYG{o}{)} \PYG{o}{:} \PYG{n}{string\PYGZus{}or\PYGZus{}string\PYGZus{}list} \PYG{o}{=}
+  \PYG{k}{match} \PYG{n}{ast} \PYG{k}{with}
+  \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{o}{[} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{ProgramRoot}\PYG{o}{,} \PYG{n}{l}\PYG{o}{)} \PYG{o}{]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{l} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Program}\PYG{o}{,} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Name} \PYG{n}{nom}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{l1}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{// }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{n}{nom}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{void main(void)\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{l1} \PYG{n}{env} \PYG{o}{(}\PYG{n}{nb\PYGZus{}tab} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{o}{)}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Commentaire} \PYG{n}{c}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{//}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{n}{c}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Print}\PYG{o}{,} \PYG{n}{l2}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{printf(}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{o}{(}\PYG{n}{generate\PYGZus{}format\PYGZus{}string} \PYG{n}{l2} \PYG{n}{env}\PYG{o}{)}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n+nc}{L}
+            \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{rev}
+               \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{fold\PYGZus{}left}
+                  \PYG{o}{(}\PYG{k}{fun} \PYG{n}{acc} \PYG{n}{x} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                    \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{x} \PYG{o}{]} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab} \PYG{o}{::} \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{, }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{::} \PYG{n}{acc}\PYG{o}{)}
+                  \PYG{n+nb+bp}{[]} \PYG{n}{l2}\PYG{o}{)}\PYG{o}{)}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{);}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{c}{(*}\PYG{c}{ définit le type des variables }\PYG{c}{*)}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Real}\PYG{o}{,} \PYG{n}{l}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{k}{let} \PYG{n}{s} \PYG{o}{=} \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{l} \PYG{n}{env} \PYG{l+m+mi}{0} \PYG{k}{in}
+      \PYG{k}{let} \PYG{n}{s} \PYG{o}{=} \PYG{n}{add\PYGZus{}semi\PYGZus{}colon} \PYG{n}{s} \PYG{k}{in}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{float }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{s}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Integer}\PYG{o}{,} \PYG{n}{l}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{k}{let} \PYG{n}{s} \PYG{o}{=} \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{l} \PYG{n}{env} \PYG{l+m+mi}{0} \PYG{k}{in}
+      \PYG{k}{let} \PYG{n}{s} \PYG{o}{=} \PYG{n}{add\PYGZus{}semi\PYGZus{}colon} \PYG{n}{s} \PYG{k}{in}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{int }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{s}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Logical}\PYG{o}{,} \PYG{n}{l}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{k}{let} \PYG{n}{s} \PYG{o}{=} \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{l} \PYG{n}{env} \PYG{l+m+mi}{0} \PYG{k}{in}
+      \PYG{k}{let} \PYG{n}{s} \PYG{o}{=} \PYG{n}{add\PYGZus{}semi\PYGZus{}colon} \PYG{n}{s} \PYG{k}{in}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{bool }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{s}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Double\PYGZus{}precision}\PYG{o}{,} \PYG{n}{l}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{k}{let} \PYG{n}{s} \PYG{o}{=} \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{l} \PYG{n}{env} \PYG{l+m+mi}{0} \PYG{k}{in}
+      \PYG{k}{let} \PYG{n}{s} \PYG{o}{=} \PYG{n}{add\PYGZus{}semi\PYGZus{}colon} \PYG{n}{s} \PYG{k}{in}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{long }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{s}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Character}\PYG{o}{,} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Constant}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{l}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{k}{let} \PYG{n}{s} \PYG{o}{=} \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{l} \PYG{n}{env} \PYG{l+m+mi}{0} \PYG{k}{in}
+      \PYG{k}{let} \PYG{n}{s} \PYG{o}{=} \PYG{n}{add\PYGZus{}semi\PYGZus{}colon} \PYG{n}{s} \PYG{k}{in}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{const char }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{s}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Character}\PYG{o}{,} \PYG{n}{l}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{k}{let} \PYG{n}{s} \PYG{o}{=} \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{l} \PYG{n}{env} \PYG{l+m+mi}{0} \PYG{k}{in}
+      \PYG{k}{let} \PYG{n}{s} \PYG{o}{=} \PYG{n}{add\PYGZus{}semi\PYGZus{}colon} \PYG{n}{s} \PYG{k}{in}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{char }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{s}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Operateur} \PYG{n+nc}{Assignation}\PYG{o}{,} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Name} \PYG{n}{s}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{l}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{n}{s}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ = }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{l} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{;}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Size}\PYG{o}{,} \PYG{n}{l}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{[}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{l} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{] }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Operateur} \PYG{n+nc}{Assignation}\PYG{o}{,} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Size}\PYG{o}{,} \PYG{n}{l1}\PYG{o}{)} \PYG{o}{::} \PYG{n}{l}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Size}\PYG{o}{,} \PYG{n}{l1}\PYG{o}{)} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl}
+            \PYG{o}{(}\PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Operateur} \PYG{n+nc}{Assignation}\PYG{o}{,} \PYG{n}{l}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q}\PYG{o}{)}
+            \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Any}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{l+m+mi}{0}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Name} \PYG{n}{s}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nc}{L} \PYG{o}{[} \PYG{n+nc}{S} \PYG{n}{s}\PYG{o}{;} \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab} \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Operateur} \PYG{n+nc}{Plus}\PYG{o}{,} \PYG{n}{elem} \PYG{o}{::} \PYG{n}{l}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{elem} \PYG{o}{]} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ + }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{l} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  
+  \PYG{c}{(*}\PYG{c}{ opérateur unaire }\PYG{c}{*)}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Operateur} \PYG{n+nc}{Moins}\PYG{o}{,} \PYG{n}{elem} \PYG{o}{::} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ \PYGZhy{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{elem} \PYG{o}{]} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Operateur} \PYG{n+nc}{Moins}\PYG{o}{,} \PYG{n}{elem} \PYG{o}{::} \PYG{n}{l}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{elem} \PYG{o}{]} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ \PYGZhy{} }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{l} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Operateur} \PYG{n+nc}{Fois}\PYG{o}{,} \PYG{n}{elem} \PYG{o}{::} \PYG{n}{l}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{elem} \PYG{o}{]} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ * }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{l} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Operateur} \PYG{n+nc}{Division}\PYG{o}{,} \PYG{n}{elem} \PYG{o}{::} \PYG{n}{l}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{elem} \PYG{o}{]} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ / }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{l} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Parentheseouvrante}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L} \PYG{o}{[} \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;} \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab} \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Parenthesefermante}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L} \PYG{o}{[} \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{)}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;} \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab} \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{OperateurLogique} \PYG{n+nc}{NonEquivalent}\PYG{o}{,} \PYG{o}{[} \PYG{n}{p1}\PYG{o}{;} \PYG{n}{p2} \PYG{o}{]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Comparateur} \PYG{n+nc}{NonEgal}\PYG{o}{,} \PYG{o}{[} \PYG{n}{p1}\PYG{o}{;} \PYG{n}{p2} \PYG{o}{]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{p1} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ != }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{p2} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{OperateurLogique} \PYG{n+nc}{Equivalent}\PYG{o}{,} \PYG{o}{[} \PYG{n}{p1}\PYG{o}{;} \PYG{n}{p2} \PYG{o}{]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Comparateur} \PYG{n+nc}{Egal}\PYG{o}{,} \PYG{o}{[} \PYG{n}{p1}\PYG{o}{;} \PYG{n}{p2} \PYG{o}{]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{p1} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ == }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{p2} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Comparateur} \PYG{n+nc}{StrictPlusPetit}\PYG{o}{,} \PYG{o}{[} \PYG{n}{p1}\PYG{o}{;} \PYG{n}{p2} \PYG{o}{]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{p1} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ \PYGZlt{} }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{p2} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Comparateur} \PYG{n+nc}{PlusPetit}\PYG{o}{,} \PYG{o}{[} \PYG{n}{p1}\PYG{o}{;} \PYG{n}{p2} \PYG{o}{]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{p1} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ \PYGZlt{}= }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{p2} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Comparateur} \PYG{n+nc}{StrictPlusGrand}\PYG{o}{,} \PYG{o}{[} \PYG{n}{p1}\PYG{o}{;} \PYG{n}{p2} \PYG{o}{]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{p1} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ \PYGZgt{} }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{p2} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Comparateur} \PYG{n+nc}{PlusGrand}\PYG{o}{,} \PYG{o}{[} \PYG{n}{p1}\PYG{o}{;} \PYG{n}{p2} \PYG{o}{]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{p1} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ \PYGZgt{}= }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{p2} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{OperateurLogique} \PYG{n+nc}{Et}\PYG{o}{,} \PYG{o}{[} \PYG{n}{p1}\PYG{o}{;} \PYG{n}{p2} \PYG{o}{]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{p1} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ \PYGZam{}\PYGZam{} }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{p2} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{OperateurLogique} \PYG{n+nc}{Ou}\PYG{o}{,} \PYG{o}{[} \PYG{n}{p1}\PYG{o}{;} \PYG{n}{p2} \PYG{o}{]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{p1} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ || }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{p2} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{OperateurLogique} \PYG{n+nc}{Non}\PYG{o}{,} \PYG{o}{[} \PYG{n}{p1}\PYG{o}{;} \PYG{n}{p2} \PYG{o}{]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{p1} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ ! }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{p2} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Operateur} \PYG{n+nc}{Puissance}\PYG{o}{,} \PYG{o}{[} \PYG{n}{p1}\PYG{o}{;} \PYG{n}{p2} \PYG{o}{]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{pow((long)}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{p1} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{, }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{p2} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{(long))}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{If}\PYG{o}{,} \PYG{n}{condition} \PYG{o}{::} \PYG{n}{instructions}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{if (}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{condition} \PYG{o}{]} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{)\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{instructions} \PYG{n}{env} \PYG{o}{(}\PYG{n}{nb\PYGZus{}tab} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{o}{)}\PYG{o}{;}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Else\PYGZus{}if}\PYG{o}{,} \PYG{n}{condition} \PYG{o}{::} \PYG{n}{instructions}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{else if (}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{condition} \PYG{o}{]} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{)\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{instructions} \PYG{n}{env} \PYG{o}{(}\PYG{n}{nb\PYGZus{}tab} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{o}{)}\PYG{o}{;}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Else}\PYG{o}{,} \PYG{n}{instructions}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{else \PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{instructions} \PYG{n}{env} \PYG{o}{(}\PYG{n}{nb\PYGZus{}tab} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{o}{)}\PYG{o}{;}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud}
+      \PYG{o}{(} \PYG{n+nc}{Syntax} \PYG{n+nc}{For}\PYG{o}{,}
+        \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Operateur} \PYG{n+nc}{Assignation}\PYG{o}{,} \PYG{o}{[} \PYG{n}{variable}\PYG{o}{;} \PYG{n}{valeur} \PYG{o}{]}\PYG{o}{)}
+        \PYG{o}{::} \PYG{n}{fin}
+        \PYG{o}{::} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Step}\PYG{o}{,} \PYG{o}{[} \PYG{n}{pas} \PYG{o}{]}\PYG{o}{)}
+        \PYG{o}{::} \PYG{n}{instructions} \PYG{o}{)}
+    \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{for (}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl}
+            \PYG{o}{[} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Operateur} \PYG{n+nc}{Assignation}\PYG{o}{,} \PYG{o}{[} \PYG{n}{variable}\PYG{o}{;} \PYG{n}{valeur} \PYG{o}{]}\PYG{o}{)} \PYG{o}{]}
+            \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl}
+            \PYG{o}{[} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Comparateur} \PYG{n+nc}{StrictPlusPetit}\PYG{o}{,} \PYG{o}{[} \PYG{n}{variable}\PYG{o}{;} \PYG{n}{fin} \PYG{o}{]}\PYG{o}{)} \PYG{o}{]}
+            \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{; }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{variable} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{=}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl}
+            \PYG{o}{[} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Operateur} \PYG{n+nc}{Plus}\PYG{o}{,} \PYG{o}{[} \PYG{n}{variable}\PYG{o}{;} \PYG{n}{pas} \PYG{o}{]}\PYG{o}{)} \PYG{o}{]}
+            \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{) \PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{instructions} \PYG{n}{env} \PYG{o}{(}\PYG{n}{nb\PYGZus{}tab} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{o}{)}\PYG{o}{;}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{While}\PYG{o}{,} \PYG{n}{condition} \PYG{o}{::} \PYG{n}{instructions}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{while (}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{o}{[} \PYG{n}{condition} \PYG{o}{]} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{)\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{instructions} \PYG{n}{env} \PYG{o}{(}\PYG{n}{nb\PYGZus{}tab} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{o}{)}\PYG{o}{;}
+          \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Integer} \PYG{n}{s}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nc}{L} \PYG{o}{[} \PYG{n+nc}{S} \PYG{n}{s}\PYG{o}{;} \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab} \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Floating} \PYG{n}{s}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nc}{L} \PYG{o}{[} \PYG{n+nc}{S} \PYG{n}{s}\PYG{o}{;} \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab} \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Double} \PYG{n}{s}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{k}{let} \PYG{n}{d} \PYG{o}{=}
+        \PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{fold\PYGZus{}left}
+          \PYG{o}{(}\PYG{k}{fun} \PYG{n}{acc} \PYG{n}{x} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{k}{if} \PYG{n}{x} \PYG{o}{=} \PYG{l+s+sc}{\PYGZsq{}d\PYGZsq{}} \PYG{k}{then} \PYG{n}{acc} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{e}\PYG{l+s+s2}{\PYGZdq{}} \PYG{k}{else} \PYG{n}{acc} \PYG{o}{\PYGZca{}} \PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{make} \PYG{l+m+mi}{1} \PYG{n}{x}\PYG{o}{)}
+          \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}} \PYG{n}{s}
+      \PYG{k}{in}
+      \PYG{n+nc}{L} \PYG{o}{[} \PYG{n+nc}{S} \PYG{n}{d}\PYG{o}{;} \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab} \PYG{o}{]}
+      \PYG{c}{(*}\PYG{c}{ convertit les d en e de fortran }\PYG{c}{*)}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Booleen} \PYG{n}{b}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n+nc}{S} \PYG{o}{(}\PYG{k}{if} \PYG{n}{b} \PYG{k}{then} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{true}\PYG{l+s+s2}{\PYGZdq{}} \PYG{k}{else} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{false}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{;} \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Chaine} \PYG{n}{s}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nc}{L} \PYG{o}{[} \PYG{n+nc}{S} \PYG{n}{s}\PYG{o}{;} \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab} \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Function}\PYG{o}{,} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Name} \PYG{n}{n}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{l}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{k}{let} \PYG{n}{sosl}\PYG{o}{,} \PYG{n}{l2} \PYG{o}{=} \PYG{n}{get\PYGZus{}function\PYGZus{}param\PYGZus{}list} \PYG{n}{l} \PYG{n}{env} \PYG{k}{in}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n}{get\PYGZus{}function\PYGZus{}return\PYGZus{}type}
+            \PYG{o}{(}\PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Function}\PYG{o}{,} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Name} \PYG{n}{n}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{l}\PYG{o}{)}\PYG{o}{)}
+            \PYG{n}{env}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{n}{n}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{sosl}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{)\PYGZob{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{l2} \PYG{n}{env} \PYG{o}{(}\PYG{n}{nb\PYGZus{}tab} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{o}{)}\PYG{o}{;}
+          \PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZcb{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Call}\PYG{o}{,} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Name} \PYG{n}{n}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{l}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n+nc}{S} \PYG{n}{n}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{l} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{)}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{Syntax} \PYG{n+nc}{Return}\PYG{o}{,} \PYG{n}{l}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nc}{L}
+        \PYG{o}{[}
+          \PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{return }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{l} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{;}
+          \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{;}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab}\PYG{o}{;}
+        \PYG{o}{]}
+
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n+nc}{NewLine}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nc}{L} \PYG{o}{[} \PYG{n+nc}{S} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;} \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{q} \PYG{n}{env} \PYG{n}{nb\PYGZus{}tab} \PYG{o}{]}
+  \PYG{o}{|} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n}{t}\PYG{o}{,} \PYG{o}{\PYGZus{}}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n}{print\PYGZus{}token} \PYG{n}{t}\PYG{o}{;}
+      \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{La syntaxe donnée n\PYGZsq{}est pas encore prise en charge}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ convertit l\PYGZsq{}arbre de syntaxe abstrait [ast] et ajoute les librairies}
+\PYG{c}{    nécessaires depuis [biblios] grace à [env] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C} \PYG{o}{(}\PYG{n}{ast} \PYG{o}{:} \PYG{n}{ast} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{(}\PYG{n}{env} \PYG{o}{:} \PYG{n}{environnement}\PYG{o}{)}
+    \PYG{o}{(}\PYG{n}{biblios} \PYG{o}{:} \PYG{n+nn}{Bibliotheques}\PYG{p}{.}\PYG{n}{libs}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{string} \PYG{o}{=}
+  \PYG{n}{generate\PYGZus{}library\PYGZus{}imports} \PYG{n}{biblios}
+  \PYG{o}{\PYGZca{}} \PYG{n+nn}{Traduction}\PYG{p}{.}\PYG{n}{string\PYGZus{}of\PYGZus{}string\PYGZus{}or\PYGZus{}string\PYGZus{}list} \PYG{o}{(}\PYG{n}{convert\PYGZus{}ast\PYGZus{}to\PYGZus{}C\PYGZus{}sosl} \PYG{n}{ast} \PYG{n}{env} \PYG{l+m+mi}{0}\PYG{o}{)}
+
+
+\end{MintedVerbatim}
