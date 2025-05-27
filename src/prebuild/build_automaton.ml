@@ -80,6 +80,7 @@ let syntax_automate_det =
 
 let () =
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 	print_string "generating prebuild automaton..."; print_newline();
 	let file = open_out "src/detAutomaton.ml" in
 	output_string file "open Automates\n\nlet syntax_automate_det = {\n\tnodes = [";
@@ -92,6 +93,8 @@ let () =
 	close_out file;
 	print_string "automaton pregenerating done"; print_newline()
 =======
+=======
+>>>>>>> Stashed changes
   print_string "generating prebuild automaton...";
   print_newline ();
   let file = open_out "src/det_automaton.ml" in
@@ -127,4 +130,7 @@ let () =
   close_out file;
   print_string "automaton pregenerating done";
   print_newline ()
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes

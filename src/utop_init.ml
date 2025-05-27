@@ -18,7 +18,11 @@
 
 #load "environnement.cmo"
 
+<<<<<<< Updated upstream
 #load "detAutomaton.cmo"
+=======
+#load "det_automaton.cmo"
+>>>>>>> Stashed changes
 
 #load "traduction.cmo"
 

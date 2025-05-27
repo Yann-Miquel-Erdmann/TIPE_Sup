@@ -1,5 +1,9 @@
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.5.14)  27 MAY 2025 17:21
+=======
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.5.14)  27 MAY 2025 17:18
+>>>>>>> Stashed changes
 =======
 This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.5.14)  27 MAY 2025 17:18
 >>>>>>> Stashed changes
@@ -1034,7 +1038,10 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
 Package hyperref Info: Link coloring OFF on input line 34.
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
  (./beamer_tipe.out)
 Runaway argument?
 {\376\377\000`\000:\0001\0002\000`\000\040\000`\000\045\000\BOOKMARK \ETC.
@@ -1061,6 +1068,9 @@ to read past where you wanted me to stop.
 I'll try to recover; but if the error is serious,
 you'd better type `E' or `X' now and fix your file.
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 \@outlinefile=\write6
 \openout6 = `beamer_tipe.out'.
@@ -5083,5 +5093,9 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `\<def>-command' on input line 41.
 
 
+<<<<<<< Updated upstream
+Package hyperref Warning: Token not allowed in a
+>>>>>>> Stashed changes
+=======
 Package hyperref Warning: Token not allowed in a
 >>>>>>> Stashed changes
