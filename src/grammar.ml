@@ -1,4 +1,4 @@
-open Grammar_functions
+open GrammarFunctions
 open Symbols
 let grammar = { start_symbol = NonTerminal ExecutableProgram;
 rules_htbl = Hashtbl.of_seq (List.to_seq [(NonTerminal ExecutableProgram,[[NonTerminal StartCommentBlock;NonTerminal Function_or_Subroutine_star_MainProgram;];[NonTerminal Function_or_Subroutine_star_MainProgram;];]);

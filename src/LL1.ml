@@ -1,4 +1,5 @@
-open Grammar_functions
+open GrammarFunctions
+
 open Symbols
 
 module SymbolSet = Set.Make (struct
@@ -252,7 +253,7 @@ let analyse_LL1_of_symbol (g : grammar) (text : (symbol * string) list)
               failwith "error 2")
             else ();
             analyse_LL1_of_pattern text s (List.nth l 0))
-          else (
+          else
             (* print_endline "cas 2";
             print_symbol (fst (List.nth text 0));
             print_newline (); *)
@@ -272,7 +273,7 @@ let analyse_LL1_of_symbol (g : grammar) (text : (symbol * string) list)
               print_SymbolSet (Hashtbl.find first_sshtbl s);
               failwith "error 3")
             else ();
-            analyse_LL1_of_pattern text s (List.nth l 0))
+            analyse_LL1_of_pattern text s (List.nth l 0)
   in
   analyse_LL1_of_symbol_aux text s
 

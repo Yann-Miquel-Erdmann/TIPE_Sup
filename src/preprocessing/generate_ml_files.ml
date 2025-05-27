@@ -174,7 +174,7 @@ let generate_file_grammar (g : grammar) (f_name : string) : unit =
 
   print_endline ("Generating the " ^ f_name ^ " file...");
   let output_file = open_out f_name in
-  output_string output_file "open Grammar_functions\nopen Symbols\n";
+  output_string output_file "open GrammarFunctions\nopen Symbols\n";
 
   output_string output_file "let grammar = { ";
   output_string output_file
@@ -204,7 +204,7 @@ let generate_files (g_path : string) : unit =
   let g = get_grammar g_path in
   Printf.printf "Grammar length %d\n" (List.length g);
   generate_file_symbols g "symbols.ml";
-  generate_file_lexer g "prebuild/build_automaton.ml" "src/det_automaton.ml";
+  generate_file_lexer g "prebuild/build_automaton.ml" "src/detAutomaton.ml";
   generate_file_grammar g "grammar.ml"
 
 let _ =

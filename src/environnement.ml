@@ -1,19 +1,23 @@
-open Abstract_tokens
+open AbstractTokens
 
 type environnement = (string, token) Hashtbl.t
 type intent = In | Out | InOut
 type var_type_subroutine = (string, intent) Hashtbl.t
 
-let print_env (env: environnement): unit = 
-  Hashtbl.iter (fun k v -> print_string k ; print_string " -> " ; print_token v; print_newline ()) env 
+let print_env (env : environnement) : unit =
+  Hashtbl.iter
+    (fun k v ->
+      print_string k;
+      print_string " -> ";
+      print_token v;
+      print_newline ())
+    env
 
-
-let rec last_of_list (l: 'a list): 'a =   
-  match l with 
+let rec last_of_list (l : 'a list) : 'a =
+  match l with
   | [] -> failwith "Liste vide "
-  | e::[] -> e
-  | e::q -> last_of_list q
-
+  | e :: [] -> e
+  | e :: q -> last_of_list q
 
 (** crée un environnement à partir de l'ast [t] *)
 let create_env_from_ast (t : ast) : environnement =
@@ -54,13 +58,13 @@ let create_env_from_ast (t : ast) : environnement =
         ( Syntax Character,
           [ Noeud (Operateur Assignation, [ Noeud (Name s, []); _ ]) ] ) ->
         Hashtbl.add env s (Syntax Real)
-    | Noeud (Syntax Function, Noeud(Name n,[])::l) ->(
-        List.iter add_env l; 
+    | Noeud (Syntax Function, Noeud (Name n, []) :: l) -> (
+        List.iter add_env l;
         match last_of_list l with
-        | Noeud(Syntax Return , Noeud(Name v,[])::_) ->  Hashtbl.add env n (Hashtbl.find env v)   
-        | _ -> () (* pas de return à la fin de la fct donc c'est une subroutine *)
-      )
-
+        | Noeud (Syntax Return, Noeud (Name v, []) :: _) ->
+            Hashtbl.add env n (Hashtbl.find env v)
+        | _ ->
+            () (* pas de return à la fin de la fct donc c'est une subroutine *))
     | Noeud (_, l) -> List.iter add_env l
   in
   add_env t;
@@ -92,7 +96,6 @@ let create_subroutine_intent (t : ast) : var_type_subroutine =
       ->
         ()
     | Noeud (_, l) -> List.iter subroutine_intent_aux l
-    
   in
   subroutine_intent_aux t;
   sub_intent

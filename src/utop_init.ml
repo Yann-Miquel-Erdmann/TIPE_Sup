@@ -16,7 +16,7 @@
 
 #load "environnement.cmo"
 
-#load "det_automaton.cmo"
+#load "detAutomaton.cmo"
 
 
 #load "traduction.cmo"

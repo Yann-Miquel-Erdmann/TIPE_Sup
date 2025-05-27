@@ -6,7 +6,7 @@ let syntax_automate_det = determinise (enleve_epsilon_trans (ou_automates (List.
 
 let () =
 	print_string "generating prebuild automaton..."; print_newline();
-	let file = open_out "src/det_automaton.ml" in
+	let file = open_out "src/detAutomaton.ml" in
 	output_string file "open Automates\n\nlet syntax_automate_det = {\n\tnodes = [";
 	output_string file (String.concat "; " (List.map string_of_int syntax_automate_det.nodes));
 	output_string file ("];\n\tdebut = "^ string_of_int syntax_automate_det.debut ^";\n\tfin = [|");

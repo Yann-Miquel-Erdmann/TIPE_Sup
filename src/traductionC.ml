@@ -1,7 +1,7 @@
 open Environnement
-open Abstract_tokens
+open AbstractTokens
 open Bibliotheques
-open Convert_to_abstract
+open ConvertToAbstract
 open LL1
 open Traduction
 
@@ -60,7 +60,8 @@ let rec add_semi_colon (s : string_or_string_list) : string_or_string_list =
   | S s -> if String.ends_with s ~suffix:";" then S s else S (s ^ ";")
   | L l -> L (map_to_last add_semi_colon l)
 
-(** Renvoie le type de la fonction d'ast [a] à l'aide de l'environnement [env] *)
+(** Renvoie le type de la fonction d'ast [a] à l'aide de l'environnement [env]
+*)
 let get_function_return_type (a : ast) (env : environnement) :
     string_or_string_list =
   match a with
@@ -76,12 +77,11 @@ let get_function_return_type (a : ast) (env : environnement) :
 let rec get_function_param_list (l : ast list) (env : environnement) :
     string_or_string_list * ast list =
   match l with
-
-  | Noeud (Name nom, []) :: Noeud(Name n,[]) :: q ->
-      let sosl, q2 = get_function_param_list (Noeud(Name n,[]) :: q) env in
+  | Noeud (Name nom, []) :: Noeud (Name n, []) :: q ->
+      let sosl, q2 = get_function_param_list (Noeud (Name n, []) :: q) env in
       (L [ S (str_of_env_type env nom); S " "; S nom; S ", "; sosl ], q)
-
-  | Noeud (Name nom, []) ::  q -> L [ S (str_of_env_type env nom); S " "; S nom ], q
+  | Noeud (Name nom, []) :: q ->
+      (L [ S (str_of_env_type env nom); S " "; S nom ], q)
   | l1 -> (S "", l)
 
 (** convertit l'arbre de syntaxe abstrait [ast] à l'aide de l'environnement
@@ -226,7 +226,6 @@ let rec convert_ast_to_C_sosl (ast : ast list) (env : environnement)
           convert_ast_to_C_sosl l env nb_tab;
           convert_ast_to_C_sosl q env nb_tab;
         ]
-  
   (* opérateur unaire *)
   | Noeud (Operateur Moins, elem :: []) :: q ->
       L
@@ -235,7 +234,6 @@ let rec convert_ast_to_C_sosl (ast : ast list) (env : environnement)
           convert_ast_to_C_sosl [ elem ] env nb_tab;
           convert_ast_to_C_sosl q env nb_tab;
         ]
-  
   | Noeud (Operateur Moins, elem :: l) :: q ->
       L
         [
@@ -475,7 +473,6 @@ let rec convert_ast_to_C_sosl (ast : ast list) (env : environnement)
           S ";\n";
           convert_ast_to_C_sosl q env nb_tab;
         ]
-
   | Noeud (NewLine, []) :: q -> L [ S "\n"; convert_ast_to_C_sosl q env nb_tab ]
   | Noeud (t, _) :: q ->
       print_token t;
@@ -487,5 +484,3 @@ let convert_ast_to_C (ast : ast list) (env : environnement)
     (biblios : Bibliotheques.libs) : string =
   generate_library_imports biblios
   ^ Traduction.string_of_string_or_string_list (convert_ast_to_C_sosl ast env 0)
-
-
