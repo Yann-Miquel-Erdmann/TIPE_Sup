@@ -1,0 +1,267 @@
+ExecutableProgram -> StartCommentBlock Function_or_Subroutine_star_MainProgram | Function_or_Subroutine_star_MainProgram
+
+StartCommentBlock -> EOS
+
+Function_or_Subroutine_star_MainProgram -> Recursive_opt_Function_or_Subroutine Function_or_Subroutine_star_MainProgram | MainProgram Function_or_Subroutine_star
+Function_or_Subroutine_star -> Recursive_opt_Function_or_Subroutine Function_or_Subroutine_star | E
+
+Recursive_opt_Function_or_Subroutine -> Recursive Function_or_Subroutine | Function_or_Subroutine
+Function_or_Subroutine -> FunctionSubprogram | SubroutineSubprogram
+
+MainProgram -> ProgramStmt MainRange
+
+MainRange -> BodyConstruct BodyConstruct_star Contains_Function_opt_EndProgramStmt | Contains_Function_opt_EndProgramStmt
+Contains_Function_opt_EndProgramStmt -> Contains_Function EndProgramStmt | EndProgramStmt
+
+Contains_Function -> Contains EOS FunctionSubprogram_star
+
+FunctionSubprogram_star -> Recursive FunctionSubprogram FunctionSubprogram_star | FunctionSubprogram FunctionSubprogram_star | E
+
+BodyConstruct_star -> BodyConstruct BodyConstruct_star | E
+
+ProgramStmt -> Program ProgramName EOS
+EndProgramStmt -> EndProgram EndName_opt EOS
+
+FunctionSubprogram -> FunctionPrefix FunctionName FunctionRange 
+
+FunctionPrefix -> TypeSpec Function | Function
+
+FunctionRange -> FunctionParList FunctionResult_opt EOS BodyConstruct_star EndFunctionStmt 
+FunctionParList -> LParenthesis FunctionPar_Comma_FunctionPar_star_opt RParenthesis 
+FunctionPar_Comma_FunctionPar_star_opt -> FunctionPar Comma_FunctionPar_star | E
+Comma_FunctionPar_star -> Comma FunctionPar Comma_FunctionPar_star | E
+FunctionPar -> DummyArgName
+
+FunctionResult_opt -> Result LParenthesis VariableName RParenthesis | E
+
+EndFunctionStmt -> EndFunction EndName_opt EOS
+
+
+SubroutineSubprogram -> Subroutine SubroutineName SubroutineRange
+
+SubroutineRange -> SubroutineParList_opt EOS BodyConstruct_star EndSubroutineStmt
+SubroutineParList_opt -> LParenthesis SubroutinePar_Comma_SubroutinePar_star_opt RParenthesis | E
+SubroutinePar_Comma_SubroutinePar_star_opt -> SubroutinePar Comma_SubroutinePar_star | E
+Comma_SubroutinePar_star -> Comma SubroutinePar Comma_SubroutinePar_star | E
+SubroutinePar -> DummyArgName
+
+
+EndSubroutineStmt -> EndSubroutine EndName_opt EOS
+
+
+EndName_opt -> EndName | E
+
+BodyConstruct -> SpecificationPartConstruct | ExecutableConstruct
+
+SpecificationPartConstruct -> DeclarationConstruct
+DeclarationConstruct -> TypeDeclarationStmt
+
+TypeDeclarationStmt -> TypeSpec Comma_AttrSpec_star TypeDecl_Assignment EOS
+
+Comma_AttrSpec_star -> Comma AttrSpec Comma_AttrSpec_star | E
+
+AttrSpec -> Parameter | Intent_in_out
+Intent_in_out -> Intent LParenthesis In_out RParenthesis
+In_out -> In | Out | InOut
+
+TypeDecl_Assignment -> Colon Colon EntityDecl Comma_EntityDecl_star | ObjectName Comma_ObjectName_star
+
+Comma_ObjectName_star -> Comma ObjectName Comma_ObjectName_star | E
+
+Comma_EntityDecl_star -> Comma EntityDecl Comma_EntityDecl_star | E
+
+EntityDecl -> ObjectName Asterisk_CharLength_opt Equal_Expr_opt
+Equal_Expr_opt -> Equal Expr | E
+Asterisk_CharLength_opt -> Asterisk CharLength | E
+
+
+CharLength -> LParenthesis TypeParamValue RParenthesis | ScalarIntLiteralConstant
+
+TypeParamValue -> Expr_Or_Asterisk
+Expr_Or_Asterisk -> Expr | Asterisk
+
+TypeSpec -> Integer KindSelector_opt | Double | Complex KindSelector_opt | Logical KindSelector_opt | Real KindSelector_opt | Character
+
+
+KindSelector_opt -> LParenthesis Expr RParenthesis | E
+
+ExecutableConstruct -> ActionStmt | DoConstruct | IfConstruct | ReturnStmt
+
+ReturnStmt -> Return EOS
+
+
+ActionStmt -> AssignmentStmt | PrintStmt
+
+AssignmentStmt -> Name Equal Expr EOS
+
+
+PrintStmt -> Print FormatIdentifier Comma_OutputItemList_opt EOS
+Comma_OutputItemList_opt -> Comma OutputItemList | E
+
+FormatIdentifier -> Asterisk
+
+OutputItemList -> OutputItem Comma_OutputItem_star
+Comma_OutputItem_star -> Comma OutputItem Comma_OutputItem_star | E
+
+OutputItem -> Expr
+
+DoConstruct -> BlockDoConstruct
+BlockDoConstruct -> Do LoopControl_opt ExecutionPartConstruct_star EndDoStmt
+
+LoopControl_opt -> LoopControl EOS | EOS
+
+EndDoStmt -> EndDo Name_opt EOS
+Name_opt -> Name | E
+
+LoopControl -> While LParenthesis Expr RParenthesis | VariableName Equal IntRealDpExpression Comma IntRealDpExpression Comma_IntRealDpExpression_opt
+
+Comma_IntRealDpExpression_opt -> Comma IntRealDpExpression | E
+
+IntRealDpExpression -> Expr
+
+
+
+IfConstruct -> IfThenStmt ExecutionPartConstruct_star ElseIfStmt_ExecutionPartConstruct_star_star ElseStmt_ExecutionPartConstruct_star_opt EndIfStmt
+ElseIfStmt_ExecutionPartConstruct_star_star -> ElseIfStmt ExecutionPartConstruct_star ElseIfStmt_ExecutionPartConstruct_star_star | E
+ExecutionPartConstruct_star -> ExecutionPartConstruct ExecutionPartConstruct_star | E
+ElseStmt_ExecutionPartConstruct_star_opt -> ElseStmt ExecutionPartConstruct_star | E
+
+IfThenStmt -> If LParenthesis ScalarLogicalExpr RParenthesis Then EOS
+ElseIfStmt -> Else If LParenthesis ScalarLogicalExpr RParenthesis Then EOS
+ElseStmt -> Else EOS
+EndIfStmt -> EndIf EOS
+
+ExecutionPartConstruct -> ExecutableConstruct
+
+ScalarLogicalExpr -> Expr
+
+
+Expr -> Level5Expr
+Level5Expr -> EquivOperand EquivOp_EquivOperand_star
+EquivOp_EquivOperand_star -> EquivOp EquivOperand EquivOp_EquivOperand_star | E
+EquivOperand -> OrOperand OrOp_OrOperand_star
+OrOp_OrOperand_star -> OrOp OrOperand OrOp_OrOperand_star | E
+OrOperand -> AndOperand AndOp_AndOperand_star
+AndOp_AndOperand_star -> AndOp AndOperand AndOp_AndOperand_star | E
+AndOperand -> NotOp_opt Level4Expr
+NotOp_opt -> NotOp | E
+
+Level4Expr -> Level3Expr RelOp_Level3Expr_star
+RelOp_Level3Expr_star -> RelOp Level3Expr RelOp_Level3Expr_star | E
+
+Level3Expr -> Level2Expr
+
+Level2Expr -> Sign_opt_AddOperand AddOp_Sign_opt_AddOperand_star
+AddOp_Sign_opt_AddOperand_star -> AddOp Sign_opt_AddOperand AddOp_Sign_opt_AddOperand_star | E
+Sign_opt_AddOperand -> Sign_opt AddOperand
+Sign_opt -> Sign | E
+AddOperand -> MultOperand MultOp_MultOperand_star
+MultOp_MultOperand_star -> MultOp MultOperand MultOp_MultOperand_star | E
+MultOperand -> Level1Expr PowerOp_Level1Expr_star
+PowerOp_Level1Expr_star -> PowerOp Level1Expr PowerOp_Level1Expr_star | E
+
+Level1Expr -> Primary
+Primary -> Icon | Rcon | Dcon | Name FunctionReference_opt | Scon | LogicalConstant | LParenthesis Expr RParenthesis 
+
+FunctionReference_opt -> LParenthesis FunctionArg_Comma_FunctionArg_star_opt_RParenthesis | E
+
+FunctionArg_Comma_FunctionArg_star_opt_RParenthesis -> FunctionArg Comma_FunctionArg_star RParenthesis | RParenthesis
+Comma_FunctionArg_star -> Comma FunctionArg Comma_FunctionArg_star | E
+
+FunctionArg -> Expr
+
+// Expr -> Expr _
+
+Name -> Ident
+ArrayName -> Ident
+ComponentName -> Ident
+EndName -> Ident
+DummyArgName -> Ident
+FunctionName -> Ident
+ImpliedDoVariable -> Ident
+ProgramName -> Ident
+SubroutineName -> Ident
+SubroutineNameUse -> Ident
+VariableName -> Ident
+ObjectName -> Ident
+
+LogicalConstant -> True | False
+
+PowerOp -> '\*\*'
+MultOp -> Asterisk | Divise
+AddOp -> Sign
+
+Sign -> Plus | Minus
+
+
+RelOp -> IsEqual | NotEqual | StrictLess | LessEqual | StrictGreater | GreaterEqual
+
+NotOp -> '\.not\.'
+AndOp -> '\.and\.'
+OrOp -> '\.or\.'
+EquivOp -> Equivalent | NotEquivalent
+
+ScalarIntLiteralConstant -> Icon
+
+Dcon -> r'(([0-9]+\.[0-9]*)|(\.[0-9]+))(d(\+|-)?[0-9]+)'
+Rcon -> r'(([0-9]+\.[0-9]*)|(\.[0-9]+))(e(\+|-)?[0-9]+)?'
+Icon -> r'[0-9]+(e(\+|-)?[0-9]+)?'
+SconSingle -> r'['](~[']|'')*[']'
+SconDouble -> r'["](~["]|"")*["]'
+Scon -> SconSingle | SconDouble
+
+
+Ident -> s'[A-Za-z][A-Za-z0-9_]*'
+
+EOS -> r'((!~[\n]*)?\n[ ]*)+'
+
+Return -> 'return'
+Result -> 'result'
+Contains -> 'contains'
+True -> '\.true\.'
+False -> '\.false\.'
+Program -> 'program'
+Function -> 'function'
+Subroutine -> 'subroutine'
+EndProgram -> 'end program'
+EndFunction -> 'end function'
+EndSubroutine -> 'end subroutine'
+EndDo -> 'end do'
+EndIf -> 'end if'
+Colon -> ':'
+Comma -> ','
+Equal -> '='
+Asterisk -> '\*'
+LParenthesis -> '\('
+RParenthesis -> '\)'
+Integer -> 'integer'
+Real -> 'real'
+Double -> 'double precision'
+Complex -> 'complex'
+Character -> 'character'
+Logical -> 'logical'
+Parameter -> 'parameter'
+Intent -> 'intent'
+In -> 'in'
+Out -> 'out'
+InOut -> 'inout'
+Call -> 'call'
+Print -> 'print'
+Do -> 'do'
+While -> 'while'
+If -> 'if'
+Else -> 'else'
+Then -> 'then'
+Divise -> '/'
+Plus -> '\+'
+Minus -> '-'
+IsEqual -> '(==)|(\.eq\.)'
+NotEqual -> '(/=)|(\.ne\.)'
+StrictLess -> '(<)|(\.lt\.)'
+LessEqual -> '(<=)|(\.le\.)' 
+StrictGreater -> '(>)|(\.gt\.)'
+GreaterEqual -> '(>=)|(\.ge\.)'
+Equivalent -> '\.eqv\.' 
+NotEquivalent -> '\.neqv\.'
+Space -> _' '
+Recursive -> 'recursive'

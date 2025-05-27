@@ -1,0 +1,25 @@
+\section{Traduction vers le langage de sortie}
+\begin{frame}
+  \frametitle{Traduction\esp}
+
+  \begin{tikzpicture}
+    % frame
+    \node[frame] (frame) {};
+    \tikzstyle{faded}=[draw=black!20,color=black!20]
+    
+    \node[below=4cm of frame.west, anchor=west, box, faded] (state_1) {\scriptsize Analyse Lexicale};
+    \node[right=0.5cm of state_1.east, anchor=west, box, faded] (state_2) {\scriptsize Analyse Syntaxique};
+    \node[right=0.5cm of state_2.east, anchor=west, box, faded] (state_3) {\scriptsize Syntaxe Abstraite};
+    \node[right=0.5cm of state_3.east, anchor=west, box] (state_4) {\scriptsize Conversion};
+    \draw[->, >=latex, faded] (state_1.east) -- (state_2.west);
+    \draw[->, >=latex, faded] (state_2.east) -- (state_3.west);
+    \draw[->, >=latex, faded] (state_3.east) -- (state_4.west);
+    \draw[dashed] (frame.south west) -- (state_4.north west);
+    \draw[dashed] (frame.south east) -- (state_4.north east);
+
+    \node(def){parcours en profondeur};
+    \node[below] at (def.south) {conversion en chaîne};
+
+  \end{tikzpicture}
+
+\end{frame}

@@ -1,0 +1,121 @@
+\documentclass[compress]{beamer} %en animé
+%\documentclass[trans]{beamer} %en superposé
+
+%%%%%%%%%%%%%% LES PACKAGES
+\input{les_packages_pour_beamer.tex}
+%%%%%%%%%%%%%% THEME BEAMER
+%votre nom court qui apparaîtra dans l'en tête
+\newcommand{\initiales}{Erwan FALAUX-BACHELOT}
+\input{les_param_beamer_tipe}
+
+
+%%%%%%%%%%%%%% MA PALETTE DE COULEURS
+\input{la_palette.tex}
+\definecolor{hellseahorse}{RGB}{204, 204, 255}
+\definecolor{seahorse}{RGB}{204,180, 255}
+\definecolor{darkseahorse}{RGB}{83, 74, 196}
+
+%symboles pratiques
+\newcommand{\flch}{\item[$\rightarrow$]}
+\newcommand{\dc}{{\usebeamercolor[fg]{structure}$\hookrightarrow$}}
+\newcommand{\ok}{\textcolor{vert}{\checkmark}}
+\newcommand{\point}{{\usebeamercolor[fg]{structure}$\bullet\enskip$}}
+\newcommand{\Point}{{\usebeamercolor[fg]{structure}$\bullet\enskip$}}
+
+
+%styles
+\newcommand{\couleur}[1]{{\usebeamercolor[fg]{structure}#1}}
+\newcommand{\important}[1]{\couleur{\textbf{#1}}}
+\newcommand{\remarque}[1]{\textit{\textrm{#1}}}
+
+%pour le template
+\newcommand{\lin}[1]{\mintinline{latex}{#1}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% A COMPLETER 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%entre crochet le titre court pour l'en tête puis le vrai titre
+\title[La Transpilation]{
+La transpilation de Fortran vers C
+}
+
+\author{
+\large 
+Présentation de \important{Erwan FALAUX-BACHELOT}\\[0.2cm]
+\footnotesize
+travail réalisé avec \couleur{Yann MIQUEL--ERDMANN}\\[0.4cm]
+\vspace*{-1.2cm}
+} 
+
+%entre crochet la short date pour l'en-tête
+\date[Juillet 2025]{}
+
+\institute{}
+
+
+%------------------------------------------------
+\begin{frame}[plain]
+\titlepage 
+\addtocounter{framenumber}{-1}
+\end{frame}
+
+%------------------------------------------------
+\title[Transpilation : conversion du Fortran vers le C]{
+Une page de titre avec logos :\\
+{\large mais sans les affectations détaillées des auteurs }
+}
+
+
+\begin{frame}
+    \frametitle{Introduction\esp}
+
+	Le Fortran: 
+    \includegraphics[scale=0.03]{static/Fortran_logo.svg.png}\\
+    Créé par: IMB en 1954\\
+    Utilisé surtout dans les supercalculateurs
+
+
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Problématique\esp}
+    
+    Comment implémenter une conversion rapide de programmes Fortran en programmes C?
+
+\end{frame}
+
+\tikzstyle{lien} = [->, >=latex]
+\tikzstyle{basic_text}=[text width=2cm, text badly centered]
+\tikzstyle{basic_node}=[draw = black,rounded corners=4pt, basic_text]
+\tikzstyle{wrapper}=[basic_node, inner sep=3pt]
+\tikzstyle{hidden}=[draw=black!0,color=black!0]
+\tikzstyle{faded}=[draw=black!20, color=black!20]
+
+\input{analyse_lexicale.tex}
+\input{analyse_syntaxique.tex}
+\input{syntaxe_abstraite.tex}
+\input{conversion.tex}
+
+\begin{frame}
+    \usetikzlibrary {fit}
+    \frametitle{Transpileur\esp}
+    \input{tikz/transpiler.tex}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Conclusion\esp}
+
+    \point Conversion rapide\\
+    \point Partie automatisée rend la création moins pénible\\
+    \point Processus interchangeable avec les langages souhaités
+
+\end{frame}
+
+\input{Annexe.tex}
+
+\end{document}

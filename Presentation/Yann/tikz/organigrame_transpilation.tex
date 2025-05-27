@@ -1,0 +1,47 @@
+\begin{center}
+
+  \begin{tikzpicture}
+    \tikzstyle{lien} = [->, >=latex]
+    \tikzstyle{basic_text}=[text width=2cm, text badly centered]
+    \tikzstyle{basic_node}=[draw = black,rounded corners=4pt, basic_text]
+    \tikzstyle{wrapper}=[basic_node, inner sep=3pt]
+
+    
+    \draw[white](-1.5,-4)rectangle(10,3);
+      
+
+
+
+    \node[basic_node] (A) at (0, 0) {analyse lexicale};
+    \node[basic_node] (B) [right=0.5cm of A] {analyse syntaxique};
+    \node[basic_node] (C) [right=0.5cm of B] {syntaxe abstraite};
+
+    \node[basic_node] (D) [right = 0.75cm of C] {conversion language B};
+    
+    \draw [lien] (A) -- (B);
+    \draw [lien] (B) -- (C);
+    \draw [lien] (C) -- (D);
+    
+    
+    \only{
+      \node[basic_node] (E) [above = 0.75cm of D] {conversion language A};
+      \node[basic_node] (F) [below = 0.75cm of D] {conversion language C};
+      
+      \node [wrapper, fit=(E), draw=red] (red_fit_2) {};
+      \node [wrapper, fit=(F), draw=red] (red_fit_3) {};
+      \draw [lien] (C) to [bend left] (E.west); 
+      \draw [lien] (C) to [bend right] (F.west); 
+    }<4->
+
+
+    % \node[fit=(red_fit_1)(red_fit_2)(red_fit_3)(blue_fit)] (global_fit) {};
+    
+    \node<2-> [wrapper, fit=(A)(B)(C), draw=vertFonce] (blue_fit) {};
+    \node<2-> [below=2cm of A.west, anchor=west, color=vertFonce] (label1) {module du langage d'entrée B};
+    
+    \node<3-> [wrapper, fit=(D), draw=red] (red_fit_1) {};
+    \node<3-> [below=0.5cm of label1.west, anchor=west, color=red] {modules des langages de sortie};
+
+    
+  \end{tikzpicture}
+\end{center}

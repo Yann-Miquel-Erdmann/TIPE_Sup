@@ -1,0 +1,152 @@
+\documentclass[compress]{beamer} %en animé
+%\documentclass[trans]{beamer} %en superposé
+
+%%%%%%%%%%%%%% LES PACKAGES
+\input{les_packages_pour_beamer.tex}
+%%%%%%%%%%%%%% THEME BEAMER
+%votre nom court qui apparaîtra dans l'en tête
+\newcommand{\initiales}{Yann Miquel--Erdmann }
+\input{les_param_beamer_tipe}
+
+
+%%%%%%%%%%%%%% MA PALETTE DE COULEURS
+\input{la_palette.tex}
+\definecolor{hellseahorse}{RGB}{204, 204, 255}
+\definecolor{seahorse}{RGB}{204,180, 255}
+\definecolor{darkseahorse}{RGB}{83, 74, 196}
+
+%symboles pratiques
+\newcommand{\flch}{\item[$\rightarrow$]}
+\newcommand{\dc}{{\usebeamercolor[fg]{structure}$\hookrightarrow$}}
+\newcommand{\ok}{\textcolor{vert}{\checkmark}}
+\newcommand{\point}{{\usebeamercolor[fg]{structure}$\bullet\enskip$}}
+\newcommand{\Point}{{\usebeamercolor[fg]{structure}$\bullet\enskip$}}
+
+
+%styles
+\newcommand{\couleur}[1]{{\usebeamercolor[fg]{structure}#1}}
+\newcommand{\important}[1]{\couleur{\textbf{#1}}}
+\newcommand{\remarque}[1]{\textit{\textrm{#1}}}
+
+%pour le template
+\newcommand{\lin}[1]{\mintinline{latex}{#1}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% A COMPLETER 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%entre crochet le titre court pour l'en tête puis le vrai titre
+\title[La Transpilation]{
+La transpilation de Fortran vers C
+}
+
+\author{
+\large 
+Présentation de \important{Yann MIQUEL--ERDMANN}\\[0.2cm]
+Candidat n° \important{51280}\\[0.4cm]
+\footnotesize
+travail réalisé avec \couleur{Erwan FALAUX--BACHELOT}\\[0.4cm]
+\vspace*{-1.2cm}
+} 
+
+%entre crochet la short date pour l'en-tête
+\date[Juillet 2025]{}
+
+\institute{}
+
+
+%------------------------------------------------
+\begin{frame}[plain]
+\titlepage 
+\addtocounter{framenumber}{-1} 
+\end{frame}
+
+%------------------------------------------------
+\title[La transpilation de Fortran vers C]{}
+
+
+\begin{frame}
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+    \frametitle{Introduction \esp}
+=======
+    \frametitle{Introduction\esp}
+
+	Le Fortran: 
+    \includegraphics[scale=0.03]{static/Fortran_logo.svg.png}\\
+    Créé par: IMB
+
+
+
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Problématique\esp}
+>>>>>>> Stashed changes
+    
+	\vspace*{0.5cm}
+=======
+    \frametitle{Introduction\esp}
+>>>>>>> Stashed changes
+
+    \begin{minipage}[t]{0.48\textwidth}
+        \includegraphics[scale=0.05]{static/Fortran_logo.svg.png}\\
+        \textbf{Le Fortran:}\\ 
+        Créé par:  John Backus, IBM\\
+        Créé en:   1957\\
+        Dernière version en: 2023\\
+        Rang sur Github: $9^{\text{ème}}$
+    \end{minipage}
+    \hspace*{0.2cm}
+    \begin{minipage}[t]{0.48\textwidth}
+        \includegraphics[scale=0.05]{static/C_logo.png}\\
+        \textbf{Le C:}\\
+        Créé par: Dennis Ritchie et \\Kenneth Thompson, Bell Labs\\
+        Créé en:  1972\\
+        Dernière version en: 2024\\
+        Rang sur Github: $41^{\text{ème}}$
+
+
+    \end{minipage}
+    
+	\vspace*{2.9cm}
+
+    \bandeauREF{%
+        \hspace*{0.2cm}\textbf{Logo Fortran}: \url{https://commons.wikimedia.org/wiki/File:Fortran_logo.svg}\\
+        \hspace*{0.2cm}\textbf{Logo C}: \url{https://commons.wikimedia.org/wiki/File:C_Logo.png}
+    }
+
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Problématique\esp}
+    
+    \begin{center}
+        \textbf{Comment implémenter une conversion rapide de programmes Fortran en programmes C?}
+    \end{center}
+
+\end{frame}
+
+
+\input{Transpilation.tex}
+
+\input{Analyse.tex}
+\input{Analyse_lexicale.tex}
+\input{Analyse_syntaxique.tex}
+\input{Traduction.tex}
+\input{Executable.tex}
+\input{Conclusion.tex}
+
+
+%------------------------------------------------
+% \input{tikz/arbre_de_syntaxe.tex}
+
+% \input{Annexe.tex}
+
+
+\end{document}

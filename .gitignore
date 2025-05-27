@@ -1,0 +1,22 @@
+*.out
+out.c
+out.f90
+
+src/*.o
+src/*.cm[aio]
+src/preprocessing/*.o
+src/preprocessing/*.cm[aio]
+src/prebuild/*.o
+src/prebuild/*.cm[aio]
+.*
+!.gitignore
+_build
+
+research_docs
+
+# pour le Tex
+Presentation/*/*
+!Presentation/*/*.tex
+!Presentation/*/*.md
+!Presentation/*/tikz/
+!Presentation/*/static/
