@@ -1,7 +1,9 @@
 #load "vector.cma"
 
 #load "symbols.cmo"
+
 #load "abstract_tokens.cmo"
+
 #load "grammar.cmo"
 
 #load "grammar_functions.cmo"
@@ -18,7 +20,6 @@
 
 #load "detAutomaton.cmo"
 
-
 #load "traduction.cmo"
 
 #load "traductionC.cmo"
@@ -27,3 +28,14 @@
 
 #load "transpileurs.cmo"
 
+#use "automates.ml"
+
+#use "LL1.ml"
+
+#use "convert_to_abstract.ml"
+
+#use "det_automaton.ml"
+
+let l = exec_of_file syntax_automate_det "tests/Fortran/test.f90"
+let a = analyse_LL1 Grammar.grammar l
+let t = convert_to_abstract a

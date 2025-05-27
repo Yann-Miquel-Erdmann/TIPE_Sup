@@ -72,27 +72,27 @@ let generate_file_lexer (g : grammar) (f_name : string)
   (* écriture de l'automate prégénéré *)
   output_string file
     ("let () =\n\
-      \tprint_string \"generating prebuild automaton...\"; print_newline();\n\
-      \tlet file = open_out \"" ^ writing_file_name
+      print_string \"generating prebuild automaton...\"; print_newline();\n\
+      let file = open_out \"" ^ writing_file_name
    ^ "\" in\n\
-      \toutput_string file \"open Automates\\n\\nlet syntax_automate_det = \
-      {\\n\\tnodes = [\";\n\
-      \toutput_string file (String.concat \"; \" (List.map string_of_int \
+      output_string file \"open Automates\\n\\nlet syntax_automate_det = \
+      {\\n    nodes = [\";\n\
+      output_string file (String.concat \"; \" (List.map string_of_int \
       syntax_automate_det.nodes));\n\
-      \toutput_string file (\"];\\n\\tdebut = \"^ string_of_int \
-      syntax_automate_det.debut ^\";\\n\\tfin = [|\");\n\
-      \toutput_string file (String.concat \"; \" (List.map (fun x -> match x \
+      output_string file (\"];\\n    debut = \"^ string_of_int \
+      syntax_automate_det.debut ^\";\\n    fin = [|\");\n\
+      output_string file (String.concat \"; \" (List.map (fun x -> match x \
       with | None -> \"None\" | Some e -> \"Some \"^string_of_terminal e) \
       (Array.to_list syntax_automate_det.fin))); output_string file \
-      \"|];\\n\\ttransitions = [|\\n\\t\\t\";\n\
-      \toutput_string file (String.concat \";\\n\\t\\t\" (Array.to_list \
+      \"|];\\n    transitions = [|\\n        \";\n\
+      output_string file (String.concat \";\\n        \" (Array.to_list \
       (Array.map (fun sub_arr -> \"[|\"^(String.concat \"; \" (Array.to_list \
       (Array.map string_of_int sub_arr)))^\"|]\") \
       syntax_automate_det.transitions)));\n\
-      \toutput_string file \"\\n\\t|]\\n}\";\n\
-      \tflush file;\n\
-      \tclose_out file;\n\
-      \tprint_string \"automaton pregenerating done\"; print_newline()");
+      output_string file \"\\n    |]\\n}\";\n\
+      flush file;\n\
+      close_out file;\n\
+      print_string \"automaton pregenerating done\"; print_newline()");
 
   flush file;
   close_out file
@@ -146,10 +146,10 @@ let generate_file_symbols (g : grammar) (f_name : string) : unit =
 
   (* représentation en chaîne des terminaux *)
   output_string output_file
-    "let string_of_terminal (t : terminal) : string =\n\tmatch t with\n";
+    "let string_of_terminal (t : terminal) : string =\n    match t with\n";
   List.iter
     (fun (s, _) ->
-      output_string output_file ("\t| " ^ s ^ " -> \"" ^ s ^ "\"\n"))
+      output_string output_file ("    | " ^ s ^ " -> \"" ^ s ^ "\"\n"))
     t;
   output_string output_file "\n";
 

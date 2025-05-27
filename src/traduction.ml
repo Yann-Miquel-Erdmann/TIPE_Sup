@@ -6,7 +6,6 @@ let tabs_to_string (n : int) : string_or_string_list = S (String.make n '\t')
 (** crée une chaîne de [n] retours à la ligne *)
 let rec n_new_lines (n : int) : string_or_string_list = S (String.make n '\n')
 
-
 let string_of_string_or_string_list (sosl : string_or_string_list) : string =
   let rec aux (sosl : string_or_string_list) (acc : string list) : string list =
     match sosl with
@@ -18,13 +17,12 @@ let string_of_string_or_string_list (sosl : string_or_string_list) : string =
   in
   String.concat "" (List.rev (aux sosl []))
 
-
-let rec last_of_list (l: 'a list): 'a =   
-  match l with 
+let rec last_of_list (l : 'a list) : 'a =
+  match l with
   | [] -> failwith "Liste vide "
-  | e::[] -> e
-  | e::q -> last_of_list q
+  | e :: [] -> e
+  | e :: q -> last_of_list q
 
-let print_sosl (sosl: string_or_string_list): unit = 
+let print_sosl (sosl : string_or_string_list) : unit =
   print_string (string_of_string_or_string_list sosl);
   print_newline ()

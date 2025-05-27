@@ -71,7 +71,7 @@ Une page de titre avec logos :\\
 
 
 \begin{frame}
-    \frametitle{Introduction}
+    \frametitle{Introduction\esp}
 
 	Le Fortran: 
     \includegraphics[scale=0.03]{static/Fortran_logo.svg.png}\\
@@ -83,17 +83,32 @@ Une page de titre avec logos :\\
 
 
 \begin{frame}
-    \frametitle{Problématique}
+    \frametitle{Problématique\esp}
     
     Comment implémenter une conversion rapide de programmes Fortran en programmes C?
 
 \end{frame}
 
+\tikzstyle{lien} = [->, >=latex]
+\tikzstyle{basic_text}=[text width=2cm, text badly centered]
+\tikzstyle{basic_node}=[draw = black,rounded corners=4pt, basic_text]
+\tikzstyle{wrapper}=[basic_node, inner sep=3pt]
+\tikzstyle{hidden}=[draw=black!0,color=black!0]
+\tikzstyle{faded}=[draw=black!20, color=black!20]
 
-\input{Transpileur.tex}
+\input{analyse_lexicale.tex}
+\input{analyse_syntaxique.tex}
+\input{syntaxe_abstraite.tex}
+\input{conversion.tex}
 
 \begin{frame}
-    \frametitle{Conclusion}
+    \usetikzlibrary {fit}
+    \frametitle{Transpileur\esp}
+    \input{figures/transpiler.tex}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Conclusion\esp}
 
     \point Conversion rapide\\
     \point Partie automatisée rend la création moins pénible\\

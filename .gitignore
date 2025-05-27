@@ -15,8 +15,8 @@ _build
 research_docs
 
 # pour le Tex
-Presentation/Yann/*
-!Presentation/Yann/*.tex
-!Presentation/Yann/*.md
-!Presentation/Yann/tikz/
-!Presentation/Yann/static/
+Presentation/*/*
+!Presentation/*/*.tex
+!Presentation/*/*.md
+!Presentation/*/tikz/
+!Presentation/*/static/

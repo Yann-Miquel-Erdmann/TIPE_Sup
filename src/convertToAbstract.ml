@@ -56,6 +56,44 @@ let rec link_return_function (t : ast) (return_val : string option) : ast =
   | Noeud (x, l) ->
       Noeud (x, List.map (fun x -> link_return_function x return_val) l)
 
+(** puts the functions contained in the contains section of [t] a level above
+    the function instead of under to treat it properly later *)
+let increase_function_level (t : ast) : ast =
+  match t with
+  | Noeud (ProgramRoot, l) ->
+      let functions =
+        List.fold_left
+          (fun acc (x : ast) ->
+            match x with
+            | Noeud (Syntax Program, l1) ->
+                List.fold_left
+                  (fun acc1 (x1 : ast) ->
+                    match x1 with
+                    | Noeud (Syntax Function, l2) -> x1 :: acc
+                    | _ -> acc)
+                  acc l1
+            | _ -> acc)
+          [] l
+      in
+      Noeud
+        ( ProgramRoot,
+          functions
+          @ List.map
+              (fun (x0 : ast) : ast ->
+                match x0 with
+                | Noeud (Syntax Program, l1) ->
+                    Noeud
+                      ( Syntax Program,
+                        List.filter
+                          (fun (x : ast) ->
+                            match x with
+                            | Noeud (Syntax Function, l2) -> false
+                            | _ -> true)
+                          l1 )
+                | _ -> x0)
+              l )
+  | _ -> failwith "The root should be ProgramRoot"
+
 (** Si [t] est un commentaire, le convertit pour séparer les différentes lignes,
     sinon renvoie une erreur *)
 let convert_comments (t : ast) : ast list =
@@ -685,9 +723,9 @@ let convert_to_abstract (t : at) : ast =
           ( ToFlatten,
             [
               convert_to_abstract_aux
-                (Noeud ((NonTerminal Contains_Function, s1), l1));
-              convert_to_abstract_aux
                 (Noeud ((NonTerminal EndProgramStmt, s), l));
+              convert_to_abstract_aux
+                (Noeud ((NonTerminal Contains_Function, s1), l1));
             ] )
     | Noeud
         ( (NonTerminal EndProgramStmt, _),
@@ -2471,4 +2509,5 @@ let convert_to_abstract (t : at) : ast =
              prerr_newline ());
         failwith "is not implemented yet"
   in
-  link_return_function (convert_to_abstract_aux t) None
+  increase_function_level
+    (link_return_function (convert_to_abstract_aux t) None)
