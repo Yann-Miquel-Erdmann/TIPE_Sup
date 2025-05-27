@@ -1,8 +1,8 @@
 \begin{MintedVerbatim}[commandchars=\\\{\}]
 \PYG{k}{open} \PYG{n+nc}{Environnement}
-\PYG{k}{open} \PYG{n+nc}{Abstract\PYGZus{}tokens}
+\PYG{k}{open} \PYG{n+nc}{AbstractTokens}
 \PYG{k}{open} \PYG{n+nc}{Bibliotheques}
-\PYG{k}{open} \PYG{n+nc}{Convert\PYGZus{}to\PYGZus{}abstract}
+\PYG{k}{open} \PYG{n+nc}{ConvertToAbstract}
 \PYG{k}{open} \PYG{n+nc}{LL1}
 \PYG{k}{open} \PYG{n+nc}{Traduction}
 

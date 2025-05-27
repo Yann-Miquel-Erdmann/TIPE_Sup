@@ -1,0 +1,26 @@
+\begin{tikzpicture}
+  \node[basic_node] (A) at (0, 0) {analyse lexicale};
+  \node[basic_node] (B) [right=0.5cm of A] {analyse syntaxique};
+  \node[basic_node] (C) [right=0.5cm of B] {syntaxe abstraite};
+  \node[wrapper, fit=(A)(B)(C), draw=blue, hidden] (blue_fit) {};
+
+  \node[basic_node] (D) [right = 0.75cm of C] {conversion langage B};
+  \node[basic_node, hidden] (E) [above = 0.75cm of D] {conversion langage A};
+  \node[basic_node, hidden] (F) [below = 0.75cm of D] {conversion langage C};
+  
+  \node[wrapper, fit=(D), draw=red, hidden] (red_fit_1) {};
+  \node[wrapper, fit=(E), draw=red, hidden] (red_fit_2) {};
+  \node[wrapper, fit=(F), draw=red, hidden] (red_fit_3) {};
+
+  \draw [lien] (A) -- (B);
+  \draw [lien] (B) -- (C);
+  \draw [lien] (C) -- (D);
+  \draw [lien, hidden] (C) to [bend left] (E.west); 
+  \draw [lien, hidden] (C) to [bend right] (F.west); 
+
+  \node[fit=(red_fit_1)(red_fit_2)(red_fit_3)(blue_fit)] (global_fit) {};
+  
+  \node[below=2cm of global_fit.west, anchor=west, color=blue, hidden] (label1) {module du langage d'entrée A};
+  \node[below=0.5cm of label1.west, anchor=west, color=red, hidden] {modules des langages de sortie};
+
+\end{tikzpicture}

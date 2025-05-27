@@ -1,0 +1,114 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{type} \PYG{n}{pattern} \PYG{o}{=} \PYG{k+kt}{string} \PYG{k+kt}{list}
+\PYG{k}{type} \PYG{n}{rule} \PYG{o}{=} \PYG{k+kt}{string} \PYG{o}{*} \PYG{n}{pattern} \PYG{k+kt}{list}
+\PYG{k}{type} \PYG{n}{grammar} \PYG{o}{=} \PYG{n}{rule} \PYG{k+kt}{list}
+
+\PYG{k}{module} \PYG{n+nc}{StringSet} \PYG{o}{=} \PYG{n+nn}{Set}\PYG{p}{.}\PYG{n+nc}{Make} \PYG{o}{(}\PYG{n+nc}{String}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ teste si le caractère [c] est une majuscule }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{alphanumerical\PYGZus{}maj} \PYG{o}{(}\PYG{n}{c} \PYG{o}{:} \PYG{k+kt}{char}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{bool} \PYG{o}{=}
+  \PYG{l+m+mi}{65} \PYG{o}{\PYGZlt{}}\PYG{o}{=} \PYG{n+nn}{Char}\PYG{p}{.}\PYG{n}{code} \PYG{n}{c} \PYG{o}{\PYGZam{}\PYGZam{}} \PYG{n+nn}{Char}\PYG{p}{.}\PYG{n}{code} \PYG{n}{c} \PYG{o}{\PYGZlt{}}\PYG{o}{=} \PYG{l+m+mi}{90}
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ teste si le caractère [c] est une minuscule }\PYG{c}{*)}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ teste si le caractère [c] est une minuscule }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{alphanumerical\PYGZus{}min} \PYG{o}{(}\PYG{n}{c} \PYG{o}{:} \PYG{k+kt}{char}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{bool} \PYG{o}{=}
+  \PYG{l+m+mi}{97} \PYG{o}{\PYGZlt{}}\PYG{o}{=} \PYG{n+nn}{Char}\PYG{p}{.}\PYG{n}{code} \PYG{n}{c} \PYG{o}{\PYGZam{}\PYGZam{}} \PYG{n+nn}{Char}\PYG{p}{.}\PYG{n}{code} \PYG{n}{c} \PYG{o}{\PYGZlt{}}\PYG{o}{=} \PYG{l+m+mi}{122}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ renvoie la liste de toutes les lignes du fichier [file\PYGZus{}name] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{read\PYGZus{}file} \PYG{o}{(}\PYG{n}{file\PYGZus{}name} \PYG{o}{:} \PYG{k+kt}{string}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{string} \PYG{k+kt}{list} \PYG{o}{=}
+  \PYG{k}{let} \PYG{k}{rec} \PYG{n}{lire} \PYG{n}{file} \PYG{n}{liste} \PYG{o}{=}
+    \PYG{k}{let} \PYG{n}{line} \PYG{o}{=} \PYG{n}{input\PYGZus{}line} \PYG{n}{file} \PYG{k}{in}
+    \PYG{n+nb+bp}{()}\PYG{o}{;}
+    \PYG{k}{try} \PYG{n}{lire} \PYG{n}{file} \PYG{o}{(}\PYG{n}{line} \PYG{o}{::} \PYG{n}{liste}\PYG{o}{)}
+    \PYG{k}{with} \PYG{n+nc}{End\PYGZus{}of\PYGZus{}file} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n}{close\PYGZus{}in} \PYG{n}{file}\PYG{o}{;}
+      \PYG{n}{line} \PYG{o}{::} \PYG{n}{liste}
+  \PYG{k}{in}
+  \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{rev} \PYG{o}{(}\PYG{n}{lire} \PYG{o}{(}\PYG{n}{open\PYGZus{}in} \PYG{n}{file\PYGZus{}name}\PYG{o}{)} \PYG{n+nb+bp}{[]}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ renvoie le nom de toutes les règles et le reste des caractères dans la ligne}
+\PYG{c}{    [s] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{get\PYGZus{}rule\PYGZus{}name} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{k+kt}{char} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{string} \PYG{o}{*} \PYG{k+kt}{char} \PYG{k+kt}{list} \PYG{o}{=}
+  \PYG{k}{let} \PYG{k}{rec} \PYG{n}{get\PYGZus{}rule\PYGZus{}name\PYGZus{}aux} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{k+kt}{char} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{(}\PYG{n}{revname} \PYG{o}{:} \PYG{k+kt}{char} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:}
+      \PYG{k+kt}{string} \PYG{o}{*} \PYG{k+kt}{char} \PYG{k+kt}{list} \PYG{o}{=}
+    \PYG{k}{match} \PYG{n}{s} \PYG{k}{with}
+    \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{no rule name one the line}\PYG{l+s+s2}{\PYGZdq{}}
+    \PYG{o}{|} \PYG{l+s+sc}{\PYGZsq{} \PYGZsq{}} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}\PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{of\PYGZus{}seq} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{to\PYGZus{}seq} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{rev} \PYG{n}{revname}\PYG{o}{)}\PYG{o}{)}\PYG{o}{,} \PYG{n}{q}\PYG{o}{)}
+    \PYG{o}{|} \PYG{n}{c} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{get\PYGZus{}rule\PYGZus{}name\PYGZus{}aux} \PYG{n}{q} \PYG{o}{(}\PYG{n}{c} \PYG{o}{::} \PYG{n}{revname}\PYG{o}{)}
+  \PYG{k}{in}
+  \PYG{n}{get\PYGZus{}rule\PYGZus{}name\PYGZus{}aux} \PYG{n}{s} \PYG{n+nb+bp}{[]}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ enlèves les chaînes de la forme \PYGZsq{}\PYGZbs{}s}\PYG{c}{*}\PYG{c}{\PYGZhy{}\PYGZgt{}\PYGZbs{}s}\PYG{c}{*}\PYG{c}{\PYGZsq{} dans la chaîne [s] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{k}{rec} \PYG{n}{remove\PYGZus{}arrow} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{k+kt}{char} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{char} \PYG{k+kt}{list} \PYG{o}{=}
+  \PYG{k}{match} \PYG{n}{s} \PYG{k}{with}
+  \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{there is no arrow in the rule}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{l+s+sc}{\PYGZsq{} \PYGZsq{}} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{remove\PYGZus{}arrow} \PYG{n}{q}
+  \PYG{o}{|} \PYG{l+s+sc}{\PYGZsq{}\PYGZhy{}\PYGZsq{}} \PYG{o}{::} \PYG{l+s+sc}{\PYGZsq{}\PYGZgt{}\PYGZsq{}} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{remove\PYGZus{}arrow} \PYG{n}{q}
+  \PYG{o}{|} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{s}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ sépare l\PYGZsq{}expression [s] en une liste de motifs }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{get\PYGZus{}derivations} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{k+kt}{char} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:} \PYG{n}{pattern} \PYG{k+kt}{list} \PYG{o}{=}
+  \PYG{c}{(*}\PYG{c}{*}\PYG{c}{ sépare les différents non terminaux de [s] sur le motif \PYGZsq{}\PYGZbs{}[a\PYGZhy{}z\PYGZbs{}] \PYGZbs{}[A\PYGZhy{}Z\PYGZbs{}]\PYGZsq{}}
+\PYG{c}{  }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{n}{split\PYGZus{}derivation} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{k+kt}{char} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:} \PYG{n}{pattern} \PYG{o}{=}
+    \PYG{c}{(*}\PYG{c}{*}\PYG{c}{ sépare les différents non terminaux de [s] sur le motif \PYGZsq{}\PYGZbs{}[a\PYGZhy{}z\PYGZbs{}]}
+\PYG{c}{        \PYGZbs{}[A\PYGZhy{}Z\PYGZbs{}]\PYGZsq{} et les ajoute à [rev\PYGZus{}rule\PYGZus{}name] }\PYG{c}{*)}
+    \PYG{k}{let} \PYG{k}{rec} \PYG{n}{split\PYGZus{}derivation\PYGZus{}aux} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{k+kt}{char} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{(}\PYG{n}{rev\PYGZus{}rule\PYGZus{}name} \PYG{o}{:} \PYG{k+kt}{char} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:}
+        \PYG{n}{pattern} \PYG{o}{=}
+      \PYG{k}{match} \PYG{n}{s} \PYG{k}{with}
+      \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+          \PYG{o}{[} \PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{trim} \PYG{o}{(}\PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{of\PYGZus{}seq} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{to\PYGZus{}seq} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{rev} \PYG{n}{rev\PYGZus{}rule\PYGZus{}name}\PYG{o}{)}\PYG{o}{)}\PYG{o}{)} \PYG{o}{]}
+      \PYG{o}{|} \PYG{n}{c1} \PYG{o}{::} \PYG{l+s+sc}{\PYGZsq{} \PYGZsq{}} \PYG{o}{::} \PYG{n}{c2} \PYG{o}{::} \PYG{n}{q}
+        \PYG{k}{when} \PYG{o}{(}\PYG{n}{alphanumerical\PYGZus{}min} \PYG{n}{c1} \PYG{o}{|}\PYG{o}{|} \PYG{n}{alphanumerical\PYGZus{}maj} \PYG{n}{c1}\PYG{o}{)}
+             \PYG{o}{\PYGZam{}\PYGZam{}} \PYG{n}{alphanumerical\PYGZus{}maj} \PYG{n}{c2} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+          \PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{trim}
+            \PYG{o}{(}\PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{of\PYGZus{}seq} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{to\PYGZus{}seq} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{rev} \PYG{o}{(}\PYG{n}{c1} \PYG{o}{::} \PYG{n}{rev\PYGZus{}rule\PYGZus{}name}\PYG{o}{)}\PYG{o}{)}\PYG{o}{)}\PYG{o}{)}
+          \PYG{o}{::} \PYG{n}{split\PYGZus{}derivation\PYGZus{}aux} \PYG{o}{(}\PYG{n}{c2} \PYG{o}{::} \PYG{n}{q}\PYG{o}{)} \PYG{n+nb+bp}{[]}
+      \PYG{o}{|} \PYG{n}{c} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{split\PYGZus{}derivation\PYGZus{}aux} \PYG{n}{q} \PYG{o}{(}\PYG{n}{c} \PYG{o}{::} \PYG{n}{rev\PYGZus{}rule\PYGZus{}name}\PYG{o}{)}
+    \PYG{k}{in}
+    \PYG{n}{split\PYGZus{}derivation\PYGZus{}aux} \PYG{n}{s} \PYG{n+nb+bp}{[]}
+  \PYG{k}{in}
+
+  \PYG{c}{(*}\PYG{c}{*}\PYG{c}{ sépare les disjonctions de non terminaux de [s] sur le motif \PYGZsq{} | \PYGZsq{} et les}
+\PYG{c}{      ajoute à [rev\PYGZus{}derivation] }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{k}{rec} \PYG{n}{split\PYGZus{}derivations} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{k+kt}{char} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{(}\PYG{n}{rev\PYGZus{}derivation} \PYG{o}{:} \PYG{k+kt}{char} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:}
+      \PYG{n}{pattern} \PYG{k+kt}{list} \PYG{o}{=}
+    \PYG{k}{match} \PYG{n}{s} \PYG{k}{with}
+    \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{[} \PYG{n}{split\PYGZus{}derivation} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{rev} \PYG{n}{rev\PYGZus{}derivation}\PYG{o}{)} \PYG{o}{]}
+    \PYG{o}{|} \PYG{l+s+sc}{\PYGZsq{} \PYGZsq{}} \PYG{o}{::} \PYG{l+s+sc}{\PYGZsq{}|\PYGZsq{}} \PYG{o}{::} \PYG{l+s+sc}{\PYGZsq{} \PYGZsq{}} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{split\PYGZus{}derivation} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{rev} \PYG{n}{rev\PYGZus{}derivation}\PYG{o}{)} \PYG{o}{::} \PYG{n}{split\PYGZus{}derivations} \PYG{n}{q} \PYG{n+nb+bp}{[]}
+    \PYG{o}{|} \PYG{n}{c} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{split\PYGZus{}derivations} \PYG{n}{q} \PYG{o}{(}\PYG{n}{c} \PYG{o}{::} \PYG{n}{rev\PYGZus{}derivation}\PYG{o}{)}
+  \PYG{k}{in}
+
+  \PYG{n}{split\PYGZus{}derivations} \PYG{n}{s} \PYG{n+nb+bp}{[]}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ teste si la ligne [l] est vide ou est commentée par \PYGZsq{}//\PYGZsq{} }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{rule\PYGZus{}filter} \PYG{o}{(}\PYG{n}{l} \PYG{o}{:} \PYG{k+kt}{string}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{bool} \PYG{o}{=}
+  \PYG{k}{if} \PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{length} \PYG{o}{(}\PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{trim} \PYG{n}{l}\PYG{o}{)} \PYG{o}{\PYGZlt{}} \PYG{l+m+mi}{2} \PYG{k}{then} \PYG{n+nb+bp}{false}
+  \PYG{k}{else} \PYG{n}{l}\PYG{o}{.}\PYG{o}{[}\PYG{l+m+mi}{0}\PYG{o}{]} \PYG{o}{\PYGZlt{}}\PYG{o}{\PYGZgt{}} \PYG{l+s+sc}{\PYGZsq{}/\PYGZsq{}} \PYG{o}{\PYGZam{}\PYGZam{}} \PYG{n}{l}\PYG{o}{.}\PYG{o}{[}\PYG{l+m+mi}{1}\PYG{o}{]} \PYG{o}{\PYGZlt{}}\PYG{o}{\PYGZgt{}} \PYG{l+s+sc}{\PYGZsq{}/\PYGZsq{}}
+
+\PYG{k}{let} \PYG{n}{get\PYGZus{}rule} \PYG{o}{(}\PYG{n}{line} \PYG{o}{:} \PYG{k+kt}{string}\PYG{o}{)} \PYG{o}{:} \PYG{n}{rule} \PYG{o}{=}
+  \PYG{k}{let} \PYG{n}{s} \PYG{o}{=} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{init} \PYG{o}{(}\PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{length} \PYG{n}{line}\PYG{o}{)} \PYG{o}{(}\PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{get} \PYG{n}{line}\PYG{o}{)} \PYG{k}{in}
+
+  \PYG{k}{let} \PYG{n}{rule\PYGZus{}name}\PYG{o}{,} \PYG{n}{s1} \PYG{o}{=} \PYG{n}{get\PYGZus{}rule\PYGZus{}name} \PYG{n}{s} \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{derivations} \PYG{o}{=} \PYG{n}{get\PYGZus{}derivations} \PYG{o}{(}\PYG{n}{remove\PYGZus{}arrow} \PYG{n}{s1}\PYG{o}{)} \PYG{k}{in}
+  \PYG{o}{(}\PYG{n}{rule\PYGZus{}name}\PYG{o}{,} \PYG{n}{derivations}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ réfupère la grammaire contenue dans [file\PYGZus{}name] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{get\PYGZus{}grammar} \PYG{o}{(}\PYG{n}{file\PYGZus{}name} \PYG{o}{:} \PYG{k+kt}{string}\PYG{o}{)} \PYG{o}{:} \PYG{n}{grammar} \PYG{o}{=}
+  \PYG{k}{let} \PYG{n}{lines} \PYG{o}{=} \PYG{n}{read\PYGZus{}file} \PYG{n}{file\PYGZus{}name} \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{not\PYGZus{}empty\PYGZus{}lines} \PYG{o}{=} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{filter} \PYG{n}{rule\PYGZus{}filter} \PYG{n}{lines} \PYG{k}{in}
+  \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{map} \PYG{n}{get\PYGZus{}rule} \PYG{n}{not\PYGZus{}empty\PYGZus{}lines}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ teste si la règle [r] est terminale }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{is\PYGZus{}terminal} \PYG{o}{(}\PYG{n}{r} \PYG{o}{:} \PYG{n}{rule}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{bool} \PYG{o}{=}
+  \PYG{k}{match} \PYG{n}{r} \PYG{k}{with} \PYG{o}{\PYGZus{}}\PYG{o}{,} \PYG{o}{[} \PYG{o}{[} \PYG{n}{s} \PYG{o}{]} \PYG{o}{]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{not} \PYG{o}{(}\PYG{n}{alphanumerical\PYGZus{}maj} \PYG{n}{s}\PYG{o}{.}\PYG{o}{[}\PYG{l+m+mi}{0}\PYG{o}{]}\PYG{o}{)} \PYG{o}{|} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb+bp}{false}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ récupère les terminaux de la grammaire [g] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{terminals} \PYG{o}{(}\PYG{n}{g} \PYG{o}{:} \PYG{n}{grammar}\PYG{o}{)} \PYG{o}{:} \PYG{n}{rule} \PYG{k+kt}{list} \PYG{o}{=} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{filter} \PYG{n}{is\PYGZus{}terminal} \PYG{n}{g}
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ récupère les non terminaux de la grammaire [g] }\PYG{c}{*)}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ récupère les non terminaux de la grammaire [g] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{non\PYGZus{}terminals} \PYG{o}{(}\PYG{n}{g} \PYG{o}{:} \PYG{n}{grammar}\PYG{o}{)} \PYG{o}{:} \PYG{n}{rule} \PYG{k+kt}{list} \PYG{o}{=}
+  \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{filter} \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{r} \PYG{o}{:} \PYG{n}{rule}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{not} \PYG{o}{(}\PYG{n}{is\PYGZus{}terminal} \PYG{n}{r}\PYG{o}{)}\PYG{o}{)} \PYG{n}{g}
+\end{MintedVerbatim}

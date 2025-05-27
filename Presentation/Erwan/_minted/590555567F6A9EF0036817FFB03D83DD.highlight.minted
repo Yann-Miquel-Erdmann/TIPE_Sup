@@ -1,0 +1,380 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{open} \PYG{n+nc}{Symbols}
+
+\PYG{c}{(*}\PYG{c}{ }
+\PYG{c}{  syntaxe actuelle:}
+\PYG{c}{    }\PYG{c}{*}\PYG{c}{ [] ✔️}
+\PYG{c}{    }\PYG{c}{*}\PYG{c}{ |  }
+\PYG{c}{    }\PYG{c}{*}\PYG{c}{ .  ✔️}
+\PYG{c}{    }\PYG{c}{*}\PYG{c}{ }\PYG{c}{*}\PYG{c}{  ✔️}
+\PYG{c}{    }\PYG{c}{*}\PYG{c}{ +  ✔️}
+\PYG{c}{    }\PYG{c}{*}\PYG{c}{ a  ✔️}
+\PYG{c}{    }\PYG{c}{*}\PYG{c}{ \PYGZbs{}  ✔️}
+\PYG{c}{    }\PYG{c}{*}\PYG{c}{ }\PYG{c}{(}\PYG{c}{)}\PYG{c}{ ✔️}
+\PYG{c}{    }\PYG{c}{*}\PYG{c}{ \PYGZsh{}  ✔️}
+\PYG{c}{    }\PYG{c}{*}\PYG{c}{ ?  ✔️}
+\PYG{c}{    }\PYG{c}{*}\PYG{c}{ \PYGZti{}  ✔️}
+\PYG{c}{*)}
+
+\PYG{k}{type} \PYG{n}{regex} \PYG{o}{=}
+  \PYG{c}{(*}\PYG{c}{ cas de base }\PYG{c}{*)}
+  \PYG{o}{|} \PYG{n+nc}{Epsilon}
+  \PYG{o}{|} \PYG{n+nc}{Caractere} \PYG{k}{of} \PYG{k+kt}{char}
+  \PYG{o}{|} \PYG{n+nc}{AllChars}
+  \PYG{o}{|} \PYG{n+nc}{Range} \PYG{k}{of} \PYG{k+kt}{char} \PYG{o}{*} \PYG{k+kt}{char}
+  \PYG{c}{(*}\PYG{c}{ opérations sur les regex}\PYG{c}{*)}
+  \PYG{o}{|} \PYG{n+nc}{Concat} \PYG{k}{of} \PYG{n}{regex} \PYG{o}{*} \PYG{n}{regex}
+  \PYG{o}{|} \PYG{n+nc}{Ou} \PYG{k}{of} \PYG{n}{regex} \PYG{o}{*} \PYG{n}{regex}
+  \PYG{o}{|} \PYG{n+nc}{UnPlus} \PYG{k}{of} \PYG{n}{regex}
+  \PYG{o}{|} \PYG{n+nc}{ZeroPlus} \PYG{k}{of} \PYG{n}{regex}
+  \PYG{o}{|} \PYG{n+nc}{Vide}
+  \PYG{o}{|} \PYG{n+nc}{Facultatif} \PYG{k}{of} \PYG{n}{regex}
+  \PYG{o}{|} \PYG{n+nc}{AllBut} \PYG{k}{of} \PYG{k+kt}{bool} \PYG{k+kt}{array}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ affiche l\PYGZsq{}expression [c] en argument }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{print\PYGZus{}reg\PYGZus{}list} \PYG{o}{(}\PYG{n}{c} \PYG{o}{:} \PYG{n}{regex} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{unit} \PYG{o}{=}
+  \PYG{c}{(*}\PYG{c}{*}\PYG{c}{ affiche en vidant au fur et à mesure la liste }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{k}{rec} \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{o}{(}\PYG{n}{r} \PYG{o}{:} \PYG{n}{regex} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{unit} \PYG{o}{=}
+    \PYG{k}{match} \PYG{n}{r} \PYG{k}{with}
+    \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb+bp}{()}
+    \PYG{o}{|} \PYG{o}{[} \PYG{n+nc}{Vide} \PYG{o}{]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}\PYGZus{}\PYGZsq{}}
+    \PYG{o}{|} \PYG{n+nc}{Vide} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}\PYGZus{}\PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{} \PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{n}{q}
+    \PYG{o}{|} \PYG{o}{[} \PYG{n+nc}{Epsilon} \PYG{o}{]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}\PYGZsh{}\PYGZsq{}}
+    \PYG{o}{|} \PYG{n+nc}{Epsilon} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}\PYGZsh{}\PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{} \PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{n}{q}
+    \PYG{o}{|} \PYG{o}{[} \PYG{n+nc}{Caractere} \PYG{n}{c} \PYG{o}{]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{print\PYGZus{}char} \PYG{n}{c}
+    \PYG{o}{|} \PYG{n+nc}{Caractere} \PYG{n}{c} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{print\PYGZus{}char} \PYG{n}{c}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{} \PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{n}{q}
+    \PYG{o}{|} \PYG{o}{[} \PYG{n+nc}{AllChars} \PYG{o}{]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}.\PYGZsq{}}
+    \PYG{o}{|} \PYG{n+nc}{AllChars} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}.\PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{} \PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{n}{q}
+    \PYG{o}{|} \PYG{o}{[} \PYG{n+nc}{Range} \PYG{o}{(}\PYG{n}{s}\PYG{o}{,} \PYG{n}{e}\PYG{o}{)} \PYG{o}{]} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}[\PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{n}{s}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}\PYGZhy{}\PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{n}{e}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}]\PYGZsq{}}
+    \PYG{o}{|} \PYG{n+nc}{Range} \PYG{o}{(}\PYG{n}{s}\PYG{o}{,} \PYG{n}{e}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}[\PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{n}{s}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}\PYGZhy{}\PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{n}{e}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}]\PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{} \PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{n}{q}
+    \PYG{o}{|} \PYG{o}{[} \PYG{n+nc}{Concat} \PYG{o}{(}\PYG{n}{e1}\PYG{o}{,} \PYG{n}{e2}\PYG{o}{)} \PYG{o}{]} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{o}{[} \PYG{n}{e1} \PYG{o}{]}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{o}{[} \PYG{n}{e2} \PYG{o}{]}
+    \PYG{o}{|} \PYG{n+nc}{Concat} \PYG{o}{(}\PYG{n}{e1}\PYG{o}{,} \PYG{n}{e2}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{o}{[} \PYG{n}{e1} \PYG{o}{]}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{o}{[} \PYG{n}{e2} \PYG{o}{]}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{} \PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{n}{q}
+    \PYG{o}{|} \PYG{o}{[} \PYG{n+nc}{Ou} \PYG{o}{(}\PYG{n}{e1}\PYG{o}{,} \PYG{n}{e2}\PYG{o}{)} \PYG{o}{]} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}(\PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{o}{[} \PYG{n}{e1} \PYG{o}{]}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}|\PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{o}{[} \PYG{n}{e2} \PYG{o}{]}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{})\PYGZsq{}}
+    \PYG{o}{|} \PYG{n+nc}{Ou} \PYG{o}{(}\PYG{n}{e1}\PYG{o}{,} \PYG{n}{e2}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}(\PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{o}{[} \PYG{n}{e1} \PYG{o}{]}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}|\PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{o}{[} \PYG{n}{e2} \PYG{o}{]}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{})\PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{} \PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{n}{q}
+    \PYG{o}{|} \PYG{o}{[} \PYG{n+nc}{UnPlus} \PYG{n}{e} \PYG{o}{]} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}(\PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{o}{[} \PYG{n}{e} \PYG{o}{]}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{)+}\PYG{l+s+s2}{\PYGZdq{}}
+    \PYG{o}{|} \PYG{n+nc}{UnPlus} \PYG{n}{e} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}(\PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{o}{[} \PYG{n}{e} \PYG{o}{]}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{)+}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{} \PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{n}{q}
+    \PYG{o}{|} \PYG{o}{[} \PYG{n+nc}{ZeroPlus} \PYG{n}{e} \PYG{o}{]} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}(\PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{o}{[} \PYG{n}{e} \PYG{o}{]}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{)*}\PYG{l+s+s2}{\PYGZdq{}}
+    \PYG{o}{|} \PYG{n+nc}{ZeroPlus} \PYG{n}{e} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}(\PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{o}{[} \PYG{n}{e} \PYG{o}{]}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{)*}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{} \PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{n}{q}
+    \PYG{o}{|} \PYG{o}{[} \PYG{n+nc}{Facultatif} \PYG{n}{e} \PYG{o}{]} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}(\PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{o}{[} \PYG{n}{e} \PYG{o}{]}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{)?}\PYG{l+s+s2}{\PYGZdq{}}
+    \PYG{o}{|} \PYG{n+nc}{Facultatif} \PYG{n}{e} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{}(\PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{o}{[} \PYG{n}{e} \PYG{o}{]}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{)?}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{} \PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{n}{q}
+    \PYG{o}{|} \PYG{o}{[} \PYG{n+nc}{AllBut} \PYG{o}{\PYGZus{}} \PYG{o}{]} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZti{}(...}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{)}\PYG{l+s+s2}{\PYGZdq{}}
+    \PYG{o}{|} \PYG{n+nc}{AllBut} \PYG{o}{\PYGZus{}} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZti{}(...}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{)}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}char} \PYG{l+s+sc}{\PYGZsq{} \PYGZsq{}}\PYG{o}{;}
+        \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{n}{q}
+  \PYG{k}{in}
+  \PYG{k}{if} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{length} \PYG{n}{c} \PYG{o}{=} \PYG{l+m+mi}{0} \PYG{k}{then} \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{[]}\PYG{l+s+s2}{\PYGZdq{}} \PYG{k}{else} \PYG{n}{print\PYGZus{}list\PYGZus{}aux} \PYG{n}{c}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ convertit la chaîne de caractères s à partir de l\PYGZsq{}index index et l\PYGZsq{}ajoute à}
+\PYG{c}{    la liste c }\PYG{c}{*)}
+\PYG{k}{let} \PYG{k}{rec} \PYG{n}{string\PYGZus{}to\PYGZus{}char\PYGZus{}2} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{k+kt}{string}\PYG{o}{)} \PYG{o}{(}\PYG{n}{c} \PYG{o}{:} \PYG{k+kt}{char} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{(}\PYG{n}{index} \PYG{o}{:} \PYG{k+kt}{int}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{char} \PYG{k+kt}{list}
+    \PYG{o}{=}
+  \PYG{k}{if} \PYG{n}{index} \PYG{o}{=} \PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{length} \PYG{n}{s} \PYG{k}{then} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{rev} \PYG{n}{c}
+  \PYG{k}{else} \PYG{n}{string\PYGZus{}to\PYGZus{}char\PYGZus{}2} \PYG{n}{s} \PYG{o}{(}\PYG{n}{s}\PYG{o}{.}\PYG{o}{[}\PYG{n}{index}\PYG{o}{]} \PYG{o}{::} \PYG{n}{c}\PYG{o}{)} \PYG{o}{(}\PYG{n}{index} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{o}{)}
+
+\PYG{k}{exception} \PYG{n+nc}{Invalid\PYGZus{}syntax}
+\PYG{k}{exception} \PYG{n+nc}{Empty\PYGZus{}pile}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ teste si la liste référencée dans [l] est vide }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{is\PYGZus{}empty} \PYG{o}{(}\PYG{n}{l} \PYG{o}{:} \PYG{k}{\PYGZsq{}}\PYG{n}{a} \PYG{k+kt}{list} \PYG{n}{ref}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{bool} \PYG{o}{=} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{length} \PYG{o}{!}\PYG{n}{l} \PYG{o}{=}\PYG{o}{=} \PYG{l+m+mi}{0}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ dépile un élément de la pile référencée par [l]}\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{pop} \PYG{o}{(}\PYG{n}{l} \PYG{o}{:} \PYG{k}{\PYGZsq{}}\PYG{n}{a} \PYG{k+kt}{list} \PYG{n}{ref}\PYG{o}{)} \PYG{o}{:} \PYG{k}{\PYGZsq{}}\PYG{n}{a} \PYG{o}{=}
+  \PYG{k}{match} \PYG{o}{!}\PYG{n}{l} \PYG{k}{with}
+  \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{k}{raise} \PYG{n+nc}{Empty\PYGZus{}pile}
+  \PYG{o}{|} \PYG{n}{x} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n}{l} \PYG{o}{:=} \PYG{n}{q}\PYG{o}{;}
+      \PYG{n}{x}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ convertit l\PYGZsq{}entier [n] en booléen }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{bool\PYGZus{}of\PYGZus{}int} \PYG{o}{(}\PYG{n}{n} \PYG{o}{:} \PYG{k+kt}{int}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{bool} \PYG{o}{=} \PYG{k}{if} \PYG{n}{n} \PYG{o}{=}\PYG{o}{=} \PYG{l+m+mi}{0} \PYG{k}{then} \PYG{n+nb+bp}{false} \PYG{k}{else} \PYG{n+nb+bp}{true}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ renvoie la disjonction de toutes les expressions régulières dans la liste}
+\PYG{c}{    [l] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{or\PYGZus{}reg} \PYG{o}{(}\PYG{n}{l} \PYG{o}{:} \PYG{n}{regex} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:} \PYG{n}{regex} \PYG{o}{=}
+  \PYG{k}{let} \PYG{k}{rec} \PYG{n}{or\PYGZus{}reg\PYGZus{}aux} \PYG{o}{(}\PYG{n}{l} \PYG{o}{:} \PYG{n}{regex} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{(}\PYG{n}{out} \PYG{o}{:} \PYG{n}{regex}\PYG{o}{)} \PYG{o}{:} \PYG{n}{regex} \PYG{o}{=}
+    \PYG{k}{match} \PYG{o}{(}\PYG{n}{l}\PYG{o}{,} \PYG{n}{out}\PYG{o}{)} \PYG{k}{with}
+    \PYG{o}{|} \PYG{n+nb+bp}{[]}\PYG{o}{,} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{out}
+    \PYG{o}{|} \PYG{n}{x} \PYG{o}{::} \PYG{n}{q}\PYG{o}{,} \PYG{n+nc}{Epsilon} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{or\PYGZus{}reg\PYGZus{}aux} \PYG{n}{q} \PYG{n}{x}
+    \PYG{o}{|} \PYG{n}{x} \PYG{o}{::} \PYG{n}{q}\PYG{o}{,} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{or\PYGZus{}reg\PYGZus{}aux} \PYG{n}{q} \PYG{o}{(}\PYG{n+nc}{Ou} \PYG{o}{(}\PYG{n}{x}\PYG{o}{,} \PYG{n}{out}\PYG{o}{)}\PYG{o}{)}
+  \PYG{k}{in}
+  \PYG{n}{or\PYGZus{}reg\PYGZus{}aux} \PYG{n}{l} \PYG{n+nc}{Epsilon}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ renvoie la concaténation de toutes les expressions régulières de [l] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{concat\PYGZus{}reg} \PYG{o}{(}\PYG{n}{l} \PYG{o}{:} \PYG{n}{regex} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:} \PYG{n}{regex} \PYG{o}{=}
+  \PYG{k}{let} \PYG{k}{rec} \PYG{n}{concat\PYGZus{}reg\PYGZus{}aux} \PYG{o}{(}\PYG{n}{l} \PYG{o}{:} \PYG{n}{regex} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{(}\PYG{n}{out} \PYG{o}{:} \PYG{n}{regex}\PYG{o}{)} \PYG{o}{:} \PYG{n}{regex} \PYG{o}{=}
+    \PYG{k}{match} \PYG{o}{(}\PYG{n}{l}\PYG{o}{,} \PYG{n}{out}\PYG{o}{)} \PYG{k}{with}
+    \PYG{o}{|} \PYG{n+nb+bp}{[]}\PYG{o}{,} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{out}
+    \PYG{o}{|} \PYG{n}{x} \PYG{o}{::} \PYG{n}{q}\PYG{o}{,} \PYG{n+nc}{Epsilon} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{concat\PYGZus{}reg\PYGZus{}aux} \PYG{n}{q} \PYG{n}{x}
+    \PYG{o}{|} \PYG{n}{x} \PYG{o}{::} \PYG{n}{q}\PYG{o}{,} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{concat\PYGZus{}reg\PYGZus{}aux} \PYG{n}{q} \PYG{o}{(}\PYG{n+nc}{Concat} \PYG{o}{(}\PYG{n}{x}\PYG{o}{,} \PYG{n}{out}\PYG{o}{)}\PYG{o}{)}
+  \PYG{k}{in}
+  \PYG{n}{concat\PYGZus{}reg\PYGZus{}aux} \PYG{n}{l} \PYG{n+nc}{Epsilon}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ transforme, si c\PYGZsq{}est possible, la chaine de caractères [s] en une expression}
+\PYG{c}{    régulière }\PYG{c}{(}\PYG{c}{regex}\PYG{c}{)}\PYG{c}{ }\PYG{c}{*)}
+\PYG{k}{let} \PYG{k}{rec} \PYG{n}{gen\PYGZus{}regex} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{k+kt}{string}\PYG{o}{)} \PYG{o}{:} \PYG{n}{regex} \PYG{o}{=}
+  \PYG{k}{let} \PYG{n}{caracters} \PYG{o}{=} \PYG{n}{ref} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{of\PYGZus{}seq} \PYG{o}{(}\PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{to\PYGZus{}seq} \PYG{n}{s}\PYG{o}{)}\PYG{o}{)} \PYG{k}{in}
+
+  \PYG{c}{(*}\PYG{c}{*}\PYG{c}{ fonction auxiliaire qui permet de générer le regex entre parenthèses }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{n}{parenthesis} \PYG{n+nb+bp}{()} \PYG{o}{:} \PYG{n}{regex} \PYG{o}{=}
+    \PYG{k}{let} \PYG{n}{l} \PYG{o}{=} \PYG{n}{ref} \PYG{n+nb+bp}{[]} \PYG{k}{in}
+    \PYG{k}{try}
+      \PYG{k}{let} \PYG{n}{count} \PYG{o}{=} \PYG{n}{ref} \PYG{l+m+mi}{0} \PYG{k}{in}
+      \PYG{k}{let} \PYG{n}{c} \PYG{o}{=} \PYG{n}{ref} \PYG{o}{(}\PYG{n}{pop} \PYG{n}{caracters}\PYG{o}{)} \PYG{k}{in}
+      \PYG{k}{let} \PYG{n}{ignore} \PYG{o}{=} \PYG{n}{ref} \PYG{n+nb+bp}{false} \PYG{k}{in}
+      \PYG{c}{(*}\PYG{c}{ boucle sur le contenu de la parenthèse et ne s\PYGZsq{}arrete pas si elle est ignorée }\PYG{c}{*)}
+      \PYG{k}{while} \PYG{n}{not} \PYG{o}{(}\PYG{o}{!}\PYG{n}{c} \PYG{o}{=} \PYG{l+s+sc}{\PYGZsq{})\PYGZsq{}} \PYG{o}{\PYGZam{}\PYGZam{}} \PYG{o}{!}\PYG{n}{count} \PYG{o}{=} \PYG{l+m+mi}{0} \PYG{o}{\PYGZam{}\PYGZam{}} \PYG{n}{not} \PYG{o}{!}\PYG{n}{ignore}\PYG{o}{)} \PYG{k}{do}
+        \PYG{k}{if} \PYG{n}{not} \PYG{o}{!}\PYG{n}{ignore} \PYG{k}{then} \PYG{o}{(}
+          \PYG{k}{if}
+            \PYG{c}{(*}\PYG{c}{ si on rencontre un \PYGZbs{}, on ignore le caractère suivant }\PYG{c}{*)}
+            \PYG{o}{!}\PYG{n}{c} \PYG{o}{=} \PYG{l+s+sc}{\PYGZsq{}\PYGZbs{}\PYGZbs{}\PYGZsq{}}
+          \PYG{k}{then} \PYG{n}{ignore} \PYG{o}{:=} \PYG{n+nb+bp}{true}
+          \PYG{k}{else} \PYG{k}{if} \PYG{o}{!}\PYG{n}{c} \PYG{o}{=} \PYG{l+s+sc}{\PYGZsq{}(\PYGZsq{}} \PYG{k}{then} \PYG{n}{count} \PYG{o}{:=} \PYG{o}{!}\PYG{n}{count} \PYG{o}{+} \PYG{l+m+mi}{1}
+          \PYG{k}{else} \PYG{k}{if} \PYG{o}{!}\PYG{n}{c} \PYG{o}{=} \PYG{l+s+sc}{\PYGZsq{})\PYGZsq{}} \PYG{k}{then} \PYG{n}{count} \PYG{o}{:=} \PYG{o}{!}\PYG{n}{count} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{o}{)}
+        \PYG{k}{else} \PYG{n}{ignore} \PYG{o}{:=} \PYG{n+nb+bp}{false}\PYG{o}{;}
+        \PYG{n}{l} \PYG{o}{:=} \PYG{o}{!}\PYG{n}{c} \PYG{o}{::} \PYG{o}{!}\PYG{n}{l}\PYG{o}{;}
+        \PYG{n}{c} \PYG{o}{:=} \PYG{n}{pop} \PYG{n}{caracters}
+      \PYG{k}{done}\PYG{o}{;}
+      \PYG{k}{let} \PYG{n}{s1} \PYG{o}{=} \PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{of\PYGZus{}seq} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{to\PYGZus{}seq} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{rev} \PYG{o}{!}\PYG{n}{l}\PYG{o}{)}\PYG{o}{)} \PYG{k}{in}
+      \PYG{n}{gen\PYGZus{}regex} \PYG{n}{s1}
+    \PYG{k}{with} \PYG{n+nc}{Empty\PYGZus{}pile} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{k}{raise} \PYG{n+nc}{Invalid\PYGZus{}syntax}
+  \PYG{k}{in}
+
+  \PYG{c}{(*}\PYG{c}{*}\PYG{c}{ fonction auxiliaire qui permet de générer le regex entre crochets }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{n}{crochet} \PYG{n+nb+bp}{()} \PYG{o}{:} \PYG{n}{regex} \PYG{o}{=}
+    \PYG{k}{let} \PYG{n}{l} \PYG{o}{=} \PYG{n}{ref} \PYG{n+nb+bp}{[]} \PYG{k}{in}
+    \PYG{k}{try}
+      \PYG{k}{let} \PYG{n}{c} \PYG{o}{=} \PYG{n}{ref} \PYG{o}{(}\PYG{n}{pop} \PYG{n}{caracters}\PYG{o}{)} \PYG{k}{in}
+      \PYG{k}{let} \PYG{n}{ignore\PYGZus{}left} \PYG{o}{=} \PYG{n}{ref} \PYG{l+m+mi}{0} \PYG{k}{in}
+      \PYG{k}{let} \PYG{n}{pile1} \PYG{o}{=} \PYG{n}{ref} \PYG{n+nb+bp}{[]} \PYG{k}{in}
+      \PYG{c}{(*}\PYG{c}{ on boucle tant que l\PYGZsq{}on a pas le crochet final et tant que l\PYGZsq{}on ignore pas }\PYG{c}{*)}
+      \PYG{k}{while} \PYG{n}{not} \PYG{o}{(}\PYG{o}{!}\PYG{n}{c} \PYG{o}{=} \PYG{l+s+sc}{\PYGZsq{}]\PYGZsq{}} \PYG{o}{\PYGZam{}\PYGZam{}} \PYG{n}{not} \PYG{o}{(}\PYG{n}{bool\PYGZus{}of\PYGZus{}int} \PYG{o}{!}\PYG{n}{ignore\PYGZus{}left}\PYG{o}{)}\PYG{o}{)} \PYG{k}{do}
+        \PYG{c}{(*}\PYG{c}{ si on ignore pas encore, on ignore pour 2 tours si on rencontre un \PYGZbs{} }\PYG{c}{*)}
+        \PYG{k}{if} \PYG{o}{(}\PYG{n}{not} \PYG{o}{(}\PYG{n}{bool\PYGZus{}of\PYGZus{}int} \PYG{o}{!}\PYG{n}{ignore\PYGZus{}left}\PYG{o}{)}\PYG{o}{)} \PYG{o}{\PYGZam{}\PYGZam{}} \PYG{o}{!}\PYG{n}{c} \PYG{o}{=} \PYG{l+s+sc}{\PYGZsq{}\PYGZbs{}\PYGZbs{}\PYGZsq{}} \PYG{k}{then} \PYG{n}{ignore\PYGZus{}left} \PYG{o}{:=} \PYG{l+m+mi}{2}\PYG{o}{;}
+        \PYG{o}{(}\PYG{k}{if} \PYG{o}{!}\PYG{n}{ignore\PYGZus{}left} \PYG{o}{\PYGZlt{}}\PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{2} \PYG{k}{then}
+           \PYG{k}{match} \PYG{o}{!}\PYG{n}{pile1} \PYG{k}{with}
+           \PYG{o}{|} \PYG{o}{[} \PYG{n+nc}{Caractere} \PYG{l+s+sc}{\PYGZsq{}\PYGZhy{}\PYGZsq{}}\PYG{o}{;} \PYG{n+nc}{Caractere} \PYG{n}{x} \PYG{o}{]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{pile1} \PYG{o}{:=} \PYG{o}{[} \PYG{n+nc}{Range} \PYG{o}{(}\PYG{n}{x}\PYG{o}{,} \PYG{o}{!}\PYG{n}{c}\PYG{o}{)} \PYG{o}{]}
+           \PYG{o}{|} \PYG{n+nc}{Caractere} \PYG{l+s+sc}{\PYGZsq{}\PYGZhy{}\PYGZsq{}} \PYG{o}{::} \PYG{n+nc}{Caractere} \PYG{n}{x} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{pile1} \PYG{o}{:=} \PYG{n+nc}{Range} \PYG{o}{(}\PYG{n}{x}\PYG{o}{,} \PYG{o}{!}\PYG{n}{c}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q}
+           \PYG{o}{|} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+               \PYG{k}{if} \PYG{o}{!}\PYG{n}{ignore\PYGZus{}left} \PYG{o}{=} \PYG{l+m+mi}{1} \PYG{o}{\PYGZam{}\PYGZam{}} \PYG{o}{!}\PYG{n}{c} \PYG{o}{=} \PYG{l+s+sc}{\PYGZsq{}n\PYGZsq{}} \PYG{k}{then}
+                 \PYG{n}{pile1} \PYG{o}{:=} \PYG{n+nc}{Caractere} \PYG{l+s+sc}{\PYGZsq{}\PYGZbs{}n\PYGZsq{}} \PYG{o}{::} \PYG{o}{!}\PYG{n}{pile1}
+               \PYG{k}{else} \PYG{n}{pile1} \PYG{o}{:=} \PYG{n+nc}{Caractere} \PYG{o}{!}\PYG{n}{c} \PYG{o}{::} \PYG{o}{!}\PYG{n}{pile1}\PYG{o}{;}
+               \PYG{n}{l} \PYG{o}{:=} \PYG{o}{!}\PYG{n}{c} \PYG{o}{::} \PYG{o}{!}\PYG{n}{l}\PYG{o}{)}\PYG{o}{;}
+        \PYG{n}{c} \PYG{o}{:=} \PYG{n}{pop} \PYG{n}{caracters}\PYG{o}{;}
+        \PYG{k}{if} \PYG{o}{!}\PYG{n}{ignore\PYGZus{}left} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0} \PYG{k}{then} \PYG{n}{ignore\PYGZus{}left} \PYG{o}{:=} \PYG{o}{!}\PYG{n}{ignore\PYGZus{}left} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}
+      \PYG{k}{done}\PYG{o}{;}
+      \PYG{n}{or\PYGZus{}reg} \PYG{o}{!}\PYG{n}{pile1}
+    \PYG{k}{with} \PYG{n+nc}{Empty\PYGZus{}pile} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{k}{raise} \PYG{n+nc}{Invalid\PYGZus{}syntax}
+  \PYG{k}{in}
+
+  \PYG{c}{(*}\PYG{c}{*}\PYG{c}{ fonction auxiliaire générale qui génère le regex à partir de la chaine,}
+\PYG{c}{      qui stocke au fur et à mesure dans la pile et qui ignore les caractères à}
+\PYG{c}{      effets lorsque ignore est à vrai }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{k}{rec} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{(}\PYG{n}{pile} \PYG{o}{:} \PYG{n}{regex} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{(}\PYG{n}{ignore} \PYG{o}{:} \PYG{k+kt}{bool}\PYG{o}{)} \PYG{o}{:} \PYG{n}{regex} \PYG{o}{=}
+    \PYG{c}{(*}\PYG{c}{ s\PYGZsq{}il n\PYGZsq{}y a plus rien a convertir, on concatène les expressions régulières}\PYG{c}{*)}
+    \PYG{k}{if} \PYG{n}{is\PYGZus{}empty} \PYG{n}{caracters} \PYG{k}{then} \PYG{n}{concat\PYGZus{}reg} \PYG{n}{pile}
+    \PYG{k}{else}
+      \PYG{k}{let} \PYG{n}{c} \PYG{o}{=} \PYG{n}{pop} \PYG{n}{caracters} \PYG{k}{in}
+      \PYG{k}{if} \PYG{n}{ignore} \PYG{k}{then}
+        \PYG{k}{if} \PYG{n}{c} \PYG{o}{=} \PYG{l+s+sc}{\PYGZsq{}n\PYGZsq{}} \PYG{k}{then} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{(}\PYG{n+nc}{Caractere} \PYG{l+s+sc}{\PYGZsq{}\PYGZbs{}n\PYGZsq{}} \PYG{o}{::} \PYG{n}{pile}\PYG{o}{)} \PYG{n+nb+bp}{false}
+        \PYG{k}{else} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{(}\PYG{n+nc}{Caractere} \PYG{n}{c} \PYG{o}{::} \PYG{n}{pile}\PYG{o}{)} \PYG{n+nb+bp}{false}
+      \PYG{k}{else}
+        \PYG{k}{match} \PYG{n}{c} \PYG{k}{with}
+        \PYG{o}{|} \PYG{l+s+sc}{\PYGZsq{}\PYGZbs{}\PYGZbs{}\PYGZsq{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{n}{pile} \PYG{n+nb+bp}{true}
+        \PYG{o}{|} \PYG{l+s+sc}{\PYGZsq{}(\PYGZsq{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{(}\PYG{n}{parenthesis} \PYG{n+nb+bp}{()} \PYG{o}{::} \PYG{n}{pile}\PYG{o}{)} \PYG{n+nb+bp}{false}
+        \PYG{o}{|} \PYG{l+s+sc}{\PYGZsq{}[\PYGZsq{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{(}\PYG{n}{crochet} \PYG{n+nb+bp}{()} \PYG{o}{::} \PYG{n}{pile}\PYG{o}{)} \PYG{n+nb+bp}{false}
+        \PYG{o}{|} \PYG{l+s+sc}{\PYGZsq{})\PYGZsq{}} \PYG{o}{|} \PYG{l+s+sc}{\PYGZsq{}]\PYGZsq{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{k}{raise} \PYG{n+nc}{Invalid\PYGZus{}syntax}
+        \PYG{o}{|} \PYG{l+s+sc}{\PYGZsq{}|\PYGZsq{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}
+            \PYG{k}{let} \PYG{n}{left} \PYG{o}{=} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{n+nb+bp}{[]} \PYG{n+nb+bp}{false} \PYG{k}{in}
+            \PYG{k}{match} \PYG{o}{(}\PYG{n}{pile}\PYG{o}{,} \PYG{n}{left}\PYG{o}{)} \PYG{k}{with}
+            \PYG{o}{|} \PYG{n+nb+bp}{[]}\PYG{o}{,} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{k}{raise} \PYG{n+nc}{Invalid\PYGZus{}syntax}
+            \PYG{o}{|} \PYG{o}{[} \PYG{n+nc}{Caractere} \PYG{n}{c} \PYG{o}{]}\PYG{o}{,} \PYG{n+nc}{AllChars} \PYG{o}{|} \PYG{o}{[} \PYG{n+nc}{AllChars} \PYG{o}{]}\PYG{o}{,} \PYG{n+nc}{Caractere} \PYG{n}{c} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                \PYG{k}{if} \PYG{n}{c} \PYG{o}{=} \PYG{l+s+sc}{\PYGZsq{}\PYGZbs{}n\PYGZsq{}} \PYG{k}{then}
+                  \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{[} \PYG{n+nc}{Ou} \PYG{o}{(}\PYG{n+nc}{Caractere} \PYG{n}{c}\PYG{o}{,} \PYG{n+nc}{AllChars}\PYG{o}{)} \PYG{o}{]} \PYG{n+nb+bp}{false}
+                \PYG{k}{else} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{[} \PYG{n+nc}{AllChars} \PYG{o}{]} \PYG{n+nb+bp}{false}
+            \PYG{o}{|} \PYG{n+nc}{Caractere} \PYG{n}{c} \PYG{o}{::} \PYG{n}{q}\PYG{o}{,} \PYG{n+nc}{AllChars} \PYG{o}{|} \PYG{n+nc}{AllChars} \PYG{o}{::} \PYG{n}{q}\PYG{o}{,} \PYG{n+nc}{Caractere} \PYG{n}{c} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                \PYG{k}{if} \PYG{n}{c} \PYG{o}{=} \PYG{l+s+sc}{\PYGZsq{}\PYGZbs{}n\PYGZsq{}} \PYG{k}{then}
+                  \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{(}\PYG{n+nc}{Ou} \PYG{o}{(}\PYG{n+nc}{Caractere} \PYG{n}{c}\PYG{o}{,} \PYG{n+nc}{AllChars}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q}\PYG{o}{)} \PYG{n+nb+bp}{false}
+                \PYG{k}{else} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{(}\PYG{n+nc}{AllChars} \PYG{o}{::} \PYG{n}{q}\PYG{o}{)} \PYG{n+nb+bp}{false}
+            \PYG{o}{|} \PYG{o}{[} \PYG{n+nc}{Range} \PYG{o}{(}\PYG{n}{d}\PYG{o}{,} \PYG{n}{f}\PYG{o}{)} \PYG{o}{]}\PYG{o}{,} \PYG{n+nc}{AllChars} \PYG{o}{|} \PYG{o}{[} \PYG{n+nc}{AllChars} \PYG{o}{]}\PYG{o}{,} \PYG{n+nc}{Range} \PYG{o}{(}\PYG{n}{d}\PYG{o}{,} \PYG{n}{f}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                \PYG{k}{if} \PYG{n}{int\PYGZus{}of\PYGZus{}char} \PYG{n}{d} \PYG{o}{\PYGZlt{}} \PYG{l+m+mi}{32} \PYG{o}{|}\PYG{o}{|} \PYG{n}{int\PYGZus{}of\PYGZus{}char} \PYG{n}{f} \PYG{o}{\PYGZlt{}} \PYG{l+m+mi}{32} \PYG{k}{then}
+                  \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{[} \PYG{n+nc}{Ou} \PYG{o}{(}\PYG{n+nc}{Range} \PYG{o}{(}\PYG{n}{d}\PYG{o}{,} \PYG{n}{f}\PYG{o}{)}\PYG{o}{,} \PYG{n+nc}{AllChars}\PYG{o}{)} \PYG{o}{]} \PYG{n+nb+bp}{false}
+                \PYG{k}{else} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{[} \PYG{n+nc}{AllChars} \PYG{o}{]} \PYG{n+nb+bp}{false}
+            \PYG{o}{|} \PYG{n+nc}{Range} \PYG{o}{(}\PYG{n}{d}\PYG{o}{,} \PYG{n}{f}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q}\PYG{o}{,} \PYG{n+nc}{AllChars} \PYG{o}{|} \PYG{n+nc}{AllChars} \PYG{o}{::} \PYG{n}{q}\PYG{o}{,} \PYG{n+nc}{Range} \PYG{o}{(}\PYG{n}{d}\PYG{o}{,} \PYG{n}{f}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                \PYG{k}{if} \PYG{n}{int\PYGZus{}of\PYGZus{}char} \PYG{n}{d} \PYG{o}{\PYGZlt{}} \PYG{l+m+mi}{32} \PYG{o}{|}\PYG{o}{|} \PYG{n}{int\PYGZus{}of\PYGZus{}char} \PYG{n}{f} \PYG{o}{\PYGZlt{}} \PYG{l+m+mi}{32} \PYG{k}{then}
+                  \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{(}\PYG{n+nc}{Ou} \PYG{o}{(}\PYG{n+nc}{Range} \PYG{o}{(}\PYG{n}{d}\PYG{o}{,} \PYG{n}{f}\PYG{o}{)}\PYG{o}{,} \PYG{n+nc}{AllChars}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q}\PYG{o}{)} \PYG{n+nb+bp}{false}
+                \PYG{k}{else} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{(}\PYG{n+nc}{AllChars} \PYG{o}{::} \PYG{n}{q}\PYG{o}{)} \PYG{n+nb+bp}{false}
+            \PYG{o}{|} \PYG{o}{[} \PYG{n}{x} \PYG{o}{]}\PYG{o}{,} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{[} \PYG{n+nc}{Ou} \PYG{o}{(}\PYG{n}{x}\PYG{o}{,} \PYG{n}{left}\PYG{o}{)} \PYG{o}{]} \PYG{n+nb+bp}{false}
+            \PYG{o}{|} \PYG{n}{x} \PYG{o}{::} \PYG{n}{q}\PYG{o}{,} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{(}\PYG{n+nc}{Ou} \PYG{o}{(}\PYG{n}{x}\PYG{o}{,} \PYG{n}{left}\PYG{o}{)} \PYG{o}{::} \PYG{n}{q}\PYG{o}{)} \PYG{n+nb+bp}{false}\PYG{o}{)}
+        \PYG{o}{|} \PYG{l+s+sc}{\PYGZsq{}\PYGZsh{}\PYGZsq{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}
+            \PYG{k}{match} \PYG{n}{pile} \PYG{k}{with}
+            \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{[} \PYG{n+nc}{Epsilon} \PYG{o}{]} \PYG{n+nb+bp}{false}
+            \PYG{o}{|} \PYG{n+nc}{Concat} \PYG{o}{(}\PYG{o}{\PYGZus{}}\PYG{o}{,} \PYG{o}{\PYGZus{}}\PYG{o}{)} \PYG{o}{::} \PYG{o}{\PYGZus{}}
+            \PYG{o}{|} \PYG{n+nc}{Caractere} \PYG{o}{\PYGZus{}} \PYG{o}{::} \PYG{o}{\PYGZus{}}
+            \PYG{o}{|} \PYG{n+nc}{Ou} \PYG{o}{(}\PYG{o}{\PYGZus{}}\PYG{o}{,} \PYG{o}{\PYGZus{}}\PYG{o}{)} \PYG{o}{::} \PYG{o}{\PYGZus{}}
+            \PYG{o}{|} \PYG{n+nc}{Range} \PYG{o}{(}\PYG{o}{\PYGZus{}}\PYG{o}{,} \PYG{o}{\PYGZus{}}\PYG{o}{)} \PYG{o}{::} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{n}{pile} \PYG{n+nb+bp}{false}
+            \PYG{o}{|} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{(}\PYG{n+nc}{Epsilon} \PYG{o}{::} \PYG{n}{pile}\PYG{o}{)} \PYG{n+nb+bp}{false}\PYG{o}{)}
+        \PYG{o}{|} \PYG{l+s+sc}{\PYGZsq{}+\PYGZsq{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}
+            \PYG{k}{match} \PYG{n}{pile} \PYG{k}{with}
+            \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{k}{raise} \PYG{n+nc}{Invalid\PYGZus{}syntax}
+            \PYG{o}{|} \PYG{n+nc}{Epsilon} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{n}{pile} \PYG{n+nb+bp}{false}
+            \PYG{o}{|} \PYG{o}{[} \PYG{n}{x} \PYG{o}{]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{[} \PYG{n+nc}{UnPlus} \PYG{n}{x} \PYG{o}{]} \PYG{n+nb+bp}{false}
+            \PYG{o}{|} \PYG{n}{x} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{(}\PYG{n+nc}{UnPlus} \PYG{n}{x} \PYG{o}{::} \PYG{n}{q}\PYG{o}{)} \PYG{n+nb+bp}{false}\PYG{o}{)}
+        \PYG{o}{|} \PYG{l+s+sc}{\PYGZsq{}*\PYGZsq{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}
+            \PYG{k}{match} \PYG{n}{pile} \PYG{k}{with}
+            \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{k}{raise} \PYG{n+nc}{Invalid\PYGZus{}syntax}
+            \PYG{o}{|} \PYG{n+nc}{Epsilon} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{n}{pile} \PYG{n+nb+bp}{false}
+            \PYG{o}{|} \PYG{o}{[} \PYG{n}{x} \PYG{o}{]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{[} \PYG{n+nc}{ZeroPlus} \PYG{n}{x} \PYG{o}{]} \PYG{n+nb+bp}{false}
+            \PYG{o}{|} \PYG{n}{x} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{(}\PYG{n+nc}{ZeroPlus} \PYG{n}{x} \PYG{o}{::} \PYG{n}{q}\PYG{o}{)} \PYG{n+nb+bp}{false}\PYG{o}{)}
+        \PYG{o}{|} \PYG{l+s+sc}{\PYGZsq{}.\PYGZsq{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{(}\PYG{n+nc}{AllChars} \PYG{o}{::} \PYG{n}{pile}\PYG{o}{)} \PYG{n+nb+bp}{false}
+        \PYG{o}{|} \PYG{l+s+sc}{\PYGZsq{}?\PYGZsq{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}
+            \PYG{k}{match} \PYG{n}{pile} \PYG{k}{with}
+            \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{k}{raise} \PYG{n+nc}{Invalid\PYGZus{}syntax}
+            \PYG{o}{|} \PYG{n+nc}{Epsilon} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{n}{pile} \PYG{n+nb+bp}{false}
+            \PYG{o}{|} \PYG{o}{[} \PYG{n}{x} \PYG{o}{]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{[} \PYG{n+nc}{Facultatif} \PYG{n}{x} \PYG{o}{]} \PYG{n+nb+bp}{false}
+            \PYG{o}{|} \PYG{n}{x} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{(}\PYG{n+nc}{Facultatif} \PYG{n}{x} \PYG{o}{::} \PYG{n}{q}\PYG{o}{)} \PYG{n+nb+bp}{false}\PYG{o}{)}
+        \PYG{o}{|} \PYG{l+s+sc}{\PYGZsq{}\PYGZti{}\PYGZsq{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}
+            \PYG{k}{let} \PYG{n}{c} \PYG{o}{=} \PYG{n}{ref} \PYG{o}{(}\PYG{n}{pop} \PYG{n}{caracters}\PYG{o}{)} \PYG{k}{in}
+            \PYG{k}{match} \PYG{o}{!}\PYG{n}{c} \PYG{k}{with}
+            \PYG{o}{|} \PYG{l+s+sc}{\PYGZsq{}[\PYGZsq{}} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                \PYG{k}{let} \PYG{n}{reg} \PYG{o}{=} \PYG{n}{crochet} \PYG{n+nb+bp}{()} \PYG{k}{in}
+                \PYG{k}{let} \PYG{k}{rec} \PYG{n}{recon\PYGZus{}crochet} \PYG{n}{e} \PYG{o}{=}
+                  \PYG{k}{match} \PYG{n}{e} \PYG{k}{with}
+                  \PYG{o}{|} \PYG{n+nc}{Caractere} \PYG{n}{c} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                      \PYG{n}{gen\PYGZus{}regex\PYGZus{}2}
+                        \PYG{o}{(}\PYG{n+nc}{AllBut} \PYG{o}{(}\PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{init} \PYG{l+m+mi}{128} \PYG{o}{(}\PYG{o}{(} \PYG{o}{\PYGZlt{}}\PYG{o}{\PYGZgt{}} \PYG{o}{)} \PYG{o}{(}\PYG{n}{int\PYGZus{}of\PYGZus{}char} \PYG{n}{c}\PYG{o}{)}\PYG{o}{)}\PYG{o}{)}
+                        \PYG{o}{::} \PYG{n}{pile}\PYG{o}{)}
+                        \PYG{n+nb+bp}{false}
+                  \PYG{o}{|} \PYG{n+nc}{Range} \PYG{o}{(}\PYG{n}{b1}\PYG{o}{,} \PYG{n}{b2}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                      \PYG{n}{gen\PYGZus{}regex\PYGZus{}2}
+                        \PYG{o}{(}\PYG{n+nc}{AllBut}
+                           \PYG{o}{(}\PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{init} \PYG{l+m+mi}{128} \PYG{o}{(}\PYG{k}{fun} \PYG{n}{i} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                                \PYG{n}{i} \PYG{o}{\PYGZlt{}} \PYG{n}{int\PYGZus{}of\PYGZus{}char} \PYG{n}{b1} \PYG{o}{|}\PYG{o}{|} \PYG{n}{i} \PYG{o}{\PYGZgt{}} \PYG{n}{int\PYGZus{}of\PYGZus{}char} \PYG{n}{b2}\PYG{o}{)}\PYG{o}{)}
+                        \PYG{o}{::} \PYG{n}{pile}\PYG{o}{)}
+                        \PYG{n+nb+bp}{false}
+                  \PYG{o}{|} \PYG{n+nc}{Ou} \PYG{o}{(}\PYG{n}{e1}\PYG{o}{,} \PYG{n}{e2}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}
+                      \PYG{k}{match} \PYG{o}{(}\PYG{n}{recon\PYGZus{}crochet} \PYG{n}{e1}\PYG{o}{,} \PYG{n}{recon\PYGZus{}crochet} \PYG{n}{e2}\PYG{o}{)} \PYG{k}{with}
+                      \PYG{o}{|} \PYG{n+nc}{AllBut} \PYG{n}{l1}\PYG{o}{,} \PYG{n+nc}{AllBut} \PYG{n}{l2} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                          \PYG{n}{gen\PYGZus{}regex\PYGZus{}2}
+                            \PYG{o}{(}\PYG{n+nc}{AllBut} \PYG{o}{(}\PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{map2} \PYG{o}{(} \PYG{o}{\PYGZam{}\PYGZam{}} \PYG{o}{)} \PYG{n}{l1} \PYG{n}{l2}\PYG{o}{)} \PYG{o}{::} \PYG{n}{pile}\PYG{o}{)}
+                            \PYG{n+nb+bp}{false}
+                      \PYG{o}{|} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{impossible}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}
+                  \PYG{o}{|} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{k}{raise} \PYG{n+nc}{Invalid\PYGZus{}syntax}
+                \PYG{k}{in}
+                \PYG{n}{recon\PYGZus{}crochet} \PYG{n}{reg}
+            \PYG{o}{|} \PYG{l+s+sc}{\PYGZsq{}(\PYGZsq{}} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                \PYG{k}{let} \PYG{n}{reg} \PYG{o}{=} \PYG{n}{parenthesis} \PYG{n+nb+bp}{()} \PYG{k}{in}
+                \PYG{k}{let} \PYG{k}{rec} \PYG{n}{recon\PYGZus{}parntethis} \PYG{n}{e} \PYG{o}{=}
+                  \PYG{k}{match} \PYG{n}{e} \PYG{k}{with}
+                  \PYG{o}{|} \PYG{n+nc}{Caractere} \PYG{n}{c} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                      \PYG{n}{gen\PYGZus{}regex\PYGZus{}2}
+                        \PYG{o}{(}\PYG{n+nc}{AllBut} \PYG{o}{(}\PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{init} \PYG{l+m+mi}{128} \PYG{o}{(}\PYG{o}{(} \PYG{o}{\PYGZlt{}}\PYG{o}{\PYGZgt{}} \PYG{o}{)} \PYG{o}{(}\PYG{n}{int\PYGZus{}of\PYGZus{}char} \PYG{n}{c}\PYG{o}{)}\PYG{o}{)}\PYG{o}{)}
+                        \PYG{o}{::} \PYG{n}{pile}\PYG{o}{)}
+                        \PYG{n+nb+bp}{false}
+                  \PYG{o}{|} \PYG{n+nc}{Range} \PYG{o}{(}\PYG{n}{b1}\PYG{o}{,} \PYG{n}{b2}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                      \PYG{n}{gen\PYGZus{}regex\PYGZus{}2}
+                        \PYG{o}{(}\PYG{n+nc}{AllBut}
+                           \PYG{o}{(}\PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{init} \PYG{l+m+mi}{128} \PYG{o}{(}\PYG{k}{fun} \PYG{n}{i} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                                \PYG{n}{i} \PYG{o}{\PYGZlt{}} \PYG{n}{int\PYGZus{}of\PYGZus{}char} \PYG{n}{b1} \PYG{o}{|}\PYG{o}{|} \PYG{n}{i} \PYG{o}{\PYGZgt{}} \PYG{n}{int\PYGZus{}of\PYGZus{}char} \PYG{n}{b2}\PYG{o}{)}\PYG{o}{)}
+                        \PYG{o}{::} \PYG{n}{pile}\PYG{o}{)}
+                        \PYG{n+nb+bp}{false}
+                  \PYG{o}{|} \PYG{n+nc}{AllChars} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                      \PYG{n}{gen\PYGZus{}regex\PYGZus{}2}
+                        \PYG{o}{(}\PYG{n+nc}{AllBut} \PYG{o}{(}\PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{init} \PYG{l+m+mi}{128} \PYG{o}{(}\PYG{o}{(} \PYG{o}{\PYGZlt{}} \PYG{o}{)} \PYG{l+m+mi}{32}\PYG{o}{)}\PYG{o}{)} \PYG{o}{::} \PYG{n}{pile}\PYG{o}{)}
+                        \PYG{n+nb+bp}{false}
+                  \PYG{o}{|} \PYG{n+nc}{Ou} \PYG{o}{(}\PYG{n}{e1}\PYG{o}{,} \PYG{n}{e2}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}
+                      \PYG{k}{match} \PYG{o}{(}\PYG{n}{recon\PYGZus{}parntethis} \PYG{n}{e1}\PYG{o}{,} \PYG{n}{recon\PYGZus{}parntethis} \PYG{n}{e2}\PYG{o}{)} \PYG{k}{with}
+                      \PYG{o}{|} \PYG{n+nc}{AllBut} \PYG{n}{l1}\PYG{o}{,} \PYG{n+nc}{AllBut} \PYG{n}{l2} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                          \PYG{n}{gen\PYGZus{}regex\PYGZus{}2}
+                            \PYG{o}{(}\PYG{n+nc}{AllBut} \PYG{o}{(}\PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{map2} \PYG{o}{(} \PYG{o}{\PYGZam{}\PYGZam{}} \PYG{o}{)} \PYG{n}{l1} \PYG{n}{l2}\PYG{o}{)} \PYG{o}{::} \PYG{n}{pile}\PYG{o}{)}
+                            \PYG{n+nb+bp}{false}
+                      \PYG{o}{|} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{impossible}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}
+                  \PYG{o}{|} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{k}{raise} \PYG{n+nc}{Invalid\PYGZus{}syntax}
+                \PYG{k}{in}
+                \PYG{n}{recon\PYGZus{}parntethis} \PYG{n}{reg}
+            \PYG{o}{|} \PYG{l+s+sc}{\PYGZsq{}\PYGZbs{}\PYGZbs{}\PYGZsq{}} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                \PYG{n}{gen\PYGZus{}regex\PYGZus{}2}
+                  \PYG{o}{(}\PYG{n+nc}{AllBut}
+                     \PYG{o}{(}\PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{init} \PYG{l+m+mi}{128} \PYG{o}{(}\PYG{o}{(} \PYG{o}{\PYGZlt{}}\PYG{o}{\PYGZgt{}} \PYG{o}{)} \PYG{o}{(}\PYG{n}{int\PYGZus{}of\PYGZus{}char} \PYG{o}{(}\PYG{n}{pop} \PYG{n}{caracters}\PYG{o}{)}\PYG{o}{)}\PYG{o}{)}\PYG{o}{)}
+                  \PYG{o}{::} \PYG{n}{pile}\PYG{o}{)}
+                  \PYG{n+nb+bp}{false}
+            \PYG{o}{|} \PYG{l+s+sc}{\PYGZsq{})\PYGZsq{}} \PYG{o}{|} \PYG{l+s+sc}{\PYGZsq{}]\PYGZsq{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{k}{raise} \PYG{n+nc}{Invalid\PYGZus{}syntax}
+            \PYG{o}{|} \PYG{n}{c1} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                \PYG{n}{gen\PYGZus{}regex\PYGZus{}2}
+                  \PYG{o}{(}\PYG{n+nc}{AllBut} \PYG{o}{(}\PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{init} \PYG{l+m+mi}{128} \PYG{o}{(}\PYG{o}{(} \PYG{o}{\PYGZlt{}}\PYG{o}{\PYGZgt{}} \PYG{o}{)} \PYG{o}{(}\PYG{n}{int\PYGZus{}of\PYGZus{}char} \PYG{n}{c1}\PYG{o}{)}\PYG{o}{)}\PYG{o}{)} \PYG{o}{::} \PYG{n}{pile}\PYG{o}{)}
+                  \PYG{n+nb+bp}{false}\PYG{o}{)}
+        \PYG{o}{|} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{o}{(}\PYG{n+nc}{Caractere} \PYG{n}{c} \PYG{o}{::} \PYG{n}{pile}\PYG{o}{)} \PYG{n+nb+bp}{false}
+  \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{reg} \PYG{o}{=} \PYG{n}{gen\PYGZus{}regex\PYGZus{}2} \PYG{n+nb+bp}{[]} \PYG{n+nb+bp}{false} \PYG{k}{in}
+  \PYG{k}{if} \PYG{n}{not} \PYG{o}{(}\PYG{n}{is\PYGZus{}empty} \PYG{n}{caracters}\PYG{o}{)} \PYG{k}{then} \PYG{k}{raise} \PYG{n+nc}{Invalid\PYGZus{}syntax} \PYG{k}{else} \PYG{n}{reg}
+\end{MintedVerbatim}

@@ -1,0 +1,215 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{open} \PYG{n+nc}{Generate\PYGZus{}grammar}
+
+\PYG{k}{let} \PYG{n}{repr\PYGZus{}of\PYGZus{}terminal} \PYG{o}{(}\PYG{o}{(}\PYG{o}{\PYGZus{}}\PYG{o}{,} \PYG{n}{p}\PYG{o}{)} \PYG{o}{:} \PYG{n}{rule}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{string} \PYG{o}{=} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{nth} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{nth} \PYG{n}{p} \PYG{l+m+mi}{0}\PYG{o}{)} \PYG{l+m+mi}{0}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ enlève les guillemets simples de l\PYGZsq{}expresion terminale [r] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{printable\PYGZus{}repr\PYGZus{}of\PYGZus{}terminal} \PYG{o}{(}\PYG{n}{r} \PYG{o}{:} \PYG{n}{rule}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{string} \PYG{o}{=}
+  \PYG{k}{let} \PYG{n}{s} \PYG{o}{=} \PYG{n}{repr\PYGZus{}of\PYGZus{}terminal} \PYG{n}{r} \PYG{k}{in}
+  \PYG{k}{if} \PYG{n}{s}\PYG{o}{.}\PYG{o}{[}\PYG{l+m+mi}{0}\PYG{o}{]} \PYG{o}{=} \PYG{l+s+sc}{\PYGZsq{}\PYGZbs{}\PYGZsq{}\PYGZsq{}} \PYG{k}{then} \PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{sub} \PYG{n}{s} \PYG{l+m+mi}{1} \PYG{o}{(}\PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{length} \PYG{n}{s} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{2}\PYG{o}{)}
+  \PYG{k}{else} \PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{sub} \PYG{n}{s} \PYG{l+m+mi}{2} \PYG{o}{(}\PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{length} \PYG{n}{s} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{3}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{ array qui permet de convertir rapidement une lettre en la disjonction entre la minnuscule et la majuscule }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{case\PYGZus{}arr} \PYG{o}{=}
+  \PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{init} \PYG{l+m+mi}{26} \PYG{o}{(}\PYG{k}{fun} \PYG{n}{i} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{(}\PYG{l+s+s2}{\PYGZdq{}}
+      \PYG{o}{\PYGZca{}} \PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{make} \PYG{l+m+mi}{1} \PYG{o}{(}\PYG{n}{char\PYGZus{}of\PYGZus{}int} \PYG{o}{(}\PYG{l+m+mi}{97} \PYG{o}{+} \PYG{n}{i}\PYG{o}{)}\PYG{o}{)}
+      \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{|}\PYG{l+s+s2}{\PYGZdq{}}
+      \PYG{o}{\PYGZca{}} \PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{make} \PYG{l+m+mi}{1} \PYG{o}{(}\PYG{n}{char\PYGZus{}of\PYGZus{}int} \PYG{o}{(}\PYG{l+m+mi}{65} \PYG{o}{+} \PYG{n}{i}\PYG{o}{)}\PYG{o}{)}
+      \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{)}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ convertit la chaîne [s] en une liste de caractères }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{char\PYGZus{}list\PYGZus{}of\PYGZus{}string} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{k+kt}{string}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{char} \PYG{k+kt}{list} \PYG{o}{=} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{of\PYGZus{}seq} \PYG{o}{(}\PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{to\PYGZus{}seq} \PYG{n}{s}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ récupère le symbole safe de la liste de règles [term], le seul qui peut être}
+\PYG{c}{    remplacé par un autre }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{get\PYGZus{}safe\PYGZus{}symbol} \PYG{o}{(}\PYG{n}{term} \PYG{o}{:} \PYG{n}{rule} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{string} \PYG{o}{=}
+  \PYG{n}{fst}
+    \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{nth}
+       \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{filter} \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{r} \PYG{o}{:} \PYG{n}{rule}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}\PYG{n}{repr\PYGZus{}of\PYGZus{}terminal} \PYG{n}{r}\PYG{o}{)}\PYG{o}{.}\PYG{o}{[}\PYG{l+m+mi}{0}\PYG{o}{]} \PYG{o}{=} \PYG{l+s+sc}{\PYGZsq{}s\PYGZsq{}}\PYG{o}{)} \PYG{n}{term}\PYG{o}{)}
+       \PYG{l+m+mi}{0}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ récupère la liste des symboles non donnés à LL1 dans la liste [term] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{get\PYGZus{}unparsed\PYGZus{}symbol} \PYG{o}{(}\PYG{n}{term} \PYG{o}{:} \PYG{n}{rule} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{string} \PYG{k+kt}{list} \PYG{o}{=}
+  \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{map} \PYG{n}{fst}
+    \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{filter} \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{r} \PYG{o}{:} \PYG{n}{rule}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}\PYG{n}{repr\PYGZus{}of\PYGZus{}terminal} \PYG{n}{r}\PYG{o}{)}\PYG{o}{.}\PYG{o}{[}\PYG{l+m+mi}{0}\PYG{o}{]} \PYG{o}{=} \PYG{l+s+sc}{\PYGZsq{}\PYGZus{}\PYGZsq{}}\PYG{o}{)} \PYG{n}{term}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ transforme la chaîne [s] pour ne plus être sensible à la casse lorsque}
+\PYG{c}{    transformée en expression régulière }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{make\PYGZus{}non\PYGZus{}case\PYGZus{}sentive} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{k+kt}{string}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{string} \PYG{o}{=}
+  \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{fold\PYGZus{}left}
+    \PYG{o}{(}\PYG{k}{fun} \PYG{n}{acc} \PYG{n}{x} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{k}{if} \PYG{n}{alphanumerical\PYGZus{}min} \PYG{n}{x} \PYG{k}{then} \PYG{n}{acc} \PYG{o}{\PYGZca{}} \PYG{n}{case\PYGZus{}arr}\PYG{o}{.}\PYG{o}{(}\PYG{n}{int\PYGZus{}of\PYGZus{}char} \PYG{n}{x} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{97}\PYG{o}{)}
+      \PYG{k}{else} \PYG{n}{acc} \PYG{o}{\PYGZca{}} \PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{make} \PYG{l+m+mi}{1} \PYG{n}{x}\PYG{o}{)}
+    \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{(}\PYG{n}{char\PYGZus{}list\PYGZus{}of\PYGZus{}string} \PYG{n}{s}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ crée le fichier [f\PYGZus{}name] qui va créer l\PYGZsq{}automate pour une utilisation}
+\PYG{c}{    ultérieure dans [writing\PYGZus{}file\PYGZus{}name] à partir de la grammaire [g] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{generate\PYGZus{}file\PYGZus{}lexer} \PYG{o}{(}\PYG{n}{g} \PYG{o}{:} \PYG{n}{grammar}\PYG{o}{)} \PYG{o}{(}\PYG{n}{f\PYGZus{}name} \PYG{o}{:} \PYG{k+kt}{string}\PYG{o}{)}
+    \PYG{o}{(}\PYG{n}{writing\PYGZus{}file\PYGZus{}name} \PYG{o}{:} \PYG{k+kt}{string}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{unit} \PYG{o}{=}
+  \PYG{k}{let} \PYG{n}{file} \PYG{o}{=} \PYG{n}{open\PYGZus{}out} \PYG{n}{f\PYGZus{}name} \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{t} \PYG{o}{=} \PYG{n}{terminals} \PYG{n}{g} \PYG{k}{in}
+  \PYG{n}{print\PYGZus{}endline} \PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Generating the }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{f\PYGZus{}name} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ file...}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{;}
+
+  \PYG{c}{(*}\PYG{c}{ création de l\PYGZsq{}automate }\PYG{c}{*)}
+  \PYG{n}{output\PYGZus{}string} \PYG{n}{file} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{open Regex}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{open Automates}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{open Symbols}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+  \PYG{n}{output\PYGZus{}string} \PYG{n}{file}
+    \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{     let syntax\PYGZus{}automate\PYGZus{}det = determinise (enleve\PYGZus{}epsilon\PYGZus{}trans (ou\PYGZus{}automates }\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{     (List.map (fun (s, t) \PYGZhy{}\PYGZgt{} automate\PYGZus{}gen (gen\PYGZus{}regex s) t) [}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+  \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter}
+    \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{s}\PYG{o}{,} \PYG{n}{p}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n}{output\PYGZus{}string} \PYG{n}{file}
+        \PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{(}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}}
+        \PYG{o}{\PYGZca{}} \PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{escaped}
+            \PYG{o}{(}\PYG{k}{let} \PYG{n}{s} \PYG{o}{=} \PYG{n}{printable\PYGZus{}repr\PYGZus{}of\PYGZus{}terminal} \PYG{o}{(}\PYG{n}{s}\PYG{o}{,} \PYG{n}{p}\PYG{o}{)} \PYG{k}{in}
+             \PYG{k}{if} \PYG{o}{(}\PYG{n}{repr\PYGZus{}of\PYGZus{}terminal} \PYG{o}{(}\PYG{n}{s}\PYG{o}{,} \PYG{n}{p}\PYG{o}{)}\PYG{o}{)}\PYG{o}{.}\PYG{o}{[}\PYG{l+m+mi}{0}\PYG{o}{]} \PYG{o}{=} \PYG{l+s+sc}{\PYGZsq{}\PYGZbs{}\PYGZsq{}\PYGZsq{}} \PYG{k}{then}
+               \PYG{n}{make\PYGZus{}non\PYGZus{}case\PYGZus{}sentive} \PYG{n}{s}
+             \PYG{k}{else} \PYG{n}{s}\PYG{o}{)}
+        \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{, }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{s} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{); }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{)}
+    \PYG{n}{t}\PYG{o}{;}
+  \PYG{n}{output\PYGZus{}string} \PYG{n}{file} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{])))}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+
+  \PYG{c}{(*}\PYG{c}{ écriture de l\PYGZsq{}automate prégénéré }\PYG{c}{*)}
+  \PYG{n}{output\PYGZus{}string} \PYG{n}{file}
+    \PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{let () =}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{      print\PYGZus{}string }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{generating prebuild automaton...}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{; print\PYGZus{}newline();}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{      let file = open\PYGZus{}out }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{writing\PYGZus{}file\PYGZus{}name}
+   \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{ in}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{      output\PYGZus{}string file }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{open Automates}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{n}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{nlet syntax\PYGZus{}automate\PYGZus{}det = }\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{      \PYGZob{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{n    nodes = [}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{;}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{      output\PYGZus{}string file (String.concat }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{; }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{ (List.map string\PYGZus{}of\PYGZus{}int }\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{      syntax\PYGZus{}automate\PYGZus{}det.nodes));}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{      output\PYGZus{}string file (}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{];}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{n    debut = }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{\PYGZca{} string\PYGZus{}of\PYGZus{}int }\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{      syntax\PYGZus{}automate\PYGZus{}det.debut \PYGZca{}}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{;}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{n    fin = [|}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{);}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{      output\PYGZus{}string file (String.concat }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{; }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{ (List.map (fun x \PYGZhy{}\PYGZgt{} match x }\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{      with | None \PYGZhy{}\PYGZgt{} }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{None}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{ | Some e \PYGZhy{}\PYGZgt{} }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{Some }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{\PYGZca{}string\PYGZus{}of\PYGZus{}terminal e) }\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{      (Array.to\PYGZus{}list syntax\PYGZus{}automate\PYGZus{}det.fin))); output\PYGZus{}string file }\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{      }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{|];}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{n    transitions = [|}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{n        }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{;}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{      output\PYGZus{}string file (String.concat }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{;}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{n        }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{ (Array.to\PYGZus{}list }\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{      (Array.map (fun sub\PYGZus{}arr \PYGZhy{}\PYGZgt{} }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{[|}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{\PYGZca{}(String.concat }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{; }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{ (Array.to\PYGZus{}list }\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{      (Array.map string\PYGZus{}of\PYGZus{}int sub\PYGZus{}arr)))\PYGZca{}}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{|]}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{) }\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{      syntax\PYGZus{}automate\PYGZus{}det.transitions)));}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{      output\PYGZus{}string file }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{n    |]}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{n\PYGZcb{}}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{;}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{      flush file;}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{      close\PYGZus{}out file;}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{      print\PYGZus{}string }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{automaton pregenerating done}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{; print\PYGZus{}newline()}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{;}
+
+  \PYG{n}{flush} \PYG{n}{file}\PYG{o}{;}
+  \PYG{n}{close\PYGZus{}out} \PYG{n}{file}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ crée le fichier [f\PYGZus{}name] qui va contenir l\PYGZsq{}ensemble des terminaux et non}
+\PYG{c}{    terminaux de la grammaire [g] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{generate\PYGZus{}file\PYGZus{}symbols} \PYG{o}{(}\PYG{n}{g} \PYG{o}{:} \PYG{n}{grammar}\PYG{o}{)} \PYG{o}{(}\PYG{n}{f\PYGZus{}name} \PYG{o}{:} \PYG{k+kt}{string}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{unit} \PYG{o}{=}
+  \PYG{k}{let} \PYG{n}{t} \PYG{o}{=}
+    \PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{EOF}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{,} \PYG{o}{[} \PYG{o}{[} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZsq{}End of file\PYGZsq{}}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{]} \PYG{o}{]}\PYG{o}{)}
+    \PYG{o}{::} \PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{E}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{,} \PYG{o}{[} \PYG{o}{[} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZsq{}Epsilon\PYGZsq{}}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{]} \PYG{o}{]}\PYG{o}{)} \PYG{o}{::} \PYG{n}{terminals} \PYG{n}{g}
+  \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{nt} \PYG{o}{=} \PYG{n}{non\PYGZus{}terminals} \PYG{n}{g} \PYG{k}{in}
+
+  \PYG{n}{print\PYGZus{}endline} \PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Generating the }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{f\PYGZus{}name} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ file...}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{;}
+  \PYG{k}{let} \PYG{n}{output\PYGZus{}file} \PYG{o}{=} \PYG{n}{open\PYGZus{}out} \PYG{n}{f\PYGZus{}name} \PYG{k}{in}
+
+  \PYG{c}{(*}\PYG{c}{ ajout des terminaux }\PYG{c}{*)}
+  \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{type terminal =}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+  \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter}
+    \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{symbol}\PYG{o}{,} \PYG{o}{\PYGZus{}}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file} \PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{  | }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{symbol} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{)}
+    \PYG{n}{t}\PYG{o}{;}
+  \PYG{c}{(*}\PYG{c}{ ajout des non terminaux}\PYG{c}{*)}
+  \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{type non\PYGZus{}terminal =}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+  \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter}
+    \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{symbol}\PYG{o}{,} \PYG{o}{\PYGZus{}}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file} \PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{  | }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{symbol} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{)}
+    \PYG{n}{nt}\PYG{o}{;}
+
+  \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file}
+    \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{type symbol = | Terminal of terminal | NonTerminal of non\PYGZus{}terminal}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+  \PYG{c}{(*}\PYG{c}{ ajoute le symbole safe }\PYG{c}{*)}
+  \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file} \PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{let safe\PYGZus{}token = }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{get\PYGZus{}safe\PYGZus{}symbol} \PYG{n}{t} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{;}
+  \PYG{c}{(*}\PYG{c}{ ajoute les tokens non utilisés par LL1 }\PYG{c}{*)}
+  \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{let unparsed\PYGZus{}tokens = [}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+  \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter}
+    \PYG{o}{(}\PYG{k}{fun} \PYG{n}{x} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file} \PYG{o}{(}\PYG{n}{x} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{; }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{)}
+    \PYG{o}{(}\PYG{n}{get\PYGZus{}unparsed\PYGZus{}symbol} \PYG{n}{t}\PYG{o}{)}\PYG{o}{;}
+  \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{]}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+
+  \PYG{c}{(*}\PYG{c}{ Fonctions utiles :}\PYG{c}{*)}
+  \PYG{c}{(*}\PYG{c}{ représentation en expression régulière des terminaux }\PYG{c}{*)}
+  \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file}
+    \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{let repr\PYGZus{}of\PYGZus{}terminal (t : terminal) : string =}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{  match t with}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+  \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter}
+    \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{s}\PYG{o}{,} \PYG{n}{p}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file}
+        \PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{  | }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{s} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ \PYGZhy{}\PYGZgt{} }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}}
+        \PYG{o}{\PYGZca{}} \PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{escaped} \PYG{o}{(}\PYG{n}{printable\PYGZus{}repr\PYGZus{}of\PYGZus{}terminal} \PYG{o}{(}\PYG{n}{s}\PYG{o}{,} \PYG{n}{p}\PYG{o}{)}\PYG{o}{)}
+        \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{)}
+    \PYG{n}{t}\PYG{o}{;}
+  \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+
+  \PYG{c}{(*}\PYG{c}{ représentation en chaîne des terminaux }\PYG{c}{*)}
+  \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file}
+    \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{let string\PYGZus{}of\PYGZus{}terminal (t : terminal) : string =}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{    match t with}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+  \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter}
+    \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{s}\PYG{o}{,} \PYG{o}{\PYGZus{}}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file} \PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{    | }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{s} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ \PYGZhy{}\PYGZgt{} }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{s} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{)}
+    \PYG{n}{t}\PYG{o}{;}
+  \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+
+  \PYG{c}{(*}\PYG{c}{ représentation en chaîne des non terminaux }\PYG{c}{*)}
+  \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file}
+    \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{let string\PYGZus{}of\PYGZus{}non\PYGZus{}terminal (nt : non\PYGZus{}terminal) : string =}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZbs{}}
+\PYG{l+s+s2}{    }\PYG{err}{\PYGZbs{}}\PYG{l+s+s2}{  match nt with}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+  \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter}
+    \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{s}\PYG{o}{,} \PYG{o}{\PYGZus{}}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file} \PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{  | }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{s} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ \PYGZhy{}\PYGZgt{} }\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{s} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{)}
+    \PYG{n}{nt}\PYG{o}{;}
+
+  \PYG{n}{flush} \PYG{n}{output\PYGZus{}file}\PYG{o}{;}
+  \PYG{n}{close\PYGZus{}out} \PYG{n}{output\PYGZus{}file}
+
+\PYG{k}{let} \PYG{n}{generate\PYGZus{}file\PYGZus{}grammar} \PYG{o}{(}\PYG{n}{g} \PYG{o}{:} \PYG{n}{grammar}\PYG{o}{)} \PYG{o}{(}\PYG{n}{f\PYGZus{}name} \PYG{o}{:} \PYG{k+kt}{string}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{unit} \PYG{o}{=}
+  \PYG{k}{let} \PYG{n}{nt} \PYG{o}{=} \PYG{n}{non\PYGZus{}terminals} \PYG{n}{g} \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{non\PYGZus{}terminals\PYGZus{}set} \PYG{o}{=} \PYG{n+nn}{StringSet}\PYG{p}{.}\PYG{n}{of\PYGZus{}list} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{map} \PYG{n}{fst} \PYG{n}{nt}\PYG{o}{)} \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{type\PYGZus{}string\PYGZus{}of\PYGZus{}symbol} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{k+kt}{string}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{string} \PYG{o}{=}
+    \PYG{k}{if} \PYG{n+nn}{StringSet}\PYG{p}{.}\PYG{n}{mem} \PYG{n}{s} \PYG{n}{non\PYGZus{}terminals\PYGZus{}set} \PYG{k}{then} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{NonTerminal}\PYG{l+s+s2}{\PYGZdq{}} \PYG{k}{else} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Terminal}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{k}{in}
+
+  \PYG{n}{print\PYGZus{}endline} \PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Generating the }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{f\PYGZus{}name} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ file...}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{;}
+  \PYG{k}{let} \PYG{n}{output\PYGZus{}file} \PYG{o}{=} \PYG{n}{open\PYGZus{}out} \PYG{n}{f\PYGZus{}name} \PYG{k}{in}
+  \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{open Grammar\PYGZus{}functions}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{open Symbols}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+
+  \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{let grammar = \PYGZob{} }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+  \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file}
+    \PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{start\PYGZus{}symbol = NonTerminal }\PYG{l+s+s2}{\PYGZdq{}}
+    \PYG{o}{\PYGZca{}} \PYG{n}{fst} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{nth} \PYG{n}{nt} \PYG{l+m+mi}{0}\PYG{o}{)}
+    \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{;}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{rules\PYGZus{}htbl = Hashtbl.of\PYGZus{}seq (List.to\PYGZus{}seq [}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{;}
+  \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter}
+    \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{o}{(}\PYG{n}{s}\PYG{o}{,} \PYG{n}{p}\PYG{o}{)} \PYG{o}{:} \PYG{n}{rule}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file} \PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{(}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{type\PYGZus{}string\PYGZus{}of\PYGZus{}symbol} \PYG{n}{s} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{s} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{,[}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{;}
+      \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter}
+        \PYG{o}{(}\PYG{k}{fun} \PYG{n}{pattern} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+          \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{[}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+          \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter}
+            \PYG{o}{(}\PYG{k}{fun} \PYG{n}{s} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+              \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file} \PYG{o}{(}\PYG{n}{type\PYGZus{}string\PYGZus{}of\PYGZus{}symbol} \PYG{n}{s} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{s} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{;}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{)}
+            \PYG{n}{pattern}\PYG{o}{;}
+          \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{];}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}
+        \PYG{n}{p}\PYG{o}{;}
+      \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{]);}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}
+    \PYG{n}{nt}\PYG{o}{;}
+  \PYG{n}{output\PYGZus{}string} \PYG{n}{output\PYGZus{}file} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{])\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+
+  \PYG{n}{flush} \PYG{n}{output\PYGZus{}file}\PYG{o}{;}
+  \PYG{n}{close\PYGZus{}out} \PYG{n}{output\PYGZus{}file}
+
+\PYG{k}{let} \PYG{n}{generate\PYGZus{}files} \PYG{o}{(}\PYG{n}{g\PYGZus{}path} \PYG{o}{:} \PYG{k+kt}{string}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{unit} \PYG{o}{=}
+  \PYG{k}{let} \PYG{n}{g} \PYG{o}{=} \PYG{n}{get\PYGZus{}grammar} \PYG{n}{g\PYGZus{}path} \PYG{k}{in}
+  \PYG{n+nn}{Printf}\PYG{p}{.}\PYG{n}{printf} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Grammar length \PYGZpc{}d}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{length} \PYG{n}{g}\PYG{o}{)}\PYG{o}{;}
+  \PYG{n}{generate\PYGZus{}file\PYGZus{}symbols} \PYG{n}{g} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{symbols.ml}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+  \PYG{n}{generate\PYGZus{}file\PYGZus{}lexer} \PYG{n}{g} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{prebuild/build\PYGZus{}automaton.ml}\PYG{l+s+s2}{\PYGZdq{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{src/det\PYGZus{}automaton.ml}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+  \PYG{n}{generate\PYGZus{}file\PYGZus{}grammar} \PYG{n}{g} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{grammar.ml}\PYG{l+s+s2}{\PYGZdq{}}
+
+\PYG{k}{let} \PYG{o}{\PYGZus{}} \PYG{o}{=}
+  \PYG{n+nn}{Sys}\PYG{p}{.}\PYG{n}{chdir} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{src/}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+  \PYG{n}{generate\PYGZus{}files} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{../grammar/Our\PYGZus{}Grammar.txt}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+  \PYG{n}{print\PYGZus{}endline} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Finished generating, exiting.}\PYG{l+s+s2}{\PYGZdq{}}
+\end{MintedVerbatim}
