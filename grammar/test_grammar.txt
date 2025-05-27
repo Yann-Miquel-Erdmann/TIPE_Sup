@@ -1,9 +1,0 @@
-Xe -> Ae Be Ce
-Ae -> A_e | E
-Be -> B_e | E
-Ce -> C_e | D_e
-Ie -> s'd'
-A_e -> 'a'
-B_e -> 'b'
-C_e -> 'c'
-D_e -> 'd'

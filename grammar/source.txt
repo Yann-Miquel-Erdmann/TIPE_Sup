@@ -1,2 +1,0 @@
-https://github.com/slebok/zoo/blob/master/zoo/fortran/f90/derricks/fetched/Fortran90.sdf
-https://slebok.github.io/zoo/#fortran_f90_derricks_fetched
