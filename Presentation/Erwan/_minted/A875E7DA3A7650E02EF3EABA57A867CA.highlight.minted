@@ -1,0 +1,32 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{type} \PYG{n}{string\PYGZus{}or\PYGZus{}string\PYGZus{}list} \PYG{o}{=} \PYG{n+nc}{S} \PYG{k}{of} \PYG{k+kt}{string} \PYG{o}{|} \PYG{n+nc}{L} \PYG{k}{of} \PYG{n}{string\PYGZus{}or\PYGZus{}string\PYGZus{}list} \PYG{k+kt}{list}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ crée une chaîne de [n] tabulations }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{tabs\PYGZus{}to\PYGZus{}string} \PYG{o}{(}\PYG{n}{n} \PYG{o}{:} \PYG{k+kt}{int}\PYG{o}{)} \PYG{o}{:} \PYG{n}{string\PYGZus{}or\PYGZus{}string\PYGZus{}list} \PYG{o}{=} \PYG{n+nc}{S} \PYG{o}{(}\PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{make} \PYG{n}{n} \PYG{l+s+sc}{\PYGZsq{}\PYGZbs{}t\PYGZsq{}}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ crée une chaîne de [n] retours à la ligne }\PYG{c}{*)}
+\PYG{k}{let} \PYG{k}{rec} \PYG{n}{n\PYGZus{}new\PYGZus{}lines} \PYG{o}{(}\PYG{n}{n} \PYG{o}{:} \PYG{k+kt}{int}\PYG{o}{)} \PYG{o}{:} \PYG{n}{string\PYGZus{}or\PYGZus{}string\PYGZus{}list} \PYG{o}{=} \PYG{n+nc}{S} \PYG{o}{(}\PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{make} \PYG{n}{n} \PYG{l+s+sc}{\PYGZsq{}\PYGZbs{}n\PYGZsq{}}\PYG{o}{)}
+
+
+\PYG{k}{let} \PYG{n}{string\PYGZus{}of\PYGZus{}string\PYGZus{}or\PYGZus{}string\PYGZus{}list} \PYG{o}{(}\PYG{n}{sosl} \PYG{o}{:} \PYG{n}{string\PYGZus{}or\PYGZus{}string\PYGZus{}list}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{string} \PYG{o}{=}
+  \PYG{k}{let} \PYG{k}{rec} \PYG{n}{aux} \PYG{o}{(}\PYG{n}{sosl} \PYG{o}{:} \PYG{n}{string\PYGZus{}or\PYGZus{}string\PYGZus{}list}\PYG{o}{)} \PYG{o}{(}\PYG{n}{acc} \PYG{o}{:} \PYG{k+kt}{string} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{string} \PYG{k+kt}{list} \PYG{o}{=}
+    \PYG{k}{match} \PYG{n}{sosl} \PYG{k}{with}
+    \PYG{o}{|} \PYG{n+nc}{S} \PYG{n}{s} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{s} \PYG{o}{::} \PYG{n}{acc}
+    \PYG{o}{|} \PYG{n+nc}{L} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{acc}
+    \PYG{o}{|} \PYG{n+nc}{L} \PYG{o}{(}\PYG{n}{e} \PYG{o}{::} \PYG{n}{q}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{k}{let} \PYG{n}{acc2} \PYG{o}{=} \PYG{n}{aux} \PYG{n}{e} \PYG{n}{acc} \PYG{k}{in}
+        \PYG{n}{aux} \PYG{o}{(}\PYG{n+nc}{L} \PYG{n}{q}\PYG{o}{)} \PYG{n}{acc2}
+  \PYG{k}{in}
+  \PYG{n+nn}{String}\PYG{p}{.}\PYG{n}{concat} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{rev} \PYG{o}{(}\PYG{n}{aux} \PYG{n}{sosl} \PYG{n+nb+bp}{[]}\PYG{o}{)}\PYG{o}{)}
+
+
+\PYG{k}{let} \PYG{k}{rec} \PYG{n}{last\PYGZus{}of\PYGZus{}list} \PYG{o}{(}\PYG{n}{l}\PYG{o}{:} \PYG{k}{\PYGZsq{}}\PYG{n}{a} \PYG{k+kt}{list}\PYG{o}{)}\PYG{o}{:} \PYG{k}{\PYGZsq{}}\PYG{n}{a} \PYG{o}{=}   
+  \PYG{k}{match} \PYG{n}{l} \PYG{k}{with} 
+  \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Liste vide }\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n}{e}\PYG{o}{::}\PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{e}
+  \PYG{o}{|} \PYG{n}{e}\PYG{o}{::}\PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{last\PYGZus{}of\PYGZus{}list} \PYG{n}{q}
+
+\PYG{k}{let} \PYG{n}{print\PYGZus{}sosl} \PYG{o}{(}\PYG{n}{sosl}\PYG{o}{:} \PYG{n}{string\PYGZus{}or\PYGZus{}string\PYGZus{}list}\PYG{o}{)}\PYG{o}{:} \PYG{k+kt}{unit} \PYG{o}{=} 
+  \PYG{n}{print\PYGZus{}string} \PYG{o}{(}\PYG{n}{string\PYGZus{}of\PYGZus{}string\PYGZus{}or\PYGZus{}string\PYGZus{}list} \PYG{n}{sosl}\PYG{o}{)}\PYG{o}{;}
+  \PYG{n}{print\PYGZus{}newline} \PYG{n+nb+bp}{()}
+\end{MintedVerbatim}

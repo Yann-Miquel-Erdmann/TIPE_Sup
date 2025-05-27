@@ -1,0 +1,282 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{open} \PYG{n+nc}{Grammar\PYGZus{}functions}
+\PYG{k}{open} \PYG{n+nc}{Symbols}
+
+\PYG{k}{module} \PYG{n+nc}{SymbolSet} \PYG{o}{=} \PYG{n+nn}{Set}\PYG{p}{.}\PYG{n+nc}{Make} \PYG{o}{(}\PYG{k}{struct}
+  \PYG{k}{type} \PYG{n}{t} \PYG{o}{=} \PYG{n}{symbol}
+
+  \PYG{k}{let} \PYG{n}{compare} \PYG{o}{=} \PYG{n}{compare}
+\PYG{k}{end}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{ arbre de syntaxe }\PYG{c}{(}\PYG{c}{non abstraite}\PYG{c}{)}\PYG{c}{ }\PYG{c}{*)}
+\PYG{k}{type} \PYG{n}{at} \PYG{o}{=} \PYG{n+nc}{Noeud} \PYG{k}{of} \PYG{o}{(}\PYG{n}{symbol} \PYG{o}{*} \PYG{k+kt}{string}\PYG{o}{)} \PYG{o}{*} \PYG{n}{at} \PYG{k+kt}{list}
+\PYG{k}{type} \PYG{n}{symbol\PYGZus{}SS\PYGZus{}Htbl} \PYG{o}{=} \PYG{o}{(}\PYG{n}{symbol}\PYG{o}{,} \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{t}\PYG{o}{)} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{t}
+
+\PYG{k}{let} \PYG{n}{print\PYGZus{}SymbolSet} \PYG{o}{(}\PYG{n}{ss} \PYG{o}{:} \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{t}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{unit} \PYG{o}{=}
+  \PYG{n}{print\PYGZus{}endline} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{SymbolSet(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+  \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{iter}
+    \PYG{o}{(}\PYG{k}{fun} \PYG{n}{s} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n}{print\PYGZus{}symbol} \PYG{n}{s}\PYG{o}{;}
+      \PYG{n}{print\PYGZus{}newline} \PYG{n+nb+bp}{()}\PYG{o}{)}
+    \PYG{n}{ss}\PYG{o}{;}
+  \PYG{n}{print\PYGZus{}endline} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{)}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}
+
+\PYG{k}{let} \PYG{n}{print\PYGZus{}SymbolSet\PYGZus{}Hastable} \PYG{o}{(}\PYG{n}{h} \PYG{o}{:} \PYG{n}{symbol\PYGZus{}SS\PYGZus{}Htbl}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{unit} \PYG{o}{=}
+  \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{iter}
+    \PYG{o}{(}\PYG{k}{fun} \PYG{n}{s} \PYG{n}{ss} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n}{print\PYGZus{}string} \PYG{o}{(}\PYG{n}{string\PYGZus{}of\PYGZus{}symbol} \PYG{n}{s} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ \PYGZhy{}\PYGZgt{} }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{;}
+      \PYG{n}{print\PYGZus{}SymbolSet} \PYG{n}{ss}\PYG{o}{;}
+      \PYG{n}{print\PYGZus{}newline} \PYG{n+nb+bp}{()}\PYG{o}{)}
+    \PYG{n}{h}
+
+\PYG{c}{(*}\PYG{c}{ returns a hashtable containing the first set of every non terminal }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{first} \PYG{o}{(}\PYG{n}{g} \PYG{o}{:} \PYG{n}{grammar}\PYG{o}{)} \PYG{o}{:} \PYG{n}{symbol\PYGZus{}SS\PYGZus{}Htbl} \PYG{o}{=}
+  \PYG{c}{(*}\PYG{c}{ prog dyn, filling first\PYGZus{}h }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{n}{first\PYGZus{}h} \PYG{o}{=} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{create} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{length} \PYG{n}{g}\PYG{o}{.}\PYG{n}{rules\PYGZus{}htbl}\PYG{o}{)} \PYG{k}{in}
+
+  \PYG{k}{let} \PYG{k}{rec} \PYG{n}{first\PYGZus{}of\PYGZus{}rule} \PYG{o}{(}\PYG{o}{(}\PYG{n}{s}\PYG{o}{,} \PYG{n}{patterns}\PYG{o}{)} \PYG{o}{:} \PYG{n}{rule}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{unit} \PYG{o}{=}
+    \PYG{k}{if} \PYG{n}{is\PYGZus{}terminal} \PYG{o}{(}\PYG{n}{s}\PYG{o}{,} \PYG{n}{patterns}\PYG{o}{)} \PYG{k}{then}
+      \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{add} \PYG{n}{first\PYGZus{}h} \PYG{n}{s} \PYG{o}{(}\PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{singleton} \PYG{n}{s}\PYG{o}{)}
+    \PYG{k}{else} \PYG{k}{if}
+      \PYG{c}{(*}\PYG{c}{ checking if already computed }\PYG{c}{*)}
+      \PYG{n}{not} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{mem} \PYG{n}{first\PYGZus{}h} \PYG{n}{s}\PYG{o}{)}
+    \PYG{k}{then}
+      \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{add} \PYG{n}{first\PYGZus{}h} \PYG{n}{s}
+        \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{fold\PYGZus{}left}
+           \PYG{o}{(}\PYG{k}{fun} \PYG{n}{acc} \PYG{n}{d} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+             \PYG{k}{let} \PYG{n}{f} \PYG{o}{=} \PYG{n}{first\PYGZus{}of\PYGZus{}pattern} \PYG{n}{s} \PYG{n}{d} \PYG{k}{in}
+             \PYG{k}{if} \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{disjoint} \PYG{n}{f} \PYG{n}{acc} \PYG{k}{then} \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{union} \PYG{n}{f} \PYG{n}{acc}
+             \PYG{k}{else} \PYG{o}{(}
+               \PYG{n}{print\PYGZus{}symbol} \PYG{n}{s}\PYG{o}{;}
+               \PYG{n}{print\PYGZus{}newline} \PYG{n+nb+bp}{()}\PYG{o}{;}
+               \PYG{n}{print\PYGZus{}SymbolSet} \PYG{n}{f}\PYG{o}{;}
+               \PYG{n}{prerr\PYGZus{}newline} \PYG{n+nb+bp}{()}\PYG{o}{;}
+               \PYG{n}{print\PYGZus{}SymbolSet} \PYG{n}{acc}\PYG{o}{;}
+               \PYG{n}{print\PYGZus{}newline} \PYG{n+nb+bp}{()}\PYG{o}{;}
+               \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{the first set is not disjoined}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{)}
+           \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{empty} \PYG{n}{patterns}\PYG{o}{)}
+    \PYG{k}{else} \PYG{n+nb+bp}{()}
+  \PYG{k}{and} \PYG{n}{first\PYGZus{}of\PYGZus{}pattern} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{n}{symbol}\PYG{o}{)} \PYG{o}{(}\PYG{n}{d} \PYG{o}{:} \PYG{n}{pattern}\PYG{o}{)} \PYG{o}{:} \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{t} \PYG{o}{=}
+    \PYG{k}{match} \PYG{n}{d} \PYG{k}{with}
+    \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{empty pattern}\PYG{l+s+s2}{\PYGZdq{}}
+    \PYG{o}{|} \PYG{n+nc}{Terminal} \PYG{n}{t} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{singleton} \PYG{o}{(}\PYG{n+nc}{Terminal} \PYG{n}{t}\PYG{o}{)}
+    \PYG{o}{|} \PYG{n}{fst\PYGZus{}symbol} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{first\PYGZus{}of\PYGZus{}rule} \PYG{o}{(}\PYG{n}{fst\PYGZus{}symbol}\PYG{o}{,} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{g}\PYG{o}{.}\PYG{n}{rules\PYGZus{}htbl} \PYG{n}{fst\PYGZus{}symbol}\PYG{o}{)}\PYG{o}{;}
+        \PYG{k}{if}
+          \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{mem} \PYG{o}{(}\PYG{n+nc}{Terminal} \PYG{n+nc}{E}\PYG{o}{)} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{first\PYGZus{}h} \PYG{n}{fst\PYGZus{}symbol}\PYG{o}{)}
+          \PYG{o}{\PYGZam{}\PYGZam{}} \PYG{n}{q} \PYG{o}{\PYGZlt{}}\PYG{o}{\PYGZgt{}} \PYG{n+nb+bp}{[]}
+        \PYG{k}{then}
+          \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{union} \PYG{o}{(}\PYG{n}{first\PYGZus{}of\PYGZus{}pattern} \PYG{n}{s} \PYG{n}{q}\PYG{o}{)}
+            \PYG{o}{(}\PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{remove} \PYG{o}{(}\PYG{n+nc}{Terminal} \PYG{n+nc}{E}\PYG{o}{)} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{first\PYGZus{}h} \PYG{n}{fst\PYGZus{}symbol}\PYG{o}{)}\PYG{o}{)}
+        \PYG{k}{else} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{first\PYGZus{}h} \PYG{n}{fst\PYGZus{}symbol}
+  \PYG{k}{in}
+  \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{iter} \PYG{o}{(}\PYG{k}{fun} \PYG{n}{name} \PYG{n}{pattern} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{first\PYGZus{}of\PYGZus{}rule} \PYG{o}{(}\PYG{n}{name}\PYG{o}{,} \PYG{n}{pattern}\PYG{o}{)}\PYG{o}{)} \PYG{n}{g}\PYG{o}{.}\PYG{n}{rules\PYGZus{}htbl}\PYG{o}{;}
+  \PYG{n}{first\PYGZus{}h}
+
+\PYG{k}{let} \PYG{k}{rec} \PYG{n}{first\PYGZus{}of\PYGZus{}pattern} \PYG{o}{(}\PYG{n}{fst\PYGZus{}ss\PYGZus{}htbl} \PYG{o}{:} \PYG{n}{symbol\PYGZus{}SS\PYGZus{}Htbl}\PYG{o}{)} \PYG{o}{(}\PYG{n}{p} \PYG{o}{:} \PYG{n}{pattern}\PYG{o}{)} \PYG{o}{:}
+    \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{t} \PYG{o}{=}
+  \PYG{c}{(*}\PYG{c}{ print\PYGZus{}endline }\PYG{c}{(}\PYG{c}{\PYGZdq{}first\PYGZus{}of\PYGZus{}pattern \PYGZdq{}}\PYG{c}{)}\PYG{c}{; print\PYGZus{}patterns [p];print\PYGZus{}newline}\PYG{c}{(}\PYG{c}{)}\PYG{c}{; }\PYG{c}{*)}
+  \PYG{k}{match} \PYG{n}{p} \PYG{k}{with}
+  \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{empty pattern in first\PYGZus{}of\PYGZus{}pattern}\PYG{l+s+s2}{\PYGZdq{}}
+  \PYG{o}{|} \PYG{n+nc}{Terminal} \PYG{n}{t} \PYG{o}{::} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{singleton} \PYG{o}{(}\PYG{n+nc}{Terminal} \PYG{n}{t}\PYG{o}{)}
+  \PYG{o}{|} \PYG{n+nc}{NonTerminal} \PYG{n}{nt} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{k}{if}
+        \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{mem} \PYG{o}{(}\PYG{n+nc}{Terminal} \PYG{n+nc}{E}\PYG{o}{)} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{fst\PYGZus{}ss\PYGZus{}htbl} \PYG{o}{(}\PYG{n+nc}{NonTerminal} \PYG{n}{nt}\PYG{o}{)}\PYG{o}{)}
+        \PYG{o}{\PYGZam{}\PYGZam{}} \PYG{n}{q} \PYG{o}{\PYGZlt{}}\PYG{o}{\PYGZgt{}} \PYG{n+nb+bp}{[]}
+      \PYG{k}{then}
+        \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{union}
+          \PYG{o}{(}\PYG{n}{first\PYGZus{}of\PYGZus{}pattern} \PYG{n}{fst\PYGZus{}ss\PYGZus{}htbl} \PYG{n}{q}\PYG{o}{)}
+          \PYG{o}{(}\PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{remove} \PYG{o}{(}\PYG{n+nc}{Terminal} \PYG{n+nc}{E}\PYG{o}{)}
+             \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{fst\PYGZus{}ss\PYGZus{}htbl} \PYG{o}{(}\PYG{n+nc}{NonTerminal} \PYG{n}{nt}\PYG{o}{)}\PYG{o}{)}\PYG{o}{)}
+      \PYG{k}{else} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{fst\PYGZus{}ss\PYGZus{}htbl} \PYG{o}{(}\PYG{n+nc}{NonTerminal} \PYG{n}{nt}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{ returns a hashtable containing the follow set of every non terminal }\PYG{c}{(}\PYG{c}{all the terminals that can occur after a rule}\PYG{c}{)}\PYG{c}{ }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{follow} \PYG{o}{(}\PYG{n}{g} \PYG{o}{:} \PYG{n}{grammar}\PYG{o}{)} \PYG{o}{:} \PYG{n}{symbol\PYGZus{}SS\PYGZus{}Htbl} \PYG{o}{=}
+  \PYG{c}{(*}\PYG{c}{ contains the terminals following the key in the hashtable }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{n}{follow\PYGZus{}non\PYGZus{}terminal} \PYG{o}{=}
+    \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{of\PYGZus{}seq}
+      \PYG{o}{(}\PYG{n+nn}{Seq}\PYG{p}{.}\PYG{n}{map}
+         \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{name}\PYG{o}{,} \PYG{n}{pattern}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}\PYG{n}{name}\PYG{o}{,} \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{empty}\PYG{o}{)}\PYG{o}{)}
+         \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{to\PYGZus{}seq} \PYG{n}{g}\PYG{o}{.}\PYG{n}{rules\PYGZus{}htbl}\PYG{o}{)}\PYG{o}{)}
+  \PYG{k}{in}
+
+  \PYG{c}{(*}\PYG{c}{ contains the rule names in which the key appears in at the end }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{n}{parent\PYGZus{}on\PYGZus{}end} \PYG{o}{=}
+    \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{of\PYGZus{}seq}
+      \PYG{o}{(}\PYG{n+nn}{Seq}\PYG{p}{.}\PYG{n}{map}
+         \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{name}\PYG{o}{,} \PYG{n}{pattern}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{o}{(}\PYG{n}{name}\PYG{o}{,} \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{empty}\PYG{o}{)}\PYG{o}{)}
+         \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{to\PYGZus{}seq} \PYG{n}{g}\PYG{o}{.}\PYG{n}{rules\PYGZus{}htbl}\PYG{o}{)}\PYG{o}{)}
+  \PYG{k}{in}
+
+  \PYG{c}{(*}\PYG{c}{ fills the follow\PYGZus{}non\PYGZus{}terminal and parent\PYGZus{}on\PYGZus{}end }\PYG{c}{*)}
+  \PYG{k}{let} \PYG{k}{rec} \PYG{n}{pattern\PYGZus{}follow} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{n}{symbol}\PYG{o}{)} \PYG{o}{(}\PYG{n}{d} \PYG{o}{:} \PYG{n}{pattern}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{unit} \PYG{o}{=}
+    \PYG{k}{match} \PYG{n}{d} \PYG{k}{with}
+    \PYG{o}{|} \PYG{n+nc}{NonTerminal} \PYG{n}{s1} \PYG{o}{::} \PYG{n}{s2} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{replace} \PYG{n}{follow\PYGZus{}non\PYGZus{}terminal} \PYG{o}{(}\PYG{n+nc}{NonTerminal} \PYG{n}{s1}\PYG{o}{)}
+          \PYG{o}{(}\PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{add} \PYG{n}{s2} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{follow\PYGZus{}non\PYGZus{}terminal} \PYG{o}{(}\PYG{n+nc}{NonTerminal} \PYG{n}{s1}\PYG{o}{)}\PYG{o}{)}\PYG{o}{)}\PYG{o}{;}
+        \PYG{n}{pattern\PYGZus{}follow} \PYG{n}{s} \PYG{o}{(}\PYG{n}{s2} \PYG{o}{::} \PYG{n}{q}\PYG{o}{)}
+    \PYG{o}{|} \PYG{n+nc}{Terminal} \PYG{n}{s1} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{pattern\PYGZus{}follow} \PYG{n}{s} \PYG{n}{q}
+    \PYG{o}{|} \PYG{n+nc}{NonTerminal} \PYG{n}{s1} \PYG{o}{::} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{k}{if} \PYG{n+nc}{NonTerminal} \PYG{n}{s1} \PYG{o}{\PYGZlt{}}\PYG{o}{\PYGZgt{}} \PYG{n}{s} \PYG{o}{\PYGZam{}\PYGZam{}} \PYG{n+nc}{NonTerminal} \PYG{n}{s1} \PYG{o}{\PYGZlt{}}\PYG{o}{\PYGZgt{}} \PYG{n+nc}{Terminal} \PYG{n+nc}{E} \PYG{k}{then}
+          \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{replace} \PYG{n}{parent\PYGZus{}on\PYGZus{}end} \PYG{o}{(}\PYG{n+nc}{NonTerminal} \PYG{n}{s1}\PYG{o}{)}
+            \PYG{o}{(}\PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{add} \PYG{n}{s} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{parent\PYGZus{}on\PYGZus{}end} \PYG{o}{(}\PYG{n+nc}{NonTerminal} \PYG{n}{s1}\PYG{o}{)}\PYG{o}{)}\PYG{o}{)}
+        \PYG{k}{else} \PYG{n+nb+bp}{()}
+    \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb+bp}{()}
+  \PYG{k}{in}
+
+  \PYG{k}{let} \PYG{n}{patterns\PYGZus{}follow} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{n}{symbol}\PYG{o}{)} \PYG{o}{(}\PYG{n}{patterns} \PYG{o}{:} \PYG{n}{pattern} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{unit} \PYG{o}{=}
+    \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter} \PYG{o}{(}\PYG{n}{pattern\PYGZus{}follow} \PYG{n}{s}\PYG{o}{)} \PYG{n}{patterns}
+  \PYG{k}{in}
+  \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{iter} \PYG{n}{patterns\PYGZus{}follow} \PYG{n}{g}\PYG{o}{.}\PYG{n}{rules\PYGZus{}htbl}\PYG{o}{;}
+
+  \PYG{k}{let} \PYG{n}{first\PYGZus{}h} \PYG{o}{=} \PYG{n}{first} \PYG{n}{g} \PYG{k}{in}
+  \PYG{c}{(*}\PYG{c}{ contains the terminals that can appear after a key in the grammar}\PYG{c}{*)}
+  \PYG{k}{let} \PYG{n}{follow\PYGZus{}h} \PYG{o}{=} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{create} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{length} \PYG{n}{first\PYGZus{}h}\PYG{o}{)} \PYG{k}{in}
+
+  \PYG{k}{let} \PYG{k}{rec} \PYG{n}{union\PYGZus{}and\PYGZus{}next\PYGZus{}on\PYGZus{}epsilon} \PYG{o}{(}\PYG{n}{next\PYGZus{}hashtable} \PYG{o}{:} \PYG{n}{symbol\PYGZus{}SS\PYGZus{}Htbl}\PYG{o}{)}
+      \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{n}{symbol}\PYG{o}{)} \PYG{o}{(}\PYG{n}{acc} \PYG{o}{:} \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{t}\PYG{o}{)} \PYG{o}{:} \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{t} \PYG{o}{=}
+    \PYG{k}{if} \PYG{n}{is\PYGZus{}non\PYGZus{}terminal\PYGZus{}symbol} \PYG{n}{s} \PYG{k}{then}
+      \PYG{k}{if} \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{mem} \PYG{o}{(}\PYG{n+nc}{Terminal} \PYG{n+nc}{E}\PYG{o}{)} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{next\PYGZus{}hashtable} \PYG{n}{s}\PYG{o}{)} \PYG{k}{then} \PYG{o}{(}
+        \PYG{n}{follow\PYGZus{}of\PYGZus{}symbol} \PYG{n}{s}\PYG{o}{;}
+        \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{remove} \PYG{o}{(}\PYG{n+nc}{Terminal} \PYG{n+nc}{E}\PYG{o}{)}
+          \PYG{o}{(}\PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{union} \PYG{n}{acc}
+             \PYG{o}{(}\PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{union} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{follow\PYGZus{}h} \PYG{n}{s}\PYG{o}{)}
+                \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{next\PYGZus{}hashtable} \PYG{n}{s}\PYG{o}{)}\PYG{o}{)}\PYG{o}{)}\PYG{o}{)}
+      \PYG{k}{else} \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{union} \PYG{n}{acc} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{next\PYGZus{}hashtable} \PYG{n}{s}\PYG{o}{)}
+    \PYG{k}{else} \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{singleton} \PYG{n}{s}
+  \PYG{k}{and} \PYG{n}{follow\PYGZus{}of\PYGZus{}symbol} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{n}{symbol}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{unit} \PYG{o}{=}
+    \PYG{c}{(*}\PYG{c}{ checking if already computed }\PYG{c}{*)}
+    \PYG{k}{if} \PYG{n}{not} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{mem} \PYG{n}{follow\PYGZus{}h} \PYG{n}{s}\PYG{o}{)} \PYG{k}{then}
+      \PYG{k}{let} \PYG{n}{follow\PYGZus{}non\PYGZus{}terminal\PYGZus{}set} \PYG{o}{=}
+        \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{fold}
+          \PYG{o}{(}\PYG{n}{union\PYGZus{}and\PYGZus{}next\PYGZus{}on\PYGZus{}epsilon} \PYG{n}{first\PYGZus{}h}\PYG{o}{)}
+          \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{follow\PYGZus{}non\PYGZus{}terminal} \PYG{n}{s}\PYG{o}{)}
+          \PYG{o}{(}\PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{singleton} \PYG{o}{(}\PYG{n+nc}{Terminal} \PYG{n+nc}{EOF}\PYG{o}{)}\PYG{o}{)}
+      \PYG{k}{in}
+      \PYG{k}{let} \PYG{n}{follow\PYGZus{}parent\PYGZus{}on\PYGZus{}end\PYGZus{}set} \PYG{o}{=}
+        \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{fold}
+          \PYG{o}{(}\PYG{k}{fun} \PYG{n}{s} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+            \PYG{n}{follow\PYGZus{}of\PYGZus{}symbol} \PYG{n}{s}\PYG{o}{;}
+            \PYG{n}{union\PYGZus{}and\PYGZus{}next\PYGZus{}on\PYGZus{}epsilon} \PYG{n}{follow\PYGZus{}h} \PYG{n}{s}\PYG{o}{)}
+          \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{parent\PYGZus{}on\PYGZus{}end} \PYG{n}{s}\PYG{o}{)}
+          \PYG{o}{(}\PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{singleton} \PYG{o}{(}\PYG{n+nc}{Terminal} \PYG{n+nc}{EOF}\PYG{o}{)}\PYG{o}{)}
+      \PYG{k}{in}
+
+      \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{replace} \PYG{n}{follow\PYGZus{}h} \PYG{n}{s}
+        \PYG{o}{(}\PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{union} \PYG{n}{follow\PYGZus{}non\PYGZus{}terminal\PYGZus{}set} \PYG{n}{follow\PYGZus{}parent\PYGZus{}on\PYGZus{}end\PYGZus{}set}\PYG{o}{)}
+    \PYG{k}{else} \PYG{n+nb+bp}{()}
+  \PYG{k}{in}
+  \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{iter} \PYG{o}{(}\PYG{k}{fun} \PYG{n}{s} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{follow\PYGZus{}of\PYGZus{}symbol} \PYG{n}{s}\PYG{o}{)} \PYG{n}{g}\PYG{o}{.}\PYG{n}{rules\PYGZus{}htbl}\PYG{o}{;}
+  \PYG{n}{follow\PYGZus{}h}
+
+\PYG{k}{let} \PYG{n}{analyse\PYGZus{}LL1\PYGZus{}of\PYGZus{}symbol} \PYG{o}{(}\PYG{n}{g} \PYG{o}{:} \PYG{n}{grammar}\PYG{o}{)} \PYG{o}{(}\PYG{n}{text} \PYG{o}{:} \PYG{o}{(}\PYG{n}{symbol} \PYG{o}{*} \PYG{k+kt}{string}\PYG{o}{)} \PYG{k+kt}{list}\PYG{o}{)}
+    \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{n}{symbol}\PYG{o}{)} \PYG{o}{:} \PYG{n}{at} \PYG{o}{*} \PYG{o}{(}\PYG{n}{symbol} \PYG{o}{*} \PYG{k+kt}{string}\PYG{o}{)} \PYG{k+kt}{list} \PYG{o}{=}
+  \PYG{k}{let} \PYG{n}{follow\PYGZus{}sshtbl} \PYG{o}{=} \PYG{n}{follow} \PYG{n}{g} \PYG{k}{in}
+  \PYG{k}{let} \PYG{n}{first\PYGZus{}sshtbl} \PYG{o}{=} \PYG{n}{first} \PYG{n}{g} \PYG{k}{in}
+
+  \PYG{k}{let} \PYG{k}{rec} \PYG{n}{analyse\PYGZus{}LL1\PYGZus{}of\PYGZus{}pattern} \PYG{o}{(}\PYG{n}{text} \PYG{o}{:} \PYG{o}{(}\PYG{n}{symbol} \PYG{o}{*} \PYG{k+kt}{string}\PYG{o}{)} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{n}{symbol}\PYG{o}{)}
+      \PYG{o}{(}\PYG{n}{p} \PYG{o}{:} \PYG{n}{pattern}\PYG{o}{)} \PYG{o}{:} \PYG{n}{at} \PYG{o}{*} \PYG{o}{(}\PYG{n}{symbol} \PYG{o}{*} \PYG{k+kt}{string}\PYG{o}{)} \PYG{k+kt}{list} \PYG{o}{=}
+    \PYG{c}{(*}\PYG{c}{ print\PYGZus{}endline \PYGZdq{}analyse\PYGZus{}LL1\PYGZus{}of\PYGZus{}pattern\PYGZdq{}; }\PYG{c}{*)}
+    \PYG{k}{if} \PYG{n}{p} \PYG{o}{=} \PYG{o}{[} \PYG{n+nc}{Terminal} \PYG{n+nc}{E} \PYG{o}{]} \PYG{k}{then}
+      \PYG{o}{(}\PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{o}{(}\PYG{n}{s}\PYG{o}{,} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{,} \PYG{o}{[} \PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{o}{(}\PYG{n+nc}{Terminal} \PYG{n+nc}{E}\PYG{o}{,} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{o}{]}\PYG{o}{)}\PYG{o}{,} \PYG{n}{text}\PYG{o}{)}
+    \PYG{k}{else}
+      \PYG{k}{let} \PYG{n}{txt} \PYG{o}{=} \PYG{n}{ref} \PYG{n}{text} \PYG{k}{in}
+      \PYG{k}{let} \PYG{n}{t} \PYG{o}{=}
+        \PYG{n+nc}{Noeud}
+          \PYG{o}{(} \PYG{o}{(}\PYG{n}{s}\PYG{o}{,} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{,}
+            \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{map}
+              \PYG{o}{(}\PYG{k}{fun} \PYG{o}{(}\PYG{n}{s\PYGZus{}p} \PYG{o}{:} \PYG{n}{symbol}\PYG{o}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                \PYG{k}{let} \PYG{n}{tree}\PYG{o}{,} \PYG{n}{txt\PYGZsq{}} \PYG{o}{=} \PYG{n}{analyse\PYGZus{}LL1\PYGZus{}of\PYGZus{}symbol\PYGZus{}aux} \PYG{o}{!}\PYG{n}{txt} \PYG{n}{s\PYGZus{}p} \PYG{k}{in}
+                \PYG{n}{txt} \PYG{o}{:=} \PYG{n}{txt\PYGZsq{}}\PYG{o}{;}
+                \PYG{n}{tree}\PYG{o}{)}
+              \PYG{n}{p} \PYG{o}{)}
+      \PYG{k}{in}
+      \PYG{o}{(}\PYG{n}{t}\PYG{o}{,} \PYG{o}{!}\PYG{n}{txt}\PYG{o}{)}
+  \PYG{k}{and} \PYG{n}{analyse\PYGZus{}LL1\PYGZus{}of\PYGZus{}symbol\PYGZus{}aux} \PYG{o}{(}\PYG{n}{text} \PYG{o}{:} \PYG{o}{(}\PYG{n}{symbol} \PYG{o}{*} \PYG{k+kt}{string}\PYG{o}{)} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{n}{symbol}\PYG{o}{)} \PYG{o}{:}
+      \PYG{n}{at} \PYG{o}{*} \PYG{o}{(}\PYG{n}{symbol} \PYG{o}{*} \PYG{k+kt}{string}\PYG{o}{)} \PYG{k+kt}{list} \PYG{o}{=}
+    \PYG{c}{(*}\PYG{c}{ print\PYGZus{}endline }\PYG{c}{(}\PYG{c}{\PYGZdq{}analyse\PYGZus{}LL1\PYGZus{}of\PYGZus{}symbol\PYGZus{}aux \PYGZdq{} \PYGZca{} string\PYGZus{}of\PYGZus{}symbol s}\PYG{c}{)}\PYG{c}{; }\PYG{c}{*)}
+    \PYG{c}{(*}\PYG{c}{print\PYGZus{}patterns [ List.map fst text ];}
+\PYG{c}{    print\PYGZus{}newline }\PYG{c}{(}\PYG{c}{)}\PYG{c}{;}\PYG{c}{*)}
+    \PYG{k}{if} \PYG{n}{is\PYGZus{}terminal} \PYG{o}{(}\PYG{n}{s}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)} \PYG{k}{then}
+      \PYG{c}{(*}\PYG{c}{ print\PYGZus{}endline \PYGZdq{}is terminal\PYGZdq{}; }\PYG{c}{*)}
+      \PYG{k}{match} \PYG{n}{text} \PYG{k}{with}
+      \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{no text to match in analyse\PYGZus{}LL1, text is empty}\PYG{l+s+s2}{\PYGZdq{}}
+      \PYG{o}{|} \PYG{n}{t1} \PYG{o}{::} \PYG{n}{q} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+          \PYG{k}{if} \PYG{n}{fst} \PYG{n}{t1} \PYG{o}{=} \PYG{n}{s} \PYG{k}{then} \PYG{o}{(}\PYG{n+nc}{Noeud} \PYG{o}{(}\PYG{n}{t1}\PYG{o}{,} \PYG{n+nb+bp}{[]}\PYG{o}{)}\PYG{o}{,} \PYG{n}{q}\PYG{o}{)}
+          \PYG{k}{else} \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{the expected terminal does not match the text}\PYG{l+s+s2}{\PYGZdq{}}
+    \PYG{k}{else}
+      \PYG{c}{(*}\PYG{c}{ print\PYGZus{}endline \PYGZdq{}is non\PYGZus{}terminal\PYGZdq{}; }\PYG{c}{*)}
+      \PYG{k}{match} \PYG{n}{text} \PYG{k}{with}
+      \PYG{o}{|} \PYG{n+nb+bp}{[]} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+          \PYG{k}{if}
+            \PYG{c}{(*}\PYG{c}{ print\PYGZus{}endline \PYGZdq{}Terminal E\PYGZdq{}; }\PYG{c}{*)}
+            \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{mem} \PYG{o}{(}\PYG{n+nc}{Terminal} \PYG{n+nc}{E}\PYG{o}{)} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{first\PYGZus{}sshtbl} \PYG{n}{s}\PYG{o}{)}
+            \PYG{o}{\PYGZam{}\PYGZam{}} \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{mem} \PYG{o}{(}\PYG{n+nc}{Terminal} \PYG{n+nc}{EOF}\PYG{o}{)} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{follow\PYGZus{}sshtbl} \PYG{n}{s}\PYG{o}{)}
+          \PYG{k}{then} \PYG{o}{(}
+            \PYG{k}{let} \PYG{n}{l} \PYG{o}{=}
+              \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{filter}
+                \PYG{o}{(}\PYG{k}{fun} \PYG{n}{p} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                  \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{mem} \PYG{o}{(}\PYG{n+nc}{Terminal} \PYG{n+nc}{E}\PYG{o}{)} \PYG{o}{(}\PYG{n}{first\PYGZus{}of\PYGZus{}pattern} \PYG{n}{first\PYGZus{}sshtbl} \PYG{n}{p}\PYG{o}{)}\PYG{o}{)}
+                \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{g}\PYG{o}{.}\PYG{n}{rules\PYGZus{}htbl} \PYG{n}{s}\PYG{o}{)}
+            \PYG{k}{in}
+            \PYG{k}{if} \PYG{n}{l} \PYG{o}{=} \PYG{n+nb+bp}{[]} \PYG{k}{then} \PYG{o}{(}
+              \PYG{n}{print\PYGZus{}string}
+                \PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{on }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{string\PYGZus{}of\PYGZus{}symbol} \PYG{n}{s} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{, expected }\PYG{l+s+s2}{\PYGZdq{}}
+                \PYG{o}{\PYGZca{}} \PYG{n}{string\PYGZus{}of\PYGZus{}symbol} \PYG{o}{(}\PYG{n+nc}{Terminal} \PYG{n+nc}{E}\PYG{o}{)}
+                \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ in first of patterns but first of patters is}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{;}
+              \PYG{n}{print\PYGZus{}SymbolSet} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{first\PYGZus{}sshtbl} \PYG{n}{s}\PYG{o}{)}\PYG{o}{;}
+              \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{error 1}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}
+            \PYG{k}{else} \PYG{n+nb+bp}{()}\PYG{o}{;}
+            \PYG{n}{analyse\PYGZus{}LL1\PYGZus{}of\PYGZus{}pattern} \PYG{n}{text} \PYG{n}{s} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{nth} \PYG{n}{l} \PYG{l+m+mi}{0}\PYG{o}{)}\PYG{o}{)}
+          \PYG{k}{else} \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{text is epsilon but more symbols are expected}\PYG{l+s+s2}{\PYGZdq{}}
+      \PYG{o}{|} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+          \PYG{k}{if}
+            \PYG{c}{(*}\PYG{c}{print\PYGZus{}SymbolSet }\PYG{c}{(}\PYG{c}{Hashtbl.find first\PYGZus{}sshtbl s}\PYG{c}{)}\PYG{c}{;}
+\PYG{c}{            print\PYGZus{}SymbolSet }\PYG{c}{(}\PYG{c}{Hashtbl.find follow\PYGZus{}sshtbl s}\PYG{c}{)}\PYG{c}{;}\PYG{c}{*)}
+            \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{mem} \PYG{o}{(}\PYG{n+nc}{Terminal} \PYG{n+nc}{E}\PYG{o}{)} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{first\PYGZus{}sshtbl} \PYG{n}{s}\PYG{o}{)}
+            \PYG{o}{\PYGZam{}\PYGZam{}} \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{mem}
+                 \PYG{o}{(}\PYG{n}{fst} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{nth} \PYG{n}{text} \PYG{l+m+mi}{0}\PYG{o}{)}\PYG{o}{)}
+                 \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{follow\PYGZus{}sshtbl} \PYG{n}{s}\PYG{o}{)}
+          \PYG{k}{then} \PYG{o}{(}
+            \PYG{k}{let} \PYG{n}{l} \PYG{o}{=}
+              \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{filter}
+                \PYG{o}{(}\PYG{k}{fun} \PYG{n}{p} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                  \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{mem} \PYG{o}{(}\PYG{n+nc}{Terminal} \PYG{n+nc}{E}\PYG{o}{)} \PYG{o}{(}\PYG{n}{first\PYGZus{}of\PYGZus{}pattern} \PYG{n}{first\PYGZus{}sshtbl} \PYG{n}{p}\PYG{o}{)}\PYG{o}{)}
+                \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{g}\PYG{o}{.}\PYG{n}{rules\PYGZus{}htbl} \PYG{n}{s}\PYG{o}{)}
+            \PYG{k}{in}
+            \PYG{k}{if} \PYG{n}{l} \PYG{o}{=} \PYG{n+nb+bp}{[]} \PYG{k}{then} \PYG{o}{(}
+              \PYG{n}{print\PYGZus{}string}
+                \PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{on }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{string\PYGZus{}of\PYGZus{}symbol} \PYG{n}{s} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{, expected }\PYG{l+s+s2}{\PYGZdq{}}
+                \PYG{o}{\PYGZca{}} \PYG{n}{string\PYGZus{}of\PYGZus{}symbol} \PYG{o}{(}\PYG{n+nc}{Terminal} \PYG{n+nc}{E}\PYG{o}{)}
+                \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ in first of patterns but first of patters is}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{;}
+              \PYG{n}{print\PYGZus{}SymbolSet} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{first\PYGZus{}sshtbl} \PYG{n}{s}\PYG{o}{)}\PYG{o}{;}
+              \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{error 2}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}
+            \PYG{k}{else} \PYG{n+nb+bp}{()}\PYG{o}{;}
+            \PYG{n}{analyse\PYGZus{}LL1\PYGZus{}of\PYGZus{}pattern} \PYG{n}{text} \PYG{n}{s} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{nth} \PYG{n}{l} \PYG{l+m+mi}{0}\PYG{o}{)}\PYG{o}{)}
+          \PYG{k}{else} \PYG{o}{(}
+            \PYG{c}{(*}\PYG{c}{ print\PYGZus{}endline \PYGZdq{}cas 2\PYGZdq{};}
+\PYG{c}{            print\PYGZus{}symbol }\PYG{c}{(}\PYG{c}{fst }\PYG{c}{(}\PYG{c}{List.nth text 0}\PYG{c}{)}\PYG{c}{)}\PYG{c}{;}
+\PYG{c}{            print\PYGZus{}newline }\PYG{c}{(}\PYG{c}{)}\PYG{c}{; }\PYG{c}{*)}
+            \PYG{k}{let} \PYG{n}{l} \PYG{o}{=}
+              \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{filter}
+                \PYG{o}{(}\PYG{k}{fun} \PYG{n}{p} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+                  \PYG{n+nn}{SymbolSet}\PYG{p}{.}\PYG{n}{mem}
+                    \PYG{o}{(}\PYG{n}{fst} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{nth} \PYG{n}{text} \PYG{l+m+mi}{0}\PYG{o}{)}\PYG{o}{)}
+                    \PYG{o}{(}\PYG{n}{first\PYGZus{}of\PYGZus{}pattern} \PYG{n}{first\PYGZus{}sshtbl} \PYG{n}{p}\PYG{o}{)}\PYG{o}{)}
+                \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{g}\PYG{o}{.}\PYG{n}{rules\PYGZus{}htbl} \PYG{n}{s}\PYG{o}{)}
+            \PYG{k}{in}
+            \PYG{k}{if} \PYG{n}{l} \PYG{o}{=} \PYG{n+nb+bp}{[]} \PYG{k}{then} \PYG{o}{(}
+              \PYG{n}{print\PYGZus{}string}
+                \PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{on }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{string\PYGZus{}of\PYGZus{}symbol} \PYG{n}{s} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{, expected }\PYG{l+s+s2}{\PYGZdq{}}
+                \PYG{o}{\PYGZca{}} \PYG{n}{string\PYGZus{}of\PYGZus{}symbol} \PYG{o}{(}\PYG{n}{fst} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{nth} \PYG{n}{text} \PYG{l+m+mi}{0}\PYG{o}{)}\PYG{o}{)}
+                \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ in first of patterns but first of patters is}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{;}
+              \PYG{n}{print\PYGZus{}SymbolSet} \PYG{o}{(}\PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{first\PYGZus{}sshtbl} \PYG{n}{s}\PYG{o}{)}\PYG{o}{;}
+              \PYG{n}{failwith} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{error 3}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}
+            \PYG{k}{else} \PYG{n+nb+bp}{()}\PYG{o}{;}
+            \PYG{n}{analyse\PYGZus{}LL1\PYGZus{}of\PYGZus{}pattern} \PYG{n}{text} \PYG{n}{s} \PYG{o}{(}\PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{nth} \PYG{n}{l} \PYG{l+m+mi}{0}\PYG{o}{)}\PYG{o}{)}
+  \PYG{k}{in}
+  \PYG{n}{analyse\PYGZus{}LL1\PYGZus{}of\PYGZus{}symbol\PYGZus{}aux} \PYG{n}{text} \PYG{n}{s}
+
+\PYG{k}{let} \PYG{n}{analyse\PYGZus{}LL1} \PYG{o}{(}\PYG{n}{g} \PYG{o}{:} \PYG{n}{grammar}\PYG{o}{)} \PYG{o}{(}\PYG{n}{text} \PYG{o}{:} \PYG{o}{(}\PYG{n}{symbol} \PYG{o}{*} \PYG{k+kt}{string}\PYG{o}{)} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:} \PYG{n}{at} \PYG{o}{=}
+  \PYG{n}{fst} \PYG{o}{(}\PYG{n}{analyse\PYGZus{}LL1\PYGZus{}of\PYGZus{}symbol} \PYG{n}{g} \PYG{o}{(}\PYG{n}{text} \PYG{o}{@} \PYG{o}{[} \PYG{o}{(}\PYG{n+nc}{Terminal} \PYG{n+nc}{EOF}\PYG{o}{,} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)} \PYG{o}{]}\PYG{o}{)} \PYG{n}{g}\PYG{o}{.}\PYG{n}{start\PYGZus{}symbol}\PYG{o}{)}
+\end{MintedVerbatim}

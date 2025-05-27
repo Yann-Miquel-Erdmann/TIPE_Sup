@@ -1,0 +1,47 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{open} \PYG{n+nc}{Transpileurs}
+
+\PYG{k}{let} \PYG{n}{print\PYGZus{}usage} \PYG{n+nb+bp}{()} \PYG{o}{=}
+  \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Usage : }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+  \PYG{n}{print\PYGZus{}newline} \PYG{n+nb+bp}{()}\PYG{o}{;}
+  \PYG{n}{print\PYGZus{}string} \PYG{n+nn}{Sys}\PYG{p}{.}\PYG{n}{argv}\PYG{o}{.}\PYG{o}{(}\PYG{l+m+mi}{0}\PYG{o}{)}\PYG{o}{;}
+  \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ \PYGZhy{}C \PYGZlt{}inupt\PYGZus{}fortran\PYGZus{}file\PYGZgt{} [\PYGZhy{}o \PYGZlt{}output\PYGZus{}c\PYGZus{}file\PYGZgt{}]}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+  \PYG{n}{print\PYGZus{}newline} \PYG{n+nb+bp}{()}\PYG{o}{;}
+  \PYG{n}{print\PYGZus{}string} \PYG{n+nn}{Sys}\PYG{p}{.}\PYG{n}{argv}\PYG{o}{.}\PYG{o}{(}\PYG{l+m+mi}{0}\PYG{o}{)}\PYG{o}{;}
+  \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ \PYGZhy{}Fortran \PYGZlt{}inupt\PYGZus{}fortran\PYGZus{}file\PYGZgt{} [\PYGZhy{}o \PYGZlt{}output\PYGZus{}fortran\PYGZus{}file\PYGZgt{}]}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+  \PYG{n}{print\PYGZus{}newline} \PYG{n+nb+bp}{()}
+
+\PYG{k}{let} \PYG{n}{output\PYGZus{}file} \PYG{o}{(}\PYG{n}{len} \PYG{o}{:} \PYG{k+kt}{int}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{string} \PYG{o}{=}
+  \PYG{k}{if} \PYG{n}{len} \PYG{o}{=}\PYG{o}{=} \PYG{l+m+mi}{5} \PYG{k}{then}
+    \PYG{k}{if}
+      \PYG{c}{(*}\PYG{c}{ un nom de fichier de sortie est donné }\PYG{c}{*)}
+      \PYG{n+nn}{Sys}\PYG{p}{.}\PYG{n}{argv}\PYG{o}{.}\PYG{o}{(}\PYG{l+m+mi}{3}\PYG{o}{)} \PYG{o}{=} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZhy{}o}\PYG{l+s+s2}{\PYGZdq{}}
+    \PYG{k}{then} \PYG{n+nn}{Sys}\PYG{p}{.}\PYG{n}{argv}\PYG{o}{.}\PYG{o}{(}\PYG{l+m+mi}{4}\PYG{o}{)}
+    \PYG{k}{else} \PYG{o}{(}
+      \PYG{n}{print\PYGZus{}usage} \PYG{n+nb+bp}{()}\PYG{o}{;}
+      \PYG{k}{raise} \PYG{o}{(}\PYG{n+nc}{Invalid\PYGZus{}argument} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{)}
+  \PYG{k}{else}
+    \PYG{c}{(*}\PYG{c}{ un nom de fichier de sortie n\PYGZsq{}est pas donné, on en donne un par défaut}\PYG{c}{*)}
+    \PYG{k}{match} \PYG{n+nn}{Sys}\PYG{p}{.}\PYG{n}{argv}\PYG{o}{.}\PYG{o}{(}\PYG{l+m+mi}{1}\PYG{o}{)} \PYG{k}{with}
+    \PYG{o}{|} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZhy{}Fortran}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{out.f90}\PYG{l+s+s2}{\PYGZdq{}}
+    \PYG{o}{|} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZhy{}C}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{out.c}\PYG{l+s+s2}{\PYGZdq{}}
+    \PYG{o}{|} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+        \PYG{n}{print\PYGZus{}usage} \PYG{n+nb+bp}{()}\PYG{o}{;}
+        \PYG{k}{raise} \PYG{o}{(}\PYG{n+nc}{Invalid\PYGZus{}argument} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}
+
+\PYG{k}{let} \PYG{n}{main} \PYG{n+nb+bp}{()} \PYG{o}{=}
+  \PYG{k}{let} \PYG{n}{len} \PYG{o}{=} \PYG{n+nn}{Array}\PYG{p}{.}\PYG{n}{length} \PYG{n+nn}{Sys}\PYG{p}{.}\PYG{n}{argv} \PYG{k}{in}
+  \PYG{k}{if} \PYG{n}{len} \PYG{o}{\PYGZlt{}}\PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{3} \PYG{o}{\PYGZam{}\PYGZam{}} \PYG{n}{len} \PYG{o}{\PYGZlt{}}\PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{5} \PYG{k}{then} \PYG{n}{print\PYGZus{}usage} \PYG{n+nb+bp}{()}
+  \PYG{k}{else}
+    \PYG{k}{let} \PYG{n}{input\PYGZus{}file\PYGZus{}name} \PYG{o}{=} \PYG{n+nn}{Sys}\PYG{p}{.}\PYG{n}{argv}\PYG{o}{.}\PYG{o}{(}\PYG{l+m+mi}{2}\PYG{o}{)} \PYG{k}{in}
+    \PYG{k}{let} \PYG{n}{output\PYGZus{}file\PYGZus{}name} \PYG{o}{=} \PYG{n}{output\PYGZus{}file} \PYG{n}{len} \PYG{k}{in}
+    \PYG{n}{print\PYGZus{}string} \PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Generating }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{output\PYGZus{}file\PYGZus{}name} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{...}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{;}
+    \PYG{n}{print\PYGZus{}newline} \PYG{n+nb+bp}{()}\PYG{o}{;}
+    \PYG{k}{if} \PYG{n+nn}{Sys}\PYG{p}{.}\PYG{n}{argv}\PYG{o}{.}\PYG{o}{(}\PYG{l+m+mi}{1}\PYG{o}{)} \PYG{o}{=} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZhy{}C}\PYG{l+s+s2}{\PYGZdq{}} \PYG{k}{then}
+      \PYG{n}{transpile\PYGZus{}Fortran\PYGZus{}to\PYGZus{}C} \PYG{n}{input\PYGZus{}file\PYGZus{}name} \PYG{n}{output\PYGZus{}file\PYGZus{}name}
+    \PYG{k}{else} \PYG{n}{transpile\PYGZus{}Fortran\PYGZus{}to\PYGZus{}Fortran} \PYG{n}{input\PYGZus{}file\PYGZus{}name} \PYG{n}{output\PYGZus{}file\PYGZus{}name}\PYG{o}{;}
+    \PYG{n}{print\PYGZus{}string} \PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Finished generating }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{output\PYGZus{}file\PYGZus{}name}\PYG{o}{)}\PYG{o}{;}
+    \PYG{n}{print\PYGZus{}newline} \PYG{n+nb+bp}{()}
+
+\PYG{k}{let} \PYG{o}{\PYGZus{}} \PYG{o}{=} \PYG{n}{main} \PYG{n+nb+bp}{()}
+\end{MintedVerbatim}

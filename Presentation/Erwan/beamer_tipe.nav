@@ -70,8 +70,11 @@
 \headcommand {\beamer@framepages {63}{63}}
 \headcommand {\slideentry {4}{0}{8}{64/64}{}{0}}
 \headcommand {\beamer@framepages {64}{64}}
-\headcommand {\beamer@partpages {1}{64}}
-\headcommand {\beamer@subsectionpages {57}{64}}
 \headcommand {\beamer@sectionpages {57}{64}}
-\headcommand {\beamer@documentpages {64}}
+\headcommand {\beamer@subsectionpages {57}{64}}
+\headcommand {\sectionentry {5}{Annexe}{65}{Annexe}{0}}
+\headcommand {\beamer@partpages {1}{744}}
+\headcommand {\beamer@subsectionpages {65}{744}}
+\headcommand {\beamer@sectionpages {65}{744}}
+\headcommand {\beamer@documentpages {744}}
 \headcommand {\gdef \inserttotalframenumber {27}}

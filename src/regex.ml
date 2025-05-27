@@ -1,6 +1,19 @@
 open Symbols
 
-
+(* 
+  syntaxe actuelle:
+    * [] ✔️
+    * |  
+    * .  ✔️
+    * *  ✔️
+    * +  ✔️
+    * a  ✔️
+    * \  ✔️
+    * () ✔️
+    * #  ✔️
+    * ?  ✔️
+    * ~  ✔️
+*)
 
 type regex =
   (* cas de base *)

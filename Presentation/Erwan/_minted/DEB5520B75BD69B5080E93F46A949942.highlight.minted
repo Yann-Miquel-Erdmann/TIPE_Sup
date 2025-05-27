@@ -1,0 +1,69 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{open} \PYG{n+nc}{Symbols}
+
+\PYG{k}{type} \PYG{n}{pattern} \PYG{o}{=} \PYG{n}{symbol} \PYG{k+kt}{list}
+\PYG{k}{type} \PYG{n}{rule} \PYG{o}{=} \PYG{n}{symbol} \PYG{o}{*} \PYG{n}{pattern} \PYG{k+kt}{list}
+\PYG{k}{type} \PYG{n}{rule\PYGZus{}hashtable} \PYG{o}{=} \PYG{o}{(}\PYG{n}{symbol}\PYG{o}{,} \PYG{n}{pattern} \PYG{k+kt}{list}\PYG{o}{)} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{t}
+\PYG{k}{type} \PYG{n}{grammar} \PYG{o}{=} \PYG{o}{\PYGZob{}} \PYG{n}{rules\PYGZus{}htbl} \PYG{o}{:} \PYG{n}{rule\PYGZus{}hashtable}\PYG{o}{;} \PYG{n}{start\PYGZus{}symbol} \PYG{o}{:} \PYG{n+nn}{Symbols}\PYG{p}{.}\PYG{n}{symbol} \PYG{o}{\PYGZcb{}}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ pour un symbole [s], renvoie sa représentation sous forme de chaîne }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{string\PYGZus{}of\PYGZus{}symbol} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{n}{symbol}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{string} \PYG{o}{=}
+  \PYG{k}{match} \PYG{n}{s} \PYG{k}{with}
+  \PYG{o}{|} \PYG{n+nc}{Terminal} \PYG{n}{t} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{string\PYGZus{}of\PYGZus{}terminal} \PYG{n}{t}
+  \PYG{o}{|} \PYG{n+nc}{NonTerminal} \PYG{n}{nt} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{string\PYGZus{}of\PYGZus{}non\PYGZus{}terminal} \PYG{n}{nt}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ affiche le symbole [s] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{print\PYGZus{}symbol} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{n}{symbol}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{unit} \PYG{o}{=} \PYG{n}{print\PYGZus{}string} \PYG{o}{(}\PYG{n}{string\PYGZus{}of\PYGZus{}symbol} \PYG{n}{s}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ affiche chaque pattern de [patterns] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{print\PYGZus{}patterns} \PYG{o}{(}\PYG{n}{patterns} \PYG{o}{:} \PYG{n}{pattern} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{unit} \PYG{o}{=}
+  \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter}
+    \PYG{o}{(}\PYG{k}{fun} \PYG{n}{pattern} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{iter} \PYG{o}{(}\PYG{k}{fun} \PYG{n}{s} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{print\PYGZus{}string} \PYG{o}{(}\PYG{n}{string\PYGZus{}of\PYGZus{}symbol} \PYG{n}{s} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{)} \PYG{n}{pattern}\PYG{o}{;}
+      \PYG{n}{print\PYGZus{}newline} \PYG{n+nb+bp}{()}\PYG{o}{)}
+    \PYG{n}{patterns}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ affiche chaque règle de [r] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{print\PYGZus{}rule\PYGZus{}list} \PYG{o}{(}\PYG{n}{r} \PYG{o}{:} \PYG{n}{rule\PYGZus{}hashtable}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{unit} \PYG{o}{=}
+  \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{iter}
+    \PYG{o}{(}\PYG{k}{fun} \PYG{n}{s} \PYG{n}{patterns} \PYG{o}{\PYGZhy{}\PYGZgt{}}
+      \PYG{n}{print\PYGZus{}string} \PYG{o}{(}\PYG{n}{string\PYGZus{}of\PYGZus{}symbol} \PYG{n}{s} \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ \PYGZhy{}\PYGZgt{} }\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}\PYG{o}{;}
+      \PYG{n}{print\PYGZus{}patterns} \PYG{n}{patterns}\PYG{o}{;}
+      \PYG{n}{print\PYGZus{}newline} \PYG{n+nb+bp}{()}\PYG{o}{)}
+    \PYG{n}{r}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ affiche la grammaire [g] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{print\PYGZus{}grammar} \PYG{o}{(}\PYG{n}{g} \PYG{o}{:} \PYG{n}{grammar}\PYG{o}{)} \PYG{o}{=}
+  \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZob{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{rules: }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+  \PYG{n}{print\PYGZus{}rule\PYGZus{}list} \PYG{n}{g}\PYG{o}{.}\PYG{n}{rules\PYGZus{}htbl}\PYG{o}{;}
+  \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{start\PYGZus{}symbol: }\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{;}
+  \PYG{n}{print\PYGZus{}symbol} \PYG{n}{g}\PYG{o}{.}\PYG{n}{start\PYGZus{}symbol}\PYG{o}{;}
+  \PYG{n}{print\PYGZus{}string} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZcb{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ teste si le symbole [s] est terminal }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{is\PYGZus{}terminal\PYGZus{}symbol} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{n}{symbol}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{bool} \PYG{o}{=}
+  \PYG{k}{match} \PYG{n}{s} \PYG{k}{with} \PYG{n+nc}{Terminal} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb+bp}{true} \PYG{o}{|} \PYG{n+nc}{NonTerminal} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb+bp}{false}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ teste si le symbole [s] est non terminal }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{is\PYGZus{}non\PYGZus{}terminal\PYGZus{}symbol} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{n}{symbol}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{bool} \PYG{o}{=} \PYG{n}{not} \PYG{o}{(}\PYG{n}{is\PYGZus{}terminal\PYGZus{}symbol} \PYG{n}{s}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ teste si la règle associe un symbole [s] est terminal }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{is\PYGZus{}terminal} \PYG{o}{(}\PYG{o}{(}\PYG{n}{s}\PYG{o}{,} \PYG{o}{\PYGZus{}}\PYG{o}{)} \PYG{o}{:} \PYG{n}{rule}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{bool} \PYG{o}{=} \PYG{n}{is\PYGZus{}terminal\PYGZus{}symbol} \PYG{n}{s}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ teste si la règle [r] est non terminale}\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{is\PYGZus{}non\PYGZus{}terminal} \PYG{o}{(}\PYG{n}{r} \PYG{o}{:} \PYG{n}{rule}\PYG{o}{)} \PYG{o}{:} \PYG{k+kt}{bool} \PYG{o}{=} \PYG{n}{not} \PYG{o}{(}\PYG{n}{is\PYGZus{}terminal} \PYG{n}{r}\PYG{o}{)}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ renvoie la liste des terminaux de [r] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{terminals} \PYG{o}{(}\PYG{n}{r} \PYG{o}{:} \PYG{n}{rule} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:} \PYG{n}{rule} \PYG{k+kt}{list} \PYG{o}{=} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{filter} \PYG{n}{is\PYGZus{}terminal} \PYG{n}{r}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ renvoie la liste des non terminaux de [r] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{non\PYGZus{}terminals} \PYG{o}{(}\PYG{n}{r} \PYG{o}{:} \PYG{n}{rule} \PYG{k+kt}{list}\PYG{o}{)} \PYG{o}{:} \PYG{n}{rule} \PYG{k+kt}{list} \PYG{o}{=} \PYG{n+nn}{List}\PYG{p}{.}\PYG{n}{filter} \PYG{n}{is\PYGZus{}non\PYGZus{}terminal} \PYG{n}{r}
+
+\PYG{c}{(*}\PYG{c}{*}\PYG{c}{ renvoie la règle associée au symbole [s] dans la grammaire [g] }\PYG{c}{*)}
+\PYG{k}{let} \PYG{n}{rule\PYGZus{}of\PYGZus{}symbol} \PYG{o}{(}\PYG{n}{g} \PYG{o}{:} \PYG{n}{grammar}\PYG{o}{)} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{n}{symbol}\PYG{o}{)} \PYG{o}{:} \PYG{n}{rule} \PYG{o}{=}
+  \PYG{k}{if} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{mem} \PYG{n}{g}\PYG{o}{.}\PYG{n}{rules\PYGZus{}htbl} \PYG{n}{s} \PYG{k}{then} \PYG{o}{(}\PYG{n}{s}\PYG{o}{,} \PYG{n+nn}{Hashtbl}\PYG{p}{.}\PYG{n}{find} \PYG{n}{g}\PYG{o}{.}\PYG{n}{rules\PYGZus{}htbl} \PYG{n}{s}\PYG{o}{)}
+  \PYG{k}{else}
+    \PYG{n}{failwith}
+      \PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{the hashed grammar does not contain }\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZca{}} \PYG{n}{string\PYGZus{}of\PYGZus{}symbol} \PYG{n}{s}
+     \PYG{o}{\PYGZca{}} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{ as a key}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{o}{)}
+\end{MintedVerbatim}
