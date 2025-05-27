@@ -31,7 +31,6 @@ type automate_det = {
   debut : int;
   fin : terminal option array;
   transitions : int array array;
-      (* transitions.(i).(j), i le sommet de départ, j l'entier du caractère *)
 }
 
 (** Renvoie la liste de toutes les lignes dans le fichier [file_name]. *)

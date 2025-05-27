@@ -97,16 +97,16 @@
   \begin{tikzpicture}
     \begin{scope}
       [every node/.style={scale=0.6,font=\Large}, scale=0.4, initial text=]
-      \tikzstyle{style0}=[draw=black]
-      \tikzstyle{style1}=[draw=black]
-      \tikzstyle{style2}=[draw=black]
-      \tikzstyle{style3}=[draw=black]
-      \tikzstyle{style4}=[draw=black]
-      \tikzstyle{style5}=[draw=black]
-      \tikzstyle{style6}=[draw=black]
-      \tikzstyle{style7}=[draw=black]
-      \tikzstyle{style8}=[draw=black]
-      \tikzstyle{style9}=[draw=black]
+      \tikzstyle{style0}=[]
+      \tikzstyle{style1}=[]
+      \tikzstyle{style2}=[]
+      \tikzstyle{style3}=[]
+      \tikzstyle{style4}=[]
+      \tikzstyle{style5}=[]
+      \tikzstyle{style6}=[]
+      \tikzstyle{style7}=[]
+      \tikzstyle{style8}=[]
+      \tikzstyle{style9}=[]
 
       \only<1> {\tikzstyle{style0}=[draw=blue!50,very thick,fill=blue!20]}
       \only<2> {\tikzstyle{style1}=[draw=blue!50,very thick,fill=blue!20]}
@@ -168,7 +168,8 @@
     }
     \node at (1, -2.3) (lb) {\texttt{res = [}};
     \only<7-> {\node [right] at (lb.east) (lb) {\texttt{'print'}};}
-    \only<9-> {\node [right] at (lb.east) (lb) {\texttt{, 'print'}};}
+    \only<9-> {\node [right] at (lb.east) (lb) {\texttt{, '*'}};}
+    \only<11-> {\node [right] at (lb.east) (lb) {\texttt{, ','}};}
     \only<25> {\node [right] at (lb.east) (lb) {\texttt{, '"Hello World"'}};}
     \node [right] at (lb.east) {\texttt{]}};
   \end{tikzpicture}
@@ -180,80 +181,57 @@
   \begin{tikzpicture}
     \begin{scope}
       [every node/.style={scale=0.6,font=\Large}, scale=0.4, initial text=]
-      \tikzstyle{style0}=[draw=black]
-      \tikzstyle{style1}=[draw=black]
-      \tikzstyle{style2}=[draw=black]
-      \tikzstyle{style3}=[draw=black]
-      \tikzstyle{style4}=[draw=black]
-      \tikzstyle{style5}=[draw=black]
-      \tikzstyle{style6}=[draw=black]
-      \tikzstyle{style7}=[draw=black]
-      \tikzstyle{style8}=[draw=black]
-      \tikzstyle{style9}=[draw=black]
+      \tikzstyle{style0}=[]
+      \tikzstyle{style1}=[]
+      \tikzstyle{style2}=[]
 
       \only<1> {\tikzstyle{style0}=[draw=blue!50,very thick,fill=blue!20]}
-      \only<2> {\tikzstyle{style1}=[draw=blue!50,very thick,fill=blue!20]}
-      \only<3> {\tikzstyle{style2}=[draw=blue!50,very thick,fill=blue!20]}
-      \only<4> {\tikzstyle{style3}=[draw=blue!50,very thick,fill=blue!20]}
-      \only<5> {\tikzstyle{style4}=[draw=blue!50,very thick,fill=blue!20]}
-      \only<6> {\tikzstyle{style5}=[draw=blue!50,very thick,fill=blue!20]}
-      \only<7> {\tikzstyle{style0}=[draw=blue!50,very thick,fill=blue!20]}
-      \only<8> {\tikzstyle{style8}=[draw=blue!50,very thick,fill=blue!20]}
-      \only<9> {\tikzstyle{style0}=[draw=blue!50,very thick,fill=blue!20]}
-      \only<10>{\tikzstyle{style9}=[draw=blue!50,very thick,fill=blue!20]}
-      \only<11> {\tikzstyle{style0}=[draw=blue!50,very thick,fill=blue!20]}
-      \only<12-23>{\tikzstyle{style6}=[draw=blue!50,very thick,fill=blue!20]}
-      \only<24>{\tikzstyle{style7}=[draw=blue!50,very thick,fill=blue!20]}
+      \only<2-3>{\tikzstyle{style1}=[draw=blue!50,very thick,fill=blue!20]}
+      \only<4> {\tikzstyle{style2}=[draw=blue!50,very thick,fill=blue!20]}
 
-      \node[state, style0, initial        ]  at (0,0) (0)          {$I$};
+      \node[state, style0, style1, style2, initial]  at (0,0) (0)          {$I$};
 
       \node[state, style1] (1) at (2,1) {1};
-      \node[state, style2] (2) [right=0.4cm of 1] {2};
-      \node[state, style3] (3) [right=0.4cm of 2] {3};
-      \node[state, style4] (4) [right=0.4cm of 3] {4};
-      \node[state, accepting right, style5] (5) [right=0.4cm of 4] {$F_1$};
+      \node[state, style1] (2) [right=0.4cm of 1] {2};
+      \node[state, style1] (3) [right=0.4cm of 2] {3};
+      \node[state, style1] (4) [right=0.4cm of 3] {4};
+      \node[state, accepting right, style1] (5) [right=0.4cm of 4] {$F_1$};
       
-      \node[state, style6,                ] (6) at (2,3) {5};
-      \node[state, style7, accepting right] (7) [right=0.4cm of 6] {$F_2$};
+      \node[state, style2,                ] (6) at (2,3) {5};
+      \node[state, style2, accepting right] (7) [right=0.4cm of 6] {$F_2$};
       
-      \node[state, style8, accepting right] (8) at (2,-1)      {$F_3$};
-      \node[state, style9, accepting right] (9) at (2,-3)      {$F_4$};
+      \node[state, accepting right]         (8) at (2,-1)      {$F_3$};
+      \node[state, accepting right]         (9) at (2,-3)      {$F_4$};
 
       \path[->]
-      (0) edge                node[above] {$*$} (8)
-      (0) edge                node[above] {\LARGE$,$} (9)
+      (0) edge                      node[above] {$*$} (8)
+      (0) edge                      node[above] {\LARGE$,$} (9)
 
-      (0) edge                node[above] {$p$} (1)
-      (1) edge                node[above] {$r$} (2)
-      (2) edge                node[above] {$i$} (3)
-      (3) edge                node[above] {$n$} (4)
-      (4) edge                node[above] {$t$} (5)
+      (0) edge [style1]             node[above] {$p$} (1)
+      (1) edge [style1]             node[above] {$r$} (2)
+      (2) edge [style1]             node[above] {$i$} (3)
+      (3) edge [style1]             node[above] {$n$} (4)
+      (4) edge [style1]             node[above] {$t$} (5)
       
       
-      (0) edge                node[above] {$"$} (6)
-      (6) edge [loop above]   node[above] {\large$[a-z]|[A-Z]|[0-9]|\_$} (6)
-      (6) edge                node[above] {$"$} (7)
+      (0) edge [style2]             node[above] {$"$} (6)
+      (6) edge [loop above, style2] node[above] {\large$[a-z]|[A-Z]|[0-9]|\_$} (6)
+      (6) edge [style2]             node[above] {$"$} (7)
       ;
       
     \end{scope}
-    \node at (8, 0) (text) {\ttfamily print*,"Hello World"};
-    \foreach \step in {1,2,...,6}{
-      \node<\step>[right=\fpeval{\step * 5.75 - 3}pt of text.west, draw=blue, fill=blue!20, inner sep=0pt, minimum width=2pt, minimum height=10pt]{};
-    }
-    \foreach \step in {7,8}{
-      \node<\step>[right=\fpeval{(\step - 1) * 5.75 - 3}pt of text.west, draw=blue, fill=blue!20, inner sep=0pt, minimum width=2pt, minimum height=10pt]{};
-    }
-    \foreach \step in {9,10}{
-      \node<\step>[right=\fpeval{(\step - 2) * 5.75 - 3}pt of text.west, draw=blue, fill=blue!20, inner sep=0pt, minimum width=2pt, minimum height=10pt]{};
-    }
-    \foreach \step in {11,12,...,24}{
-      \node<\step>[right=\fpeval{(\step - 3) * 5.75 - 3}pt of text.west, draw=blue, fill=blue!20, inner sep=0pt, minimum width=2pt, minimum height=10pt]{};
-    }
+    \node at (6, 0) (text1) {\ttfamily print};
+    \node [right=-5pt of text1.east, anchor=west] (text2) {\ttfamily print};
+    \node [right=-5pt of text2.east, anchor=west] (text3) {\ttfamily "Hello World"};
+    
+    \node<2>[fit=(text1), draw=blue, fill=blue!20, inner sep=-2pt, fill opacity=0.5]{};
+    \node<3>[fit=(text2), draw=blue, fill=blue!20, inner sep=-2pt, fill opacity=0.5]{};
+    \node<4>[fit=(text3), draw=blue, fill=blue!20, inner sep=-2pt, fill opacity=0.5]{};
+    
     \node at (1, -2.3) (lb) {\texttt{res = [}};
-    \only<7-> {\node [right] at (lb.east) (lb) {\texttt{'print'}};}
-    \only<9-> {\node [right] at (lb.east) (lb) {\texttt{, '*'}};} 
-    \only<11-> {\node [right] at (lb.east) (lb) {\texttt{, ','}};}
-    \only<25> {\node [right] at (lb.east) (lb) {\texttt{, '"Hello World"'}};}
+    \only<2-> {\node [right] at (lb.east) (lb) {\texttt{'print'}};}
+    \only<3-> {\node [right] at (lb.east) (lb) {\texttt{, 'print'}};} 
+    \only<4> {\node [right] at (lb.east) (lb) {\texttt{, '"Hello World"'}};}
     \node [right] at (lb.east) {\texttt{]}};
   \end{tikzpicture}
 \end{frame}
@@ -319,7 +297,7 @@
       \begin{scope}[shift={(2.5, 0)}]
         \node{
           \begin{minipage}{0.55\textwidth}
-            \inputminted[firstline=7, lastline=12,firstnumber=1]{ocaml}{scripts/automates.ml}
+            \inputminted[firstline=7, lastline=12,firstnumber=1]{ocaml}{../../src/automates.ml}
           \end{minipage}
         };
       \end{scope}
@@ -329,7 +307,7 @@
       \begin{scope}[shift={(-2.5, 0)}]
         \node{
           \begin{minipage}{0.55\textwidth}
-            \inputminted[firstline=29, lastline=34,firstnumber=1]{ocaml}{scripts/automates.ml}
+            \inputminted[firstline=29, lastline=34,firstnumber=1]{ocaml}{../../src/automates.ml}
           \end{minipage}
         };
       \end{scope}

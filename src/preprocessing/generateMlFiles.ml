@@ -1,4 +1,4 @@
-open Generate_grammar
+open GenerateGrammar
 
 let repr_of_terminal ((_, p) : rule) : string = List.nth (List.nth p 0) 0
 
@@ -204,7 +204,7 @@ let generate_files (g_path : string) : unit =
   let g = get_grammar g_path in
   Printf.printf "Grammar length %d\n" (List.length g);
   generate_file_symbols g "symbols.ml";
-  generate_file_lexer g "prebuild/build_automaton.ml" "src/detAutomaton.ml";
+  generate_file_lexer g "prebuild/buildAutomaton.ml" "src/detAutomaton.ml";
   generate_file_grammar g "grammar.ml"
 
 let _ =

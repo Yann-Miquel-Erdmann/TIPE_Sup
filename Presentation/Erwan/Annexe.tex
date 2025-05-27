@@ -1,60 +1,14 @@
+
+{
+% \setbeamertemplate{headline}{}
+
 \section{Annexe}
 
-% \tableofcontents
+\foreach \name in{src/preprocessing/generateGrammar.ml, src/preprocessing/generateMlFiles.ml, src/prebuild/buildAutomaton.ml, src/abstractTokens.ml, src/bibliotheques.ml, src/environnement.ml, src/symbols.ml, src/traduction.ml, src/regex.ml, src/grammarFunctions.ml, src/grammar.ml, src/automates.ml, src/LL1.ml, src/convertToAbstract.ml, src/detAutomaton.ml, src/traductionC.ml, src/traductionFortran.ml, src/transpileurs.ml, src/main.ml}{
+    \subsection{\name}
+    \tiny   \inputminted[]{ocaml}{../../\name}
+    
+    \pagebreak
+}
 
-\subsection{\url{generate_ml_files.ml}}
-\inputminted[]{ocaml}{../../src/preprocessing/generate_ml_files.ml}
-\pagebreak
-\subsection{\url{generate_grammar.ml}}
-\inputminted[]{ocaml}{../../src/preprocessing/generate_grammar.ml}
-\pagebreak
-\subsection{\url{build_automaton.ml}}
-\inputminted[]{ocaml}{../../src/prebuild/build_automaton.ml}
-\pagebreak
-\subsection{\url{abstract_tokens.ml}}
-\inputminted[]{ocaml}{../../src/abstract_tokens.ml}
-\pagebreak
-\subsection{\url{bibliotheques.ml}}
-\inputminted[]{ocaml}{../../src/bibliotheques.ml}
-\pagebreak
-\subsection{\url{environnement.ml}}
-\inputminted[]{ocaml}{../../src/environnement.ml}
-\pagebreak
-\subsection{\url{symbols.ml}}
-\inputminted[]{ocaml}{../../src/symbols.ml}
-\pagebreak
-\subsection{\url{traduction.ml}}
-\inputminted[]{ocaml}{../../src/traduction.ml}
-\pagebreak
-\subsection{\url{regex.ml}}
-\inputminted[]{ocaml}{../../src/regex.ml}
-\pagebreak
-\subsection{\url{grammar_functions.ml}}
-\inputminted[]{ocaml}{../../src/grammar_functions.ml}
-\pagebreak
-\subsection{\url{grammar.ml}}
-\inputminted[]{ocaml}{../../src/grammar.ml}
-\pagebreak
-\subsection{\url{automates.ml}}
-\inputminted[]{ocaml}{../../src/automates.ml}
-\pagebreak
-\subsection{\url{LL1.ml}}
-\inputminted[]{ocaml}{../../src/LL1.ml}
-\pagebreak
-\subsection{\url{convert_to_abstract.ml}}
-\inputminted[]{ocaml}{../../src/convert_to_abstract.ml}
-\pagebreak
-\subsection{\url{det_automaton.ml}}
-\inputminted[]{ocaml}{../../src/det_automaton.ml}
-\pagebreak
-\subsection{\url{traductionC.ml}}
-\inputminted[]{ocaml}{../../src/traductionC.ml}
-\pagebreak
-\subsection{\url{traductionFortran.ml}}
-\inputminted[]{ocaml}{../../src/traductionFortran.ml}
-\pagebreak
-\subsection{\url{transpileurs.ml}}
-\inputminted[]{ocaml}{../../src/transpileurs.ml}
-\pagebreak
-\subsection{\url{main.ml}}
-\inputminted[]{ocaml}{../../src/main.ml}
+}
