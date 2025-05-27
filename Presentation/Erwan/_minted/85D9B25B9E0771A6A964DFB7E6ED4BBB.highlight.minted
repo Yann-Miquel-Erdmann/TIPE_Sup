@@ -1,7 +1,0 @@
-\begin{MintedVerbatim}[commandchars=\\\{\}]
-S \PYGZhy{}\PYGZgt{} A
-A \PYGZhy{}\PYGZgt{} aA
-A \PYGZhy{}\PYGZgt{} B
-B \PYGZhy{}\PYGZgt{} bB
-B \PYGZhy{}\PYGZgt{} epsilon
-\end{MintedVerbatim}
