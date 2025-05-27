@@ -1,35 +1,14 @@
-\section*{Annexe}
 
-% \tableofcontents
+{
+% \setbeamertemplate{headline}{}
 
-\inputminted[]{ocaml}{../../src/abstract_tokens.ml}
-\pagebreak
-\inputminted[]{ocaml}{../../src/bibliotheques.ml}
-\pagebreak
-\inputminted[]{ocaml}{../../src/environnement.ml}
-\pagebreak
-\inputminted[]{ocaml}{../../src/symbols.ml}
-\pagebreak
-\inputminted[]{ocaml}{../../src/traduction.ml}
-\pagebreak
-\inputminted[]{ocaml}{../../src/regex.ml}
-\pagebreak
-\inputminted[]{ocaml}{../../src/grammar_functions.ml}
-\pagebreak
-\inputminted[]{ocaml}{../../src/grammar.ml}
-\pagebreak
-\inputminted[]{ocaml}{../../src/automates.ml}
-\pagebreak
-\inputminted[]{ocaml}{../../src/LL1.ml}
-\pagebreak
-\inputminted[]{ocaml}{../../src/convert_to_abstract.ml}
-\pagebreak
-\inputminted[]{ocaml}{../../src/det_automaton.ml}
-\pagebreak
-\inputminted[]{ocaml}{../../src/traductionC.ml}
-\pagebreak
-\inputminted[]{ocaml}{../../src/traductionFortran.ml}
-\pagebreak
-\inputminted[]{ocaml}{../../src/transpileurs.ml}
-\pagebreak
-\inputminted[]{ocaml}{../../src/main.ml}
+\section{Annexe}
+
+\foreach \name in{src/abstractTokens.ml, src/bibliotheques.ml, src/environnement.ml, src/symbols.ml, src/traduction.ml, src/regex.ml, src/grammarFunctions.ml, src/grammar.ml, src/automates.ml, src/LL1.ml, src/convertToAbstract.ml, src/detAutomaton.ml, src/traductionC.ml, src/traductionFortran.ml, src/transpileurs.ml, src/main.ml}{
+    \subsection{\name}
+    \tiny   \inputminted[]{ocaml}{../../\name}
+    
+    \pagebreak
+}
+
+}

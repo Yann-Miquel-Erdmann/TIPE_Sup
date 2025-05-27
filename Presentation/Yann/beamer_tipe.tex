@@ -5,7 +5,7 @@
 \input{les_packages_pour_beamer.tex}
 %%%%%%%%%%%%%% THEME BEAMER
 %votre nom court qui apparaîtra dans l'en tête
-\newcommand{\initiales}{Petit Nom }
+\newcommand{\initiales}{Yann Miquel--Erdmann }
 \input{les_param_beamer_tipe}
 
 
@@ -46,6 +46,7 @@ La transpilation de Fortran vers C
 \author{
 \large 
 Présentation de \important{Yann MIQUEL--ERDMANN}\\[0.2cm]
+Candidat n° \important{51280}\\[0.4cm]
 \footnotesize
 travail réalisé avec \couleur{Erwan FALAUX--BACHELOT}\\[0.4cm]
 \vspace*{-1.2cm}
@@ -64,20 +65,40 @@ travail réalisé avec \couleur{Erwan FALAUX--BACHELOT}\\[0.4cm]
 \end{frame}
 
 %------------------------------------------------
-\title[Gros titre : et sous titre (version courte)]{
-Une page de titre avec logos :\\
-{\large mais sans les affectations détaillées des auteurs }
-}
+\title[La transpilation de Fortran vers C]{}
 
 
 \begin{frame}
-    \frametitle{Introduction}
+    \frametitle{Introduction \esp}
+    
+	\vspace*{0.5cm}
 
-	Le Fortran: 
-    \includegraphics[scale=0.03]{static/Fortran_logo.svg.png}\\
-    Créé par: IMB
+    \begin{minipage}[t]{0.48\textwidth}
+        \includegraphics[scale=0.05]{static/Fortran_logo.svg.png}\\
+        \textbf{Le Fortran:}\\ 
+        Créé par:  John Backus, IBM\\
+        Créé en:   1957\\
+        Dernière version en: 2023\\
+        Rang sur Github: $9^{\text{ème}}$
+    \end{minipage}
+    \hspace*{0.2cm}
+    \begin{minipage}[t]{0.48\textwidth}
+        \includegraphics[scale=0.05]{static/C_logo.png}\\
+        \textbf{Le C:}\\
+        Créé par: Dennis Ritchie et \\Kenneth Thompson, Bell Labs\\
+        Créé en:  1972\\
+        Dernière version en: 2024\\
+        Rang sur Github: $41^{\text{ème}}$
 
 
+    \end{minipage}
+    
+	\vspace*{2.9cm}
+
+    \bandeauREF{%
+        \hspace*{0.2cm}\textbf{Logo Fortran}: \url{https://commons.wikimedia.org/wiki/File:Fortran_logo.svg}\\
+        \hspace*{0.2cm}\textbf{Logo C}: \url{https://commons.wikimedia.org/wiki/File:C_Logo.png}
+    }
 
 \end{frame}
 
@@ -85,25 +106,27 @@ Une page de titre avec logos :\\
 \begin{frame}
     \frametitle{Problématique}
     
-    Comment implémenter une conversion rapide de programmes Fortran en programmes C?
+    \begin{center}
+        \textbf{Comment implémenter une conversion rapide de programmes Fortran en programmes C?}
+    \end{center}
 
 \end{frame}
 
 
-
-
-
-%------------------------------------------------
-\input{tikz/arbre_de_syntaxe.tex}
-
 \input{Transpilation.tex}
+
 \input{Analyse.tex}
 \input{Analyse_lexicale.tex}
 \input{Analyse_syntaxique.tex}
 \input{Traduction.tex}
 \input{Executable.tex}
 \input{Conclusion.tex}
-\input{Annexe.tex}
+
+
+%------------------------------------------------
+% \input{tikz/arbre_de_syntaxe.tex}
+
+% \input{Annexe.tex}
 
 
 \end{document}
