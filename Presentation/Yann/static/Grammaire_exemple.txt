@@ -1,0 +1,15 @@
+ProgrammeFortran -> ProgramMC NomProgramme NouvelleLigne Print EndProgramMC NomProgramme
+
+Print -> PrintMC Espace Asterisque Virgule Espace Chaine ParamListe
+ParamListe -> Virgule Espace Chaine ParamListe | Epsilon 
+
+PrintMC -> 'print'
+ProgramMC -> 'program'
+EndProgramMC -> 'end program'
+Virgule -> ','
+Asterisque -> '\*'
+Espace -> ' '
+NouvelleLigne -> '\n'
+
+NomProgramme -> '([a-z]|[A-Z])*'
+Chaine -> '".*"'

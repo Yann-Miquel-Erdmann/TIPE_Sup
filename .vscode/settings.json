@@ -1,0 +1,21 @@
+{
+    "fortran.fortls.disabled": true,
+    "nasc-touchbar.toggleSidebar": true,
+    "nasc-touchbar.addCursorBelow": false,
+    "nasc-touchbar.gitSync": true,
+    "ocaml.sandbox": {
+        "kind": "opam",
+        "switch": "default"
+    },
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "*.cmi": true,
+        "*.cmo": true
+    },
+    // "cSpell.enabled": true
+}

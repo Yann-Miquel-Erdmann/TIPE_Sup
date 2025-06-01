@@ -1,0 +1,31 @@
+program fibonacci
+    implicit none
+    integer :: n, result_rec
+    n  = 10
+    ! Appel de la fonction récursive
+    result_rec = fibonacci_rec(n)
+    print *, "Fibonacci (récursif) de ", n, " est ", result_rec
+
+    contains
+    recursive function fibonacci_rec(n) result(retval)
+        integer, intent(in) :: n
+        integer :: retval
+
+        if (n < 0) then
+            print *, "Erreur: n ne doit pas être négatif"
+            retval = -1
+            return
+        end if
+        if (n == 0) then
+            retval = 0
+            return
+        else if (n == 1) then
+            retval = 1
+            return
+        end if
+
+        retval = fibonacci_rec(n - 1) + fibonacci_rec(n - 2)
+
+    end function fibonacci_rec
+
+end program fibonacci

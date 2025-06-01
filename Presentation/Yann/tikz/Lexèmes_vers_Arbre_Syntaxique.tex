@@ -1,0 +1,27 @@
+\begin{tikzpicture}
+    
+    \tikzstyle{lien} = [->, >=latex]
+    \tikzstyle{basic_text}=[text width=2cm, text badly centered]
+    \tikzstyle{basic_node}=[draw = black,rounded corners=4pt, basic_text]
+    \tikzstyle{wrapper}=[basic_node, inner sep=3pt]
+    \tikzstyle{hidden}=[draw=black!0,color=black!0]
+    \tikzstyle{faded}=[draw=black!20, color=black!20]
+    
+
+    \node [basic_node, text width=4cm, align=left] (Lexemes) {
+         \begin{minted}[stripall, fontsize=\tiny]{ocaml}
+            [Programme; NomProgramme('hello'); NouvelleLigne; Print; Asterisque; Virgule; Chaine('"Hello World!"'); NouvelleLigne; FinProgramme; NomProgramme('hello')]
+         \end{minted}
+    };
+
+    \node [basic_node, text width=6cm, align=left] (AS) [right=1cm of Lexemes] {
+        \scalebox{0.7}{
+            \parbox{\textwidth}{
+                \input{tikz/arbre_de_syntaxe.tex}
+            }
+        }
+    };
+ 
+    \draw [lien] (Lexemes.north) to[out=45, in=135]  node[midway, above] {\textbf{Analyse syntaxique}}   (AS.north west) ; 
+
+\end{tikzpicture}

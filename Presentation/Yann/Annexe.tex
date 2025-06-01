@@ -1,14 +1,9 @@
 
-{
-% \setbeamertemplate{headline}{}
-
 \section{Annexe}
 
-\foreach \name in{src/abstractTokens.ml, src/bibliotheques.ml, src/environnement.ml, src/symbols.ml, src/traduction.ml, src/regex.ml, src/grammarFunctions.ml, src/grammar.ml, src/automates.ml, src/LL1.ml, src/convertToAbstract.ml, src/detAutomaton.ml, src/traductionC.ml, src/traductionFortran.ml, src/transpileurs.ml, src/main.ml}{
+\foreach \name in{src/preprocessing/generateGrammar.ml, src/preprocessing/generateMlFiles.ml, src/prebuild/buildAutomaton.ml, src/abstractTokens.ml, src/bibliotheques.ml, src/environnement.ml, src/symbols.ml, src/traduction.ml, src/regex.ml, src/grammarFunctions.ml, src/grammar.ml, src/automates.ml, src/LL1.ml, src/convertToAbstract.ml, src/detAutomaton.ml, src/traductionC.ml, src/traductionFortran.ml, src/transpileurs.ml, src/main.ml}{
     \subsection{\name}
     \tiny   \inputminted[]{ocaml}{../../\name}
     
     \pagebreak
-}
-
 }

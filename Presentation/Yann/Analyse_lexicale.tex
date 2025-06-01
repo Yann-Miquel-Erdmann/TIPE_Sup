@@ -2,14 +2,38 @@
 
 \begin{frame}
     
-    but: transformer le programme en entrée en une liste de lexèmes
-    def lexème, bien faire la différence entre le lexème et le type reconnu, ie "Hello World" est un lexème de type string 
+   \input{tikz/Fortran_vers_Lexèmes.tex}
 
+\end{frame}
+
+\begin{frame}
+  \frametitle{Définition\esp}
+
+  
+  Les automates sont définis par $(\mathcal{A} = \Sigma, Q, I, F, \delta)$\\
+
+  \vspace{0.5cm}
+  \pause
+  \begin{tikzpicture}
+    \node [state, initial]         (1) at (0, 0)        {1};
+    \node [state]                  (2) [right=1cm of 1] {2};
+    \node [state, accepting right] (3) [right=1cm of 2] {3};
+
+    \path [->]
+    (1) edge              node [above] {a} (2)
+    (2) edge              node [above] {c} (3)
+    (2) edge [loop above] node [above] {b} (2)
+    ;
+
+  \end{tikzpicture}\\
+  $\mathcal{L} (\mathcal{A} ) = a\cdot b^*\cdot c$
+
+  
 \end{frame}
 
 %------------étude d'un exemple-----------
 \begin{frame}
-  \frametitle{Les automates: étude d'un exemple}
+  \frametitle{Les automates: étude d'un exemple \esp}
   \begin{tikzpicture}
     \begin{scope}
       [every node/.style={scale=0.6,font=\Large}, scale=0.4, initial text=]
@@ -64,11 +88,12 @@
       
       
       (0) edge                node[above] {$"$} (6)
-      (6) edge [loop above]   node[above] {\large$[a-zA-Z0-9\_]$} (6)
+      (6) edge [loop above]   node[above] {\large$[a-z]|[A-Z]|[0-9]|\_$} (6)
       (6) edge                node[above] {$"$} (7)
       ;
       
     \end{scope}
+
     \node at (8, 0) (text) {\ttfamily print*,"Hello World"};
     \foreach \step in {1,2,...,6}{
       \node<\step>[right=\fpeval{\step * 5.75 - 3}pt of text.west, draw=blue, fill=blue!20, inner sep=0pt, minimum width=2pt, minimum height=10pt]{};
@@ -82,18 +107,78 @@
     \foreach \step in {11,12,...,24}{
       \node<\step>[right=\fpeval{(\step - 3) * 5.75 - 3}pt of text.west, draw=blue, fill=blue!20, inner sep=0pt, minimum width=2pt, minimum height=10pt]{};
     }
-    \node at (1, -2.3) (lb) {\texttt{res = [}};
-    \only<7-> {\node [right] at (lb.east) (lb) {\texttt{'print'}};}
-    \only<9-> {\node [right] at (lb.east) (lb) {\texttt{, '*'}};} 
-    \only<11-> {\node [right] at (lb.east) (lb) {\texttt{, ','}};}
-    \only<25> {\node [right] at (lb.east) (lb) {\texttt{, '"Hello World"'}};}
+    
+    \node at (0, -2.3) (lb) {\small \texttt{res = [}};
+
+    \only<7-> {\node [right] at (lb.east) (lb) {\small \texttt{Print}};}
+    \only<9-> {\node [right] at (lb.east) (lb) {\small \texttt{, Astérisque}};} 
+    \only<11-> {\node [right] at (lb.east) (lb) {\small \texttt{, Virgule}};}
+    \only<25> {\node [right] at (lb.south) (lb) {\small \texttt{, Chaîne('"Hello World"')}};}
+    \node [right] at (lb.east) {\small \texttt{]}};
+  \end{tikzpicture}
+\end{frame}
+
+
+%------------étude d'un exemple-----------
+\begin{frame}
+  \frametitle{Les automates: étude d'un exemple\esp}
+  \begin{tikzpicture}
+    \begin{scope}
+      [every node/.style={scale=0.6,font=\Large}, scale=0.4, initial text=]
+      \tikzstyle{style0}=[]
+      \tikzstyle{style1}=[]
+      \tikzstyle{style2}=[]
+
+      \only<1> {\tikzstyle{style0}=[draw=blue!50,very thick,fill=blue!20]}
+      \only<2-3>{\tikzstyle{style1}=[draw=blue!50,very thick,fill=blue!20]}
+      \only<4> {\tikzstyle{style2}=[draw=blue!50,very thick,fill=blue!20]}
+
+      \node[state, style0, style1, style2, initial]  at (0,0) (0)          {$I$};
+
+      \node[state, style1] (1) at (2,1) {1};
+      \node[state, style1] (2) [right=0.4cm of 1] {2};
+      \node[state, style1] (3) [right=0.4cm of 2] {3};
+      \node[state, style1] (4) [right=0.4cm of 3] {4};
+      \node[state, accepting right, style1] (5) [right=0.4cm of 4] {$F_1$};
+      
+      \node[state, style2,                ] (6) at (2,3) {5};
+      \node[state, style2, accepting right] (7) [right=0.4cm of 6] {$F_2$};
+      
+      \node[state, accepting right]         (8) at (2,-1)      {$F_3$};
+      \node[state, accepting right]         (9) at (2,-3)      {$F_4$};
+
+      \path[->]
+      (0) edge                      node[above] {$*$} (8)
+      (0) edge                      node[above] {\LARGE$,$} (9)
+
+      (0) edge [style1]             node[above] {$p$} (1)
+      (1) edge [style1]             node[above] {$r$} (2)
+      (2) edge [style1]             node[above] {$i$} (3)
+      (3) edge [style1]             node[above] {$n$} (4)
+      (4) edge [style1]             node[above] {$t$} (5)
+      
+      
+      (0) edge [style2]             node[above] {$"$} (6)
+      (6) edge [loop above, style2] node[above] {\large$[a-z]|[A-Z]|[0-9]|\_$} (6)
+      (6) edge [style2]             node[above] {$"$} (7)
+      ;
+      
+    \end{scope}
+    \node at (6, 0) (text1) {\ttfamily print};
+    \node [right=-5pt of text1.east, anchor=west] (text2) {\ttfamily print};
+    \node [right=-5pt of text2.east, anchor=west] (text3) {\ttfamily "Hello World"};
+    
+    \node<2>[fit=(text1), draw=blue, fill=blue!20, inner sep=-2pt, fill opacity=0.5]{};
+    \node<3>[fit=(text2), draw=blue, fill=blue!20, inner sep=-2pt, fill opacity=0.5]{};
+    \node<4>[fit=(text3), draw=blue, fill=blue!20, inner sep=-2pt, fill opacity=0.5]{};
+    
+    \node at (0, -2.3) (lb) {\texttt{res = [}};
+    \only<2-> {\node [right] at (lb.east) (lb) {\texttt{Print}};}
+    \only<3-> {\node [right] at (lb.east) (lb) {\texttt{, Print}};} 
+    \only<4> {\node [right] at (lb.east) (lb) {\texttt{, Chaîne('"Hello World"')}};}
     \node [right] at (lb.east) {\texttt{]}};
   \end{tikzpicture}
 \end{frame}
 
-\begin{frame}
-    exemple de la liste de lexèmes qui est donnée en Ocaml pour notre programme
-
-\end{frame}
 
 

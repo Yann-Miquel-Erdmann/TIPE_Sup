@@ -1,0 +1,29 @@
+\begin{tikzpicture}
+    
+    \tikzstyle{lien} = [->, >=latex]
+    \tikzstyle{basic_text}=[text width=2cm, text badly centered]
+    \tikzstyle{basic_node}=[draw = black,rounded corners=4pt, basic_text]
+    \tikzstyle{wrapper}=[basic_node, inner sep=3pt]
+    \tikzstyle{hidden}=[draw=black!0,color=black!0]
+    \tikzstyle{faded}=[draw=black!20, color=black!20]
+    
+
+    \node [basic_node, text width=6cm, align=left] (AS) {
+         \scalebox{0.7}{
+            \parbox{\textwidth}{
+                \input{tikz/arbre_de_syntaxe.tex}
+            }
+        }
+    };
+
+    \node [basic_node, text width=4cm, align=left] (AST) [right=1cm of AS] {
+        \scalebox{0.7}{
+            \parbox{\textwidth}{
+                \input{tikz/arbre_de_syntaxe_abstraite.tex}
+            }
+        }
+    };
+ 
+    \draw [lien] (AS.north) to[out=45, in=135]  node[midway, above] {\textbf{Conversion en arbre de syntaxe abstraite}}  (AST.north west) ; 
+
+\end{tikzpicture}

@@ -1,39 +1,90 @@
 \subsection{Analyse Syntaxique}
 
 \begin{frame}
-    but de l'analyse syntaxique, transformer la liste de lexèmes en un arbre de syntaxe pui un arbre de syntaxe abstraite
+    \input{tikz/Lexèmes_vers_Arbre_Syntaxique.tex}
 \end{frame}
 
 \begin{frame}
-    algo LL1
+    \frametitle{Algorithme LL1\esp}
+
+    Nécessite:\\
+    \vspace{0.05cm}\\{
+    $\bullet$ Une grammaire LL (sans récursion gauche et sans ambigüité)\\
+    $\text{\textcolor{red}{\ding{55}}} \ \ \mathcal{A} \rightarrow \mathcal{A}a$\\
+    $\text{\textcolor{red}{\ding{55}}} \ \  \mathcal{A} \rightarrow a\mathcal{A}\mathcal{A} \ | \ \epsilon $\\}
+    \vspace{0.25cm}\\
+    {
+    $\bullet$ LL1: un seul lexème suffit à choisir la règle de production\\
+    $\mathcal{A} \rightarrow a\mathcal{A} | b\mathcal{A} $
+}
+
+
 \end{frame}
 
 %%%%%%%%%%%%%%%% pas pour Erwan
 \begin{frame}
-    tableau des first 
+    \frametitle{Tableau des premiers et suivants\esp}
+    (1): ProgrammeFortran -> ProgramMC NomProgramme NouvelleLigne Print EndProgramMC NomProgramme\\
+    (2): Print -> PrintMC Espace Asterisque Virgule Espace Chaine ParamListe\\
+    (3): ParamListe -> Virgule Espace Chaine ParamListe\\
+    (4): ParamListe ->  Epsilon \\
+
+    \begin{tabular}{|c|c|c|}
+    \hline
+        & Premiers & Suivants\\  
+    \hline
+    ProgrammeFortran & $\{ProgramMC\}$ & $\{\$\}$ \\
+    \hline
+    Print & $\{PrintMC\}$ & $\{EndProgramMC\}$ \\
+    \hline
+    ParamListe & $\{ Virgule, \epsilon \}$ & $\{EndProgramMC\}$\\
+    \hline
+
+    \end{tabular}
+
 \end{frame}
 
 \begin{frame}
-    tableau des follow 
+    \frametitle{Tableau de lecture\esp}
+    (1): ProgrammeFortran -> ProgramMC NomProgramme NouvelleLigne Print EndProgramMC NomProgramme\\
+    (2): Print -> PrintMC Espace Asterisque Virgule Espace Chaine ParamListe\\
+    (3): ParamListe -> Virgule Espace Chaine ParamListe\\
+    (4): ParamListe ->  Epsilon \\\\
+    \vspace{0.25cm}
+    {
+    \footnotesize
+    \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+        \hline
+        & PrintMC & ProgramMC & EndProgramMC & Virgule \\
+        \hline
+        ProgrammeFortran & & 1 & & \\
+        \hline
+        Print & 2 & & & \\
+        \hline
+        ParamListe & & & 4 & 3 \\
+        \hline
+    \end{tabular}
+    }
+
 \end{frame}
+
+
 
 \begin{frame}
-    partie de pseudo code de LL1 ou sinon expliquer l'idée
+    \frametitle{Arbre de syntaxe\esp}
+    \begin{center}
+        \scalebox{1.2}{
+        \input{tikz/arbre_de_syntaxe.tex}
+        }
+        
+    \end{center}
 \end{frame}
+
+
 
 \begin{frame}
-    on exécute l'algo sur hello world avec des \lin{\ pause}
-    pour construire l'arbre de syntaxe
+    \frametitle{Conversion en arbre de syntaxe abstraite\esp}
+    \input{tikz/Arbre_Syntaxique_vers_AST.tex}
 \end{frame}
 
 
-\begin{frame}
-    on montre le vrai arbre de syntaxe pour hello world
-\end{frame}
-
-\begin{frame}
-    c'est pourquoi on transforme l'arbre de syntaxe en un arbre de syntaxe abstraite qui ne dépend pas du langage d'entrée  
-    je dis que c'est Erwan qui l'a fait
-    l'idée est de reconnaitre des motifs tels que l'assignation d'une variable ou bien l'affichage en console mais en oubliant la syntaxe utilisée  
-    exemple de l'arbre de syntaxe en entrée et de l'ast en sortie  
-\end{frame}

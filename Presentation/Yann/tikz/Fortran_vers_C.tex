@@ -11,7 +11,7 @@
     \node [basic_node, text width=5cm, align=left] (Fortran) {
         \scalebox{0.8}{
             \parbox{\textwidth}{
-                \textbf{Programe Fortran}
+                \textbf{Programme Fortran}
                 \inputminted[firstline=1, lastline=3,firstnumber=1]{fortran}{static/HelloWorld.f90}
             }
         }
@@ -20,12 +20,12 @@
     \node [basic_node, text width=5cm, align=left] (C) [right=1cm of Fortran] {
             \scalebox{0.8}{
             \parbox{\textwidth}{
-                \textbf{Programe C}
+                \textbf{Programme C}
 
         \inputminted[firstline=1, lastline=4,firstnumber=1]{c}{static/HelloWorld.c}
             } } 
     };
  
-    \draw [lien] (Fortran.north) to[out=45, in=135]  node[midway, above] {transpilation}   (C.north west) ; 
+    \draw [lien] (Fortran.north) to[out=45, in=135]  node[midway, above] {\textbf{Transpilation}}   (C.north west) ; 
 
 \end{tikzpicture}

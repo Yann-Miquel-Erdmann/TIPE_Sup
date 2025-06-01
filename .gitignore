@@ -14,6 +14,7 @@ _build
 
 research_docs
 
+
 # pour le Tex
 Presentation/*/*
 !Presentation/*/*.tex

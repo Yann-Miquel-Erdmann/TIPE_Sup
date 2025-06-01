@@ -1,13 +1,12 @@
 \tikzstyle{feuille}=[draw, rectangle, inner sep = 0.12cm]
 \tikzstyle{noeud}=[draw, rectangle,rounded corners, minimum width= 0.64cm, line width = 1pt]
-
 \begin{tikzpicture}[
         baseline=(base), 
-        level/.style={sibling distance = 2.5cm/#1, level distance = 1cm},
-        every node/.style={scale=0.5}
+        level/.style={sibling distance = 2cm/#1, level distance = 1cm},
+        every node/.style={scale=0.6, font=\footnotesize}
     ]
     
-    \node[ noeud] {ProgrammeFortran}
+    \node[ noeud] {Programme}
     child { 
         node[ noeud] (base) {ProgramMC}
         child { 
@@ -20,11 +19,11 @@
             node [ feuille] {\textbackslash n}
         }
     }
-    child { 
+    child [ level distance=2cm]{ 
         % node[ noeud] {Print\_star}
         % child { 
             node [ noeud] {Print}
-            child{
+            child {
                 node [noeud] {PrintMC}
                 child { 
                     node [ feuille] {print}

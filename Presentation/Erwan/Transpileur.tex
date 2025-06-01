@@ -1,0 +1,21 @@
+
+
+\newcounter{i}
+\forloop{i}{0}{\value{i} < 10}{
+    \ifcase\arabic{i}
+      {}
+      \or
+      \input{analyse_lexicale.tex}
+      \or
+      \input{analyse_syntaxique.tex}
+      \or
+      \input{syntaxe_abstraite.tex}
+      \or
+      \input{conversion.tex}
+      \else
+      \begin{frame}
+        \frametitle{Transpileur}
+        \input{figures/transpiler_etape_\arabic{i}.tex}
+      \end{frame}
+    \fi
+}

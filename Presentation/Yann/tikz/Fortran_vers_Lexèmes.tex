@@ -1,0 +1,28 @@
+\begin{tikzpicture}
+    
+    \tikzstyle{lien} = [->, >=latex]
+    \tikzstyle{basic_text}=[text width=2cm, text badly centered]
+    \tikzstyle{basic_node}=[draw = black,rounded corners=4pt, basic_text]
+    \tikzstyle{wrapper}=[basic_node, inner sep=3pt]
+    \tikzstyle{hidden}=[draw=black!0,color=black!0]
+    \tikzstyle{faded}=[draw=black!20, color=black!20]
+    
+
+    \node [basic_node, text width=5cm, align=left] (Fortran) {
+        \scalebox{0.8}{
+            \parbox{\textwidth}{
+                \textbf{Programme Fortran}
+                \inputminted[firstline=1, lastline=3,firstnumber=1]{fortran}{static/HelloWorld.f90}
+            }
+        }
+    };
+
+    \node [basic_node, text width=5cm, align=left] (Lexemes) [right=1cm of Fortran] {
+         \begin{minted}[stripall, linenos]{ocaml}
+            [Programme; NomProgramme('hello'); NouvelleLigne; Print; Asterisque; Virgule; Chaine('"Hello World!"'); NouvelleLigne; FinProgramme; NomProgramme('hello')]
+         \end{minted}
+    };
+ 
+    \draw [lien] (Fortran.north) to[out=45, in=135]  node[midway, above] {\textbf{Analyse lexicale}}   (Lexemes.north west) ; 
+
+\end{tikzpicture}
