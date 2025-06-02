@@ -14,70 +14,43 @@
         }
     }
     child { 
-        node[ noeud] {NouvelleLigne}
+        node[ noeud] {NLigne}
         child { 
             node [ feuille] {\textbackslash n}
         }
     }
     child [ level distance=2cm]{ 
-        % node[ noeud] {Print\_star}
-        % child { 
-            node [ noeud] {Print}
-            child {
-                node [noeud] {PrintMC}
-                child { 
-                    node [ feuille] {print}
-                }
+        node [ noeud] {Print}
+        child {
+            node [noeud] {PrintMC}
+            child { 
+                node [ feuille] {print}
             }
-            child{
-                node [noeud] {Espace}
-                child { 
-                    node [feuille] {\space}
-                }
+        }
+        child{
+            node [noeud] {Asterisque}
+            child { 
+                node [feuille] {*}
             }
-            child{
-                node [noeud] {Asterisque}
-                child { 
-                    node [feuille] {*}
-                }
+        }
+        child{
+            node [noeud] {Virgule}
+            child { 
+                node [feuille] {,}
             }
-            child{
-                node [noeud] {Virgule}
-                child { 
-                    node [feuille] {,}
-                }
+        }
+        child{
+            node [noeud] {Chaine}
+            child { 
+                node [feuille] {"Hello World"}
             }
-            child{
-                node [noeud] {Espace}
-                child { 
-                    node [feuille] {\space}
-                }
+        }
+        child{
+            node [noeud] {Paramliste}
+            child { 
+                node [feuille] {$\varepsilon$}
             }
-            child{
-                node [noeud] {Chaine}
-                child { 
-                    node [feuille] {"Hello World"}
-                }
-            }
-            child{
-                node [noeud] {Paramliste}
-                child { 
-                   node [feuille] {$\epsilon$}
-                }
-            }
-        % }
-        % child { 
-        %     node [ noeud] {NouvelleLigne}
-        %     child { 
-        %         node [ feuille] {\textbackslash n}
-        %     }  
-        % }
-        % child { 
-        %     node [ noeud] {Print\_star}
-        %     child { 
-        %         node [ feuille] {$\epsilon$}
-        %     }
-        % }
+        }
     }
     child { 
         node[ noeud] {EndProgramMC}

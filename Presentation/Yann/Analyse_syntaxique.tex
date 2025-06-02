@@ -10,12 +10,13 @@
     Nécessite:\\
     \vspace{0.05cm}\\{
     $\bullet$ Une grammaire LL (sans récursion gauche et sans ambigüité)\\
-    $\text{\textcolor{red}{\ding{55}}} \ \ \mathcal{A} \rightarrow \mathcal{A}a$\\
-    $\text{\textcolor{red}{\ding{55}}} \ \  \mathcal{A} \rightarrow a\mathcal{A}\mathcal{A} \ | \ \epsilon $\\}
+    $\text{\textcolor{red}{\ding{55}}} \ \ \mathcal{X} \rightarrow \mathcal{X}a$\\
+    $\text{\textcolor{red}{\ding{55}}} \ \  \mathcal{X} \rightarrow a\mathcal{X}\mathcal{X} \ | \ \varepsilon  $\\}
     \vspace{0.25cm}\\
     {
     $\bullet$ LL1: un seul lexème suffit à choisir la règle de production\\
-    $\mathcal{A} \rightarrow a\mathcal{A} | b\mathcal{A} $
+    $\mathcal{X} \rightarrow a\mathcal{X} | b\mathcal{X} $\\
+    $\mathcal{Y} \rightarrow c\mathcal{Y} | d\mathcal{Y} $
 }
 
 
@@ -24,7 +25,8 @@
 %%%%%%%%%%%%%%%% pas pour Erwan
 \begin{frame}
     \frametitle{Tableau des premiers et suivants\esp}
-    (1): ProgrammeFortran -> ProgramMC NomProgramme NouvelleLigne Print EndProgramMC NomProgramme\\
+    \small
+    (1): Programme -> ProgramMC NomProgramme NouvelleLigne Print EndProgramMC NomProgramme\\
     (2): Print -> PrintMC Espace Asterisque Virgule Espace Chaine ParamListe\\
     (3): ParamListe -> Virgule Espace Chaine ParamListe\\
     (4): ParamListe ->  Epsilon \\
@@ -33,11 +35,11 @@
     \hline
         & Premiers & Suivants\\  
     \hline
-    ProgrammeFortran & $\{ProgramMC\}$ & $\{\$\}$ \\
+    Programme & $\{ProgramMC\}$ & $\{\$\}$ \\
     \hline
     Print & $\{PrintMC\}$ & $\{EndProgramMC\}$ \\
     \hline
-    ParamListe & $\{ Virgule, \epsilon \}$ & $\{EndProgramMC\}$\\
+    ParamListe & $\{ Virgule, \varepsilon \}$ & $\{EndProgramMC\}$\\
     \hline
 
     \end{tabular}
@@ -46,7 +48,8 @@
 
 \begin{frame}
     \frametitle{Tableau de lecture\esp}
-    (1): ProgrammeFortran -> ProgramMC NomProgramme NouvelleLigne Print EndProgramMC NomProgramme\\
+    \small
+    (1): Programme -> ProgramMC NomProgramme NouvelleLigne Print EndProgramMC NomProgramme\\
     (2): Print -> PrintMC Espace Asterisque Virgule Espace Chaine ParamListe\\
     (3): ParamListe -> Virgule Espace Chaine ParamListe\\
     (4): ParamListe ->  Epsilon \\\\
@@ -57,7 +60,7 @@
         \hline
         & PrintMC & ProgramMC & EndProgramMC & Virgule \\
         \hline
-        ProgrammeFortran & & 1 & & \\
+        Programme & & 1 & & \\
         \hline
         Print & 2 & & & \\
         \hline

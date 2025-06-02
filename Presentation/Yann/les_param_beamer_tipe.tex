@@ -65,12 +65,14 @@
 %-----------------------------------------------
 %Plan qui s'affiche au début de chaque section %|
 \AtBeginSection[]{                             %|
-\begin{frame}[plain,allowframebreaks]                           %|
-\frametitle{Plan\\[0.1cm]\esp}                     %|
+\begin{frame}[plain] 
+                          %|
+\frametitle{Plan\esp}                     %|
 \tableofcontents[                              %|
 currentsection,                                %|
 hideothersubsections,                          %|
-subsubsectionstyle=hide
+subsubsectionstyle=hide,
+sections={1-5}
 ]                       %|
 \addtocounter{framenumber}{-1}                 %|
 \end{frame}}                                   %|
