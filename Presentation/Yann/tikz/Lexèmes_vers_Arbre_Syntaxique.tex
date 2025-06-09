@@ -9,14 +9,22 @@
     
 
     \node [basic_node, text width=4cm, align=left] (Lexemes) {
-         \begin{minted}[stripall, fontsize=\tiny]{ocaml}
-            [Programme; NomProgramme('hello'); NouvelleLigne; Print; Asterisque; Virgule; Chaine('"Hello World!"'); NouvelleLigne; FinProgramme; NomProgramme('hello')]
-         \end{minted}
+        \scalebox{0.7}{
+            \parbox{\textwidth}{
+
+                \textbf{Liste de lexèmes}
+                \inputminted{ocaml}{static/lexemes.ml}
+
+            }
+        }
     };
 
     \node [basic_node, text width=6cm, align=left] (AS) [right=1cm of Lexemes] {
-        \scalebox{0.7}{
+        
+         \scalebox{0.7}{
             \parbox{\textwidth}{
+                \textbf{Arbre de syntaxe}
+
                 \input{tikz/arbre_de_syntaxe.tex}
             }
         }

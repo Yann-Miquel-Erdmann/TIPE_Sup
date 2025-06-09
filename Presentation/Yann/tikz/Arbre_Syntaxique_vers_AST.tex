@@ -9,8 +9,11 @@
     
 
     \node [basic_node, text width=6cm, align=left] (AS) {
+        
          \scalebox{0.7}{
             \parbox{\textwidth}{
+                \textbf{Arbre de syntaxe}
+
                 \input{tikz/arbre_de_syntaxe.tex}
             }
         }
@@ -19,6 +22,8 @@
     \node [basic_node, text width=4cm, align=left] (AST) [right=1cm of AS] {
         \scalebox{0.7}{
             \parbox{\textwidth}{
+                \textbf{Arbre de syntaxe abstraite}
+
                 \input{tikz/arbre_de_syntaxe_abstraite.tex}
             }
         }

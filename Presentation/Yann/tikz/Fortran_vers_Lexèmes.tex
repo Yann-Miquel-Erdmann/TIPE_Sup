@@ -12,15 +12,20 @@
         \scalebox{0.8}{
             \parbox{\textwidth}{
                 \textbf{Programme Fortran}
-                \inputminted[firstline=1, lastline=3,firstnumber=1]{fortran}{static/HelloWorld.f90}
+                \inputminted{fortran}{static/HelloWorld.f90}
             }
         }
     };
 
     \node [basic_node, text width=5cm, align=left] (Lexemes) [right=1cm of Fortran] {
-         \begin{minted}[stripall, linenos]{ocaml}
-            [Programme; NomProgramme('hello'); NouvelleLigne; Print; Asterisque; Virgule; Chaine('"Hello World!"'); NouvelleLigne; FinProgramme; NomProgramme('hello')]
-         \end{minted}
+        \scalebox{0.7}{
+            \parbox{\textwidth}{
+
+                \textbf{Liste de lexèmes}
+                \inputminted{ocaml}{static/lexemes.ml}
+
+            }
+        }
     };
  
     \draw [lien] (Fortran.north) to[out=45, in=135]  node[midway, above] {\textbf{Analyse lexicale}}   (Lexemes.north west) ; 
