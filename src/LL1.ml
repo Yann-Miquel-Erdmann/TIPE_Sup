@@ -1,5 +1,4 @@
 open GrammarFunctions
-
 open Symbols
 
 module SymbolSet = Set.Make (struct
@@ -203,7 +202,12 @@ let analyse_LL1_of_symbol (g : grammar) (text : (symbol * string) list)
       | [] -> failwith "no text to match in analyse_LL1, text is empty"
       | t1 :: q ->
           if fst t1 = s then (Noeud (t1, []), q)
-          else failwith "the expected terminal does not match the text"
+          else (
+            print_endline
+              ("Got "
+              ^ string_of_symbol (fst t1)
+              ^ " but expected " ^ string_of_symbol s);
+            failwith "the expected terminal does not match the text")
     else
       (* print_endline "is non_terminal"; *)
       match text with

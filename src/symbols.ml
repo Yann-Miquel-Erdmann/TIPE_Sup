@@ -113,7 +113,6 @@ type non_terminal =
   | TypeParamValue
   | Expr_Or_Asterisk
   | TypeSpec
-  | KindSelector_opt
   | ExecutableConstruct
   | ReturnStmt
   | ActionStmt
@@ -132,13 +131,13 @@ type non_terminal =
   | LoopControl
   | Comma_IntRealDpExpression_opt
   | IntRealDpExpression
+  | IfConstructEndif
   | IfConstruct
-  | ElseIfStmt_ExecutionPartConstruct_star_star
+  | ElseIfConstruct_star
+  | ElseIfConstruct
+  | IfConstruct_opt
   | ExecutionPartConstruct_star
-  | ElseStmt_ExecutionPartConstruct_star_opt
   | IfThenStmt
-  | ElseIfStmt
-  | ElseStmt
   | EndIfStmt
   | ExecutionPartConstruct
   | ScalarLogicalExpr
@@ -203,10 +202,10 @@ let repr_of_terminal (t : terminal) : string =
   | Dcon -> "(([0-9]+\\.[0-9]*)|(\\.[0-9]+))(d(\\+|-)?[0-9]+)"
   | Rcon -> "(([0-9]+\\.[0-9]*)|(\\.[0-9]+))(e(\\+|-)?[0-9]+)?"
   | Icon -> "[0-9]+(e(\\+|-)?[0-9]+)?"
-  | SconSingle -> "['](~[']|'')*[']"
-  | SconDouble -> "[\"](~[\"]|\"\")*[\"]"
+  | SconSingle -> "'(~'|'')*'"
+  | SconDouble -> "\"(~\"|\"\")*\""
   | Ident -> "[A-Za-z][A-Za-z0-9_]*"
-  | EOS -> "((!~[\\n]*)?\\n[ ]*)+"
+  | EOS -> "((!~(\\n)*)?\\n( )*)+"
   | Return -> "return"
   | Result -> "result"
   | Contains -> "contains"
@@ -375,7 +374,6 @@ let string_of_non_terminal (nt : non_terminal) : string =
   | TypeParamValue -> "TypeParamValue"
   | Expr_Or_Asterisk -> "Expr_Or_Asterisk"
   | TypeSpec -> "TypeSpec"
-  | KindSelector_opt -> "KindSelector_opt"
   | ExecutableConstruct -> "ExecutableConstruct"
   | ReturnStmt -> "ReturnStmt"
   | ActionStmt -> "ActionStmt"
@@ -394,13 +392,13 @@ let string_of_non_terminal (nt : non_terminal) : string =
   | LoopControl -> "LoopControl"
   | Comma_IntRealDpExpression_opt -> "Comma_IntRealDpExpression_opt"
   | IntRealDpExpression -> "IntRealDpExpression"
+  | IfConstructEndif -> "IfConstructEndif"
   | IfConstruct -> "IfConstruct"
-  | ElseIfStmt_ExecutionPartConstruct_star_star -> "ElseIfStmt_ExecutionPartConstruct_star_star"
+  | ElseIfConstruct_star -> "ElseIfConstruct_star"
+  | ElseIfConstruct -> "ElseIfConstruct"
+  | IfConstruct_opt -> "IfConstruct_opt"
   | ExecutionPartConstruct_star -> "ExecutionPartConstruct_star"
-  | ElseStmt_ExecutionPartConstruct_star_opt -> "ElseStmt_ExecutionPartConstruct_star_opt"
   | IfThenStmt -> "IfThenStmt"
-  | ElseIfStmt -> "ElseIfStmt"
-  | ElseStmt -> "ElseStmt"
   | EndIfStmt -> "EndIfStmt"
   | ExecutionPartConstruct -> "ExecutionPartConstruct"
   | ScalarLogicalExpr -> "ScalarLogicalExpr"

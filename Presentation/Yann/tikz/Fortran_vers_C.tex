@@ -18,12 +18,12 @@
     };
 
     \node [basic_node, text width=5cm, align=left] (C) [right=1cm of Fortran] {
-            \scalebox{0.8}{
+        \scalebox{0.8}{
             \parbox{\textwidth}{
                 \textbf{Programme C}
-
-        \inputminted[firstline=1, lastline=4,firstnumber=1]{c}{static/HelloWorld.c}
-            } } 
+                \inputminted[firstline=1, lastline=4,firstnumber=1]{c}{static/HelloWorld.c}
+            }
+        } 
     };
  
     \draw [lien] (Fortran.north) to[out=45, in=135]  node[midway, above] {\textbf{Transpilation}}   (C.north west) ; 

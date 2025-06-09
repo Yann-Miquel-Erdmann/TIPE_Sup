@@ -3,14 +3,13 @@
 
 ! qsdvmkqsdv
 
-
-real function func(arg1, arg2) 
-
+function func(arg1, arg2)
+    real func
     real :: arg1
     real :: arg2
     func = arg1+arg2*3
 
-end function func
+end function
 
 
 
@@ -18,7 +17,7 @@ end function func
 program addNumbers
     ! ceci est un commentaire
     
-    real :: a, b, res
+    real :: a = 1, b = 2, res = 3
     real :: func
     integer :: n 
     n = 7

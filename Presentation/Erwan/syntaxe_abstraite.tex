@@ -1,5 +1,27 @@
 \section{Conversion vers la syntaxe abstraite}
 
+% TODO ajouter ici une diapo pour expliquer le but général (arbre donné trop gros + pas adapté pour les autres langages que fortran, on le transforme en un arbre de syntaxe abstraite)
+
+\begin{frame}
+  \frametitle{Principe général de l'abstraction}
+  \begin{tikzpicture}
+    \node (0, 0) {}; % to align the scope
+    \begin{scope} [shift={(5.5, 0)}]
+      \node [basic_node, text width=7cm, align=left] (Fortran) {
+        \scalebox{0.8}{\textbf{Arbre de syntaxe}} 
+        \scalebox{0.6}{\input{tikz/arbre_de_syntaxe.tex}}
+      };
+
+      \node [basic_node, text width=5.5cm, below=1cm of Fortran, align=left] (C) {
+        \scalebox{0.8}{\textbf{Arbre de syntaxe abstraite}}
+        \scalebox{0.9}{\input{tikz/arbre_de_syntaxe_abstraite.tex}}
+      };
+
+      \draw [lien, thick] (Fortran.south) to (C.north);
+    \end{scope}
+  \end{tikzpicture}
+\end{frame}
+
 \newcommand{\drawcross}[1]{
   \draw[cross] (#1.north west) -- (#1.south east);
   \draw[cross] (#1.north east) -- (#1.south west);
@@ -9,9 +31,7 @@
 
 %--------------expilaction---------------
 \subsection{Fonctionnement}
-\addtocounter{framenumber}{-1}
 \begin{frame}
-  \addtocounter{framenumber}{1}
   \frametitle{Syntaxe abstraite\esp}
 
   \begin{tikzpicture}
@@ -19,9 +39,9 @@
     \node[frame] (frame) {};
     \tikzstyle{faded}=[draw=black!20,color=black!20]
     
-    \node[below=4cm of frame.west, anchor=west, box, faded] (state_1) {\scriptsize Analyse Lexicale};
-    \node[right=0.5cm of state_1.east, anchor=west, box, faded] (state_2) {\scriptsize Analyse Syntaxique};
-    \node[right=0.5cm of state_2.east, anchor=west, box] (state_3) {\scriptsize Syntaxe Abstraite};
+    \node[below=4cm of frame.west, anchor=west, box, faded] (state_1) {\scriptsize Analyse lexicale};
+    \node[right=0.5cm of state_1.east, anchor=west, box, faded] (state_2) {\scriptsize Analyse syntaxique};
+    \node[right=0.5cm of state_2.east, anchor=west, box] (state_3) {\scriptsize Abstraction};
     \node[right=0.5cm of state_3.east, anchor=west, box, faded] (state_4) {\scriptsize Conversion};
     \draw[->, >=latex, faded] (state_1.east) -- (state_2.west);
     \draw[->, >=latex, faded] (state_2.east) -- (state_3.west);
@@ -54,7 +74,7 @@
       \only<4->{\drawcross{7}}
       
       \only<5->{
-        \node[right=0.8cm of 3, font=\ttfamily] {=>};
+        \node[right=0.8cm of 3, font=\ttfamily] {$\Rightarrow$};
 
         \node [right=2.5cm of 0] (_0) {S};
         \node [below=0.3cm of _0] (_1) {A};
@@ -71,7 +91,7 @@
       \only<6->{\draw[->, >=latex, draw=blue, very thick] (_4) [bend right] to (_0);}
 
       \only<7>{
-        \node[right=0.8cm of _4, font=\ttfamily] {=>};
+        \node[right=0.8cm of _4, font=\ttfamily] {$\Rightarrow$};
 
         \node [right=2.5cm of _1] (__0) {S};
         \node [below=0.3cm of __0.south west] (__1) {A};
@@ -91,105 +111,13 @@
 \end{frame}
 
 %----------un exemple----------
-\addtocounter{framenumber}{-1}
 \subsection{Un exemple}
 \begin{frame}
-  \addtocounter{framenumber}{1}
-  \begin{tikzpicture}
-    \begin{scope}
-      \node{};
-    \end{scope}
-    \begin{scope}[shift={(2, 0)}]
-      \node[font=\scriptsize] (0) at (-3, 0) {Programme};
-  
-      \node[font=\scriptsize] (1) at (-6, -1) {ProgramMC};
-      \node[font=\scriptsize] (2) at (-4, -1) {NouvelleLigne};
-      \node[font=\scriptsize] (3) at (-2, -1) {Print};
-      \node[font=\scriptsize] (4) at (1, -1) {EndProgramMC};
-      
-      \node[font=\scriptsize] (5) at (-6, -2) {'program'};
-      \node[font=\scriptsize] (6) at (-4, -2) {'\\n'};
-      \node[font=\scriptsize] (7) at (-6.5, -3) {PrintMC};
-      \node[font=\scriptsize] (8) at (-5, -3) {Espace};
-      \node[font=\scriptsize] (9) at (-3.5, -3) {Asterisque};
-      \node[font=\scriptsize] (10) at (-2, -3) {Virgule};
-      \node[font=\scriptsize] (11) at (-1, -3) {Espace};
-      \node[font=\scriptsize] (12) at (0, -3) {Chaine};
-      \node[font=\scriptsize] (13) at (1.5, -3) {ParamListe};
-      \node[font=\scriptsize] (14) at (1, -2){'\lin{end} program'};
-      
-      \node[font=\scriptsize] (15) at (-6.5, -4) {'print'};
-      \node[font=\scriptsize] (16) at (-5, -4) {' '};
-      \node[font=\scriptsize] (17) at (-3.5, -4) {'*'};
-      \node[font=\scriptsize] (18) at (-2, -4) {','};
-      \node[font=\scriptsize] (19) at (-1, -4) {' '};
-      \node[font=\scriptsize] (20) at (0, -4) {'"Hello World"'};
-      \node[font=\scriptsize] (21) at (1.5, -4) {Epsilon};
-    \end{scope}
-    
-    \draw (0) -- (1);
-    \draw (0) -- (2);
-    \draw (0) -- (3);
-    \draw (0) -- (4);
-
-    \draw (1) -- (5);
-    \draw (2) -- (6);
-    \draw (3) -- (7);
-    \draw (3) -- (8);
-    \draw (3) -- (9);
-    \draw (3) -- (10);
-    \draw (3) -- (11);
-    \draw (3) -- (12);
-    \draw (3) -- (13);
-    \draw (4) -- (14);
-    
-    \draw (7) -- (15);
-    \draw (8) -- (16);
-    \draw (9) -- (17);
-    \draw (10) -- (18);
-    \draw (11) -- (19);
-    \draw (12) -- (20);
-    \draw (13) -- (21);
-
-    \only<2>{
-      \drawcross{1}
-      \drawcross{5}
-      \drawcross{6}
-      \drawcross{7}
-      \drawcross{15}
-      \drawcross{8}
-      \drawcross{16}
-      \drawcross{9}
-      \drawcross{17}
-      \drawcross{11}
-      \drawcross{19}
-      \drawcross{13}
-      \drawcross{21}
-      \drawcross{4}
-      \drawcross{14}
-      \drawcross{10}
-      \drawcross{18}
-      \drawcross{12}
-    }
-  \end{tikzpicture}
-
+  \scalebox{0.8}{\input{tikz/arbre_de_syntaxe2.tex}}
 \end{frame}
 
 \begin{frame}
-  \begin{tikzpicture}
-    \begin{scope}
-      \node{};
-    \end{scope}
-    \begin{scope}[shift={(5, 0)}]
-      \node[font=\scriptsize] (0) at (0, 0) {Programme};
-      \node[font=\scriptsize] (1) at (-1, -1) {NouvelleLigne};
-      \node[font=\scriptsize] (2) at (1, -1) {Print};
-      \node[font=\scriptsize] (3) at (1, -2) {'"Hello World"'};
-    \end{scope}
-    
-    \draw (0) -- (1);
-    \draw (0) -- (2);
-    \draw (2) -- (3);
-  \end{tikzpicture}
-
+  \begin{center}
+    \input{tikz/arbre_de_syntaxe_abstraite.tex}
+  \end{center}
 \end{frame}

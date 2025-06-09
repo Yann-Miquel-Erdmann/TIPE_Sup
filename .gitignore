@@ -5,9 +5,9 @@ out.f90
 src/*.o
 src/*.cm[aio]
 src/preprocessing/*.o
-src/preprocessing/*.cm[aio]
+src/preprocessing/*.cm[aiox]
 src/prebuild/*.o
-src/prebuild/*.cm[aio]
+src/prebuild/*.cm[aiox]
 .*
 !.gitignore
 _build

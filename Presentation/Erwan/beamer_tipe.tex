@@ -44,11 +44,11 @@ La transpilation de Fortran vers C
 }
 
 \author{
-\large 
-Présentation de \important{Erwan FALAUX-BACHELOT}\\[0.2cm]
-\footnotesize
-travail réalisé avec \couleur{Yann MIQUEL--ERDMANN}\\[0.4cm]
-\vspace*{-1.2cm}
+    \large 
+    Présentation de \important{Erwan FALAUX-BACHELOT} (n° \important{33293})\\[0.2cm]
+    \footnotesize
+    travail réalisé avec \couleur{Yann MIQUEL--ERDMANN}\\[0.4cm]
+    \vspace*{-1.2cm}
 } 
 
 %entre crochet la short date pour l'en-tête
@@ -59,25 +59,45 @@ travail réalisé avec \couleur{Yann MIQUEL--ERDMANN}\\[0.4cm]
 
 %------------------------------------------------
 \begin{frame}[plain]
-\titlepage 
-\addtocounter{framenumber}{-1}
+    \titlepage 
+    \addtocounter{framenumber}{-1}
 \end{frame}
 
 %------------------------------------------------
 \title[Transpilation : conversion du Fortran vers le C]{
-Une page de titre avec logos :\\
-{\large mais sans les affectations détaillées des auteurs }
+    Une page de titre avec logos :\\
+    {\large mais sans les affectations détaillées des auteurs }
 }
 
 
 \begin{frame}
     \frametitle{Introduction\esp}
 
-	Le Fortran: 
-    \includegraphics[scale=0.03]{static/Fortran_logo.svg.png}\\
-    Créé par: IMB en 1954\\
-    Utilisé surtout dans les supercalculateurs
+	\vspace{1.5cm}
+    \begin{minipage}[t]{0.48\textwidth}
+        \includegraphics[scale=0.05]{static/Fortran_logo.svg.png}\\
+        \textbf{Le Fortran:}\\ 
+        Créé par:  John Backus, IBM\\
+        Créé en:   1957\\
+        Dernière version en: 2023\\
+        Rang sur Github: $41^{\text{ème}}$
+    \end{minipage}
+    \hspace*{0.2cm}
+    \begin{minipage}[t]{0.48\textwidth}
+        \includegraphics[scale=0.05]{static/C_logo.png}\\
+        \textbf{Le C:}\\
+        Créé par: Dennis Ritchie et \\Kenneth Thompson, Bell Labs\\
+        Créé en:  1972\\
+        Dernière version en: 2024\\
+        Rang sur Github: $9^{\text{ème}}$
+    \end{minipage}
+    
+	\vspace*{1.9cm}
 
+    \bandeauREF{
+        \hspace*{0.2cm}\textbf{Logo Fortran}: \url{https://commons.wikimedia.org/wiki/File:Fortran_logo.svg}\\
+        \hspace*{0.2cm}\textbf{Logo C}: \url{https://commons.wikimedia.org/wiki/File:C_Logo.png}
+    }
 
 \end{frame}
 
@@ -85,9 +105,13 @@ Une page de titre avec logos :\\
 \begin{frame}
     \frametitle{Problématique\esp}
     
-    Comment implémenter une conversion rapide de programmes Fortran en programmes C?
+    \begin{center}
+        \textbf{Comment implémenter une conversion rapide de programmes Fortran en programmes C?}
+    \end{center}
 
 \end{frame}
+
+
 
 \tikzstyle{lien} = [->, >=latex]
 \tikzstyle{basic_text}=[text width=2cm, text badly centered]
@@ -96,6 +120,12 @@ Une page de titre avec logos :\\
 \tikzstyle{hidden}=[draw=black!0,color=black!0]
 \tikzstyle{faded}=[draw=black!20, color=black!20]
 
+\input{Transpilation.tex}
+
+\begin{frame}
+    \frametitle{Un peu plus de détails}
+    \input{tikz/transpiler_simple.tex}
+\end{frame}
 \input{analyse_lexicale.tex}
 \input{analyse_syntaxique.tex}
 \input{syntaxe_abstraite.tex}
@@ -108,9 +138,33 @@ Une page de titre avec logos :\\
 \end{frame}
 
 \begin{frame}
+\noindent
+\begin{minipage}[t]{0.47\textwidth}
+    \scalebox{0.4}{
+        \parbox{\textwidth}{
+            \inputminted{fortran}{static/fibonacci.f90}
+        }
+    }
+    
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.52\textwidth}
+    \scalebox{0.4}{
+        \color{black!20}
+        \vrule{\color{white}a}
+        \color{black}
+        \parbox{\textwidth}{
+            \inputminted{c}{static/fibonacci.c}
+        }
+    }
+\end{minipage}
+
+\end{frame}
+
+\begin{frame}
     \frametitle{Conclusion\esp}
 
-    \point Conversion rapide\\
+    \point Conversion rapide: 10000 transpilations du fibonacci en 21s\\
     \point Partie automatisée rend la création moins pénible\\
     \point Processus interchangeable avec les langages souhaités
 

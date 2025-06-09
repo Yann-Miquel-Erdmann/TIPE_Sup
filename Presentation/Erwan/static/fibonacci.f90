@@ -1,9 +1,9 @@
 program fibonacci
     integer :: n, result_rec
     n = 10
-    ! Appel de la fonction récursive
+    ! Appel de la fonction recursive
     result_rec = fibonacci_rec(n)
-    print *, "Fibonacci (récursif) de ", n, " est ", result_rec
+    print *, "Fibonacci (recursif) de ", n, " est ", result_rec
 
 contains
     recursive function fibonacci_rec(n) result(retval)
@@ -11,7 +11,7 @@ contains
         integer :: retval
 
         if (n < 0) then
-            print *, "Erreur: n ne doit pas être négatif"
+            print *, "Erreur: n ne doit pas etre negatif"
             retval = -1
             return
         end if
@@ -21,9 +21,9 @@ contains
         else if (n == 1) then
             retval = 1
             return
+        else
+            retval = fibonacci_rec(n - 1) + fibonacci_rec(n - 2)
         end if
-
-        retval = fibonacci_rec(n - 1) + fibonacci_rec(n - 2)
 
     end function fibonacci_rec
 end program fibonacci

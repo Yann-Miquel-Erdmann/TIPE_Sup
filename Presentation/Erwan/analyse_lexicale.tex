@@ -1,4 +1,33 @@
-\section{Analyse Lexicale}
+\section{Analyse lexicale}
+
+\begin{frame}
+  \frametitle{Principe général de l'analyse lexicale}
+  \begin{tikzpicture}
+    \node (0, 0) {}; % to align the scope
+    \begin{scope} [shift={(5.5, 0)}]
+      \node [basic_node, text width=4.5cm, align=left] (Fortran){
+      \scalebox{0.8}{
+        \parbox{\textwidth}{
+          \textbf{Programme Fortran}
+          \inputminted[firstline=1, lastline=3, linenos=false]{fortran}{static/HelloWorld.f90}
+        }
+      }
+    };
+
+    \node [basic_node, text width=10.5cm, align=left, below=1cm of Fortran] (C) {
+      \scalebox{0.8}{
+        \parbox{\textwidth}{
+          \textbf{Liste de lexèmes}
+          \footnotesize\inputminted[frame=none, xleftmargin=0pt, linenos=false, breaklines=false]{ocaml}{static/listeLexemes.ml}
+        }
+      } 
+    };
+
+    \draw [lien, thick] (Fortran.south) to (C.north);
+    \end{scope}
+  \end{tikzpicture}
+\end{frame}
+
 %----------------regex----------------
 \subsection{Les expressions régulières}
 \tikzstyle{box}=[draw, rounded corners=4pt]
@@ -15,9 +44,9 @@
     \node[below=0.5cm of frame.north west, anchor=north west] (1) {\point Expressions régulières};
     \node[faded, below=0.6cm of 1.west, anchor=west] {\point Automates};
     
-    \node[below=4cm of frame.west, anchor=west, box] (state_1) {\scriptsize Analyse Lexicale};
-    \node[right=0.5cm of state_1.east, anchor=west, box, faded] (state_2) {\scriptsize Analyse Syntaxique};
-    \node[right=0.5cm of state_2.east, anchor=west, box, faded] (state_3) {\scriptsize Syntaxe Abstraite};
+    \node[below=4cm of frame.west, anchor=west, box] (state_1) {\scriptsize Analyse lexicale};
+    \node[right=0.5cm of state_1.east, anchor=west, box, faded] (state_2) {\scriptsize Analyse syntaxique};
+    \node[right=0.5cm of state_2.east, anchor=west, box, faded] (state_3) {\scriptsize Abstraction};
     \node[right=0.5cm of state_3.east, anchor=west, box, faded] (state_4) {\scriptsize Conversion};
     \draw[->, >=latex, faded] (state_1.east) -- (state_2.west);
     \draw[->, >=latex, faded] (state_2.east) -- (state_3.west);
@@ -42,10 +71,20 @@
     % exemple
     \only<4->{
       \node[below=1.6cm of 1.south] (exmpl) {$\ \ $exemple:};
-      \node[below, anchor=north east] (part1) at (exmpl.south) {[0 - 9]+}; \node[right=-3pt] (part2) at (part1.east) {(.[0 - 9]+)?};
+      \node[below, anchor=north east] (part0) at (exmpl.south) {[0 - 9]$^+$}; \node[right = -4pt] (part1) at (part0.east) {$\cdot$}; \node[right=-4pt] (part2) at (part1.east) {(,[0 - 9]$^+$)?};
     }
-    \only<5->{\node[fit=(part1), draw=blue, rounded corners=4pt, inner sep=-1.5pt]{};}
-    \only<6->{\node[fit=(part2), draw=red, rounded corners=4pt, inner sep=-1.5pt]{};}
+    \node<5->[fit=(part0), draw=blue, rounded corners=4pt, inner sep=-1.5pt]{};
+    \node<6->[fit=(part2), draw=red, rounded corners=4pt, inner sep=-1.5pt]{};
+    \only<7->{
+      \node[below=1cm of part0.west, anchor=west] (part10) {"};
+      \node[right = -4pt] (part11) at (part10.east) {$\cdot$};
+      \node[right = -4pt] (part12) at (part11.east) {($\sim$")$^*$};
+      \node[right = -4pt] (part13) at (part12.east) {$\cdot$};
+      \node[right = -4pt] (part14) at (part13.east) {"};
+    }
+    \node<8->[fit=(part10), draw=vertFonce, rounded corners=4pt, inner sep=-1.5pt]{};
+    \node<8->[fit=(part14), draw=vertFonce, rounded corners=4pt, inner sep=-1.5pt]{};
+    \node<9->[fit=(part12), draw=violet, rounded corners=4pt, inner sep=-1.5pt]{};
   \end{tikzpicture}
 \end{frame}
 
@@ -60,9 +99,9 @@
     \node[below=0.5cm of frame.north west, anchor=north west, faded] (1) {\point Expressions régulières};
     \node[below=0.6cm of 1.west, anchor=west] (_2) {\point Automates};
 
-    \node[below=4cm of frame.west, anchor=west, box] (state_1) {\scriptsize Analyse Lexicale};
-    \node[right=0.5cm of state_1.east, anchor=west, box, faded] (state_2) {\scriptsize Analyse Syntaxique};
-    \node[right=0.5cm of state_2.east, anchor=west, box, faded] (state_3) {\scriptsize Syntaxe Abstraite};
+    \node[below=4cm of frame.west, anchor=west, box] (state_1) {\scriptsize Analyse lexicale};
+    \node[right=0.5cm of state_1.east, anchor=west, box, faded] (state_2) {\scriptsize Analyse syntaxique};
+    \node[right=0.5cm of state_2.east, anchor=west, box, faded] (state_3) {\scriptsize Abstraction};
     \node[right=0.5cm of state_3.east, anchor=west, box, faded] (state_4) {\scriptsize Conversion};
     \draw[->, >=latex, faded] (state_1.east) -- (state_2.west);
     \draw[->, >=latex, faded] (state_2.east) -- (state_3.west);
@@ -71,7 +110,7 @@
     \draw[dashed] (frame.south east) -- (state_1.north east);
 
     % definition
-    \only<1->{\node[right=4.5 cm of _2] (def) {$(\Sigma, Q, I, F, \delta)$};}
+    \only<1->{\node[right=4.5 cm of _2] (def) {$\mathcal{A}=(\Sigma, Q, I, F, \delta)$};}
     \only<2->{
       \begin{scope}
         [below=1.5cm of def.south, scale=0.8, every node/.style={scale=0.8}, initial text=, shift={(0.8, 0)}]
@@ -81,12 +120,12 @@
         \node [state, accepting right] (3) [right=1cm of 2] {3};
 
         \path[->]
-        (1) edge              node [above] {a} (2)
-        (2) edge              node [above] {c} (3)
-        (2) edge [loop above] node [above] {b} (2)
+        (1) edge              node [above] {$a$} (2)
+        (2) edge              node [above] {$c$} (3)
+        (2) edge [loop above] node [above] {$b$} (2)
         ;
       \end{scope}
-      \node [below=2.2cm of def.south, font=\scriptsize] {automate pour $a\cdot b*\cdot c$};
+      \node [below=2.2cm of def.south, font=\scriptsize] {Automate qui a pour langage $a\cdot b^*\cdot c$};
     }
   \end{tikzpicture}
 \end{frame}
@@ -95,13 +134,14 @@
 \begin{frame}
   \frametitle{Les automates: étude d'un exemple\esp}
   \begin{tikzpicture}
+    \node at (3, 0) (text) {\ttfamily print*,"Hello World"};
     \begin{scope}
-      [every node/.style={scale=0.6,font=\Large}, scale=0.4, initial text=]
+      [every node/.style={scale=0.6,font=\Large}, scale=0.4, initial text=, shift={(-13, 0)}]
       \tikzstyle{style0}=[]
       \tikzstyle{style1}=[]
       \tikzstyle{style2}=[]
       \tikzstyle{style3}=[]
-      \tikzstyle{style4}=[]
+      \tikzstyle{style4}=[] 
       \tikzstyle{style5}=[]
       \tikzstyle{style6}=[]
       \tikzstyle{style7}=[]
@@ -148,12 +188,11 @@
       
       
       (0) edge                node[above] {$"$} (6)
-      (6) edge [loop above]   node[above] {\large$[a-z]|[A-Z]|[0-9]|\_$} (6)
+      (6) edge [loop above]   node[above] {$\sim"$} (6)
       (6) edge                node[above] {$"$} (7)
       ;
       
     \end{scope}
-    \node at (8, 0) (text) {\ttfamily print*,"Hello World"};
     \foreach \step in {1,2,...,6}{
       \node<\step>[right=\fpeval{\step * 5.75 - 3}pt of text.west, draw=blue, fill=blue!20, inner sep=0pt, minimum width=2pt, minimum height=10pt]{};
     }
@@ -166,21 +205,29 @@
     \foreach \step in {11,12,...,24}{
       \node<\step>[right=\fpeval{(\step - 3) * 5.75 - 3}pt of text.west, draw=blue, fill=blue!20, inner sep=0pt, minimum width=2pt, minimum height=10pt]{};
     }
-    \node at (1, -2.3) (lb) {\texttt{res = [}};
-    \only<7-> {\node [right] at (lb.east) (lb) {\texttt{'print'}};}
-    \only<9-> {\node [right] at (lb.east) (lb) {\texttt{, '*'}};}
-    \only<11-> {\node [right] at (lb.east) (lb) {\texttt{, ','}};}
-    \only<25> {\node [right] at (lb.east) (lb) {\texttt{, '"Hello World"'}};}
-    \node [right] at (lb.east) {\texttt{]}};
+
+    \node at (0, -2.3) (lb) {
+      \begin{minipage}{\textwidth}
+        \only<1-6>  {\inputminted[firstline=1, lastline=1, linenos=false, frame=none, xleftmargin=0pt,]{ocaml}{static/exampleList.ml}}
+        \only<7-8>  {\inputminted[firstline=2, lastline=2, linenos=false, frame=none, xleftmargin=0pt,]{ocaml}{static/exampleList.ml}}
+        \only<9-10> {\inputminted[firstline=3, lastline=3, linenos=false, frame=none, xleftmargin=0pt,]{ocaml}{static/exampleList.ml}}
+        \only<11-24>{\inputminted[firstline=4, lastline=4, linenos=false, frame=none, xleftmargin=0pt,]{ocaml}{static/exampleList.ml}}
+        \only<25>   {\inputminted[firstline=5, lastline=5, linenos=false, frame=none, xleftmargin=0pt,]{ocaml}{static/exampleList.ml}}
+      \end{minipage}
+    };
   \end{tikzpicture}
 \end{frame}
 
-%------------étude d'un exemple-----------
+%------------étude d'un exemple 2-----------
 \begin{frame}
   \frametitle{Les automates: étude d'un exemple\esp}
   \begin{tikzpicture}
+    \node at (1, 0) (text1) {\ttfamily print};
+    \node [right=-5pt of text1.east, anchor=west] (text2) {\ttfamily print};
+    \node [right=-5pt of text2.east, anchor=west] (text3) {\ttfamily "Hello World"};
+
     \begin{scope}
-      [every node/.style={scale=0.6,font=\Large}, scale=0.4, initial text=]
+      [every node/.style={scale=0.6,font=\Large}, scale=0.4, initial text=, shift={(-13, 0)}]
       \tikzstyle{style0}=[]
       \tikzstyle{style1}=[]
       \tikzstyle{style2}=[]
@@ -215,24 +262,23 @@
       
       
       (0) edge [style2]             node[above] {$"$} (6)
-      (6) edge [loop above, style2] node[above] {\large$[a-z]|[A-Z]|[0-9]|\_$} (6)
+      (6) edge [loop above, style2] node[above] {$\sim"$} (6)
       (6) edge [style2]             node[above] {$"$} (7)
       ;
       
     \end{scope}
-    \node at (6, 0) (text1) {\ttfamily print};
-    \node [right=-5pt of text1.east, anchor=west] (text2) {\ttfamily print};
-    \node [right=-5pt of text2.east, anchor=west] (text3) {\ttfamily "Hello World"};
     
     \node<2>[fit=(text1), draw=blue, fill=blue!20, inner sep=-2pt, fill opacity=0.5]{};
     \node<3>[fit=(text2), draw=blue, fill=blue!20, inner sep=-2pt, fill opacity=0.5]{};
     \node<4>[fit=(text3), draw=blue, fill=blue!20, inner sep=-2pt, fill opacity=0.5]{};
-    
-    \node at (1, -2.3) (lb) {\texttt{res = [}};
-    \only<2-> {\node [right] at (lb.east) (lb) {\texttt{'print'}};}
-    \only<3-> {\node [right] at (lb.east) (lb) {\texttt{, 'print'}};} 
-    \only<4> {\node [right] at (lb.east) (lb) {\texttt{, '"Hello World"'}};}
-    \node [right] at (lb.east) {\texttt{]}};
+    \node at (0, -2.3) {
+      \begin{minipage}{\textwidth}
+        \only<1>{\inputminted[firstline=1, lastline=1, linenos=false, frame=none, xleftmargin=0pt,]{ocaml}{static/exampleList.ml}}
+        \only<2>{\inputminted[firstline=2, lastline=2, linenos=false, frame=none, xleftmargin=0pt,]{ocaml}{static/exampleList.ml}}
+        \only<3>{\inputminted[firstline=6, lastline=6, linenos=false, frame=none, xleftmargin=0pt,]{ocaml}{static/exampleList.ml}}
+        \only<4>{\inputminted[firstline=7, lastline=7, linenos=false, frame=none, xleftmargin=0pt,]{ocaml}{static/exampleList.ml}}
+      \end{minipage}
+    };
   \end{tikzpicture}
 \end{frame}
 
@@ -248,9 +294,9 @@
     \begin{scope}
       \node[frame] (frame) {};
       
-      \node[below=4cm of frame.west, anchor=west, box] (state_1) {\scriptsize Analyse Lexicale};
-      \node[right=0.5cm of state_1.east, anchor=west, box, faded] (state_2) {\scriptsize Analyse Syntaxique};
-      \node[right=0.5cm of state_2.east, anchor=west, box, faded] (state_3) {\scriptsize Syntaxe Abstraite};
+      \node[below=4cm of frame.west, anchor=west, box] (state_1) {\scriptsize Analyse lexicale};
+      \node[right=0.5cm of state_1.east, anchor=west, box, faded] (state_2) {\scriptsize Analyse syntaxique};
+      \node[right=0.5cm of state_2.east, anchor=west, box, faded] (state_3) {\scriptsize Abstraction};
       \node[right=0.5cm of state_3.east, anchor=west, box, faded] (state_4) {\scriptsize Conversion};
       \draw[->, >=latex, faded] (state_1.east) -- (state_2.west);
       \draw[->, >=latex, faded] (state_2.east) -- (state_3.west);
@@ -269,10 +315,10 @@
         \node[state, right=0.5cm of 2, accepting right] (4) {4};
 
         \path[->]
-        (0) edge node[above] {a} (1)
-        (0) edge node[above] {a} (2)
-        (1) edge node[above] {b} (3)
-        (2) edge node[above] {c} (4)
+        (0) edge node[above] {$a$} (1)
+        (0) edge node[above] {$a$} (2)
+        (1) edge node[above] {$b$} (3)
+        (2) edge node[above] {$c$} (4)
         ;
       
       \end{scope}
@@ -286,12 +332,14 @@
         \node[state, accepting right] (4) at (3.3, -1) {4};
 
         \path[->]
-        (0) edge node[above] {a} (1)
-        (1) edge node[above] {b} (3)
-        (1) edge node[above] {c} (4)
+        (0) edge node[above] {$a$} (1)
+        (1) edge node[above] {$b$} (3)
+        (1) edge node[above] {$c$} (4)
         ;
       \end{scope}
     }
+
+    \node<1> at (0, -2.7) {\footnotesize Deux automates reconnaisants $(ab)|(ac)$};
 
     \only<2>{
       \begin{scope}[shift={(2.5, 0)}]

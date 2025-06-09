@@ -2,11 +2,11 @@
 
 #load "symbols.cmo"
 
-#load "abstract_tokens.cmo"
+#load "abstractTokens.cmo"
 
 #load "grammar.cmo"
 
-#load "grammar_functions.cmo"
+#load "grammarFunctions.cmo"
 
 #load "regex.cmo"
 
@@ -14,13 +14,15 @@
 
 #load "LL1.cmo"
 
-#load "convert_to_abstract.cmo"
+#load "convertToAbstract.cmo"
 
 #load "environnement.cmo"
 
 #load "detAutomaton.cmo"
 
 #load "traduction.cmo"
+
+#load "bibliotheques.cmo"
 
 #load "traductionC.cmo"
 
@@ -32,10 +34,24 @@
 
 #use "LL1.ml"
 
-#use "convert_to_abstract.ml"
+#use "convertToAbstract.ml"
 
-#use "det_automaton.ml"
+#use "detAutomaton.ml"
 
-let l = exec_of_file syntax_automate_det "tests/Fortran/test.f90"
-let a = analyse_LL1 Grammar.grammar l
-let t = convert_to_abstract a
+#use "environnement.ml"
+
+let stress_test (n : int) =
+  let start = Sys.time () in
+  for i = 0 to n do
+    let l = exec_of_file syntax_automate_det "tests/Fortran/fibonacci.f90" in
+    let a = analyse_LL1 Grammar.grammar l in
+    ignore (convert_to_abstract a)
+  done;
+  print_float (Sys.time () -. start);
+  print_newline ()
+
+let generate_ast (filename : string) =
+  let l = exec_of_file syntax_automate_det ("tests/Fortran/" ^ filename) in
+  let a = analyse_LL1 Grammar.grammar l in
+  convert_to_abstract a
+(*create_env_from_ast t*)

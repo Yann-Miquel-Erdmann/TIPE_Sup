@@ -33,7 +33,7 @@ type syntax =
   | Size
   | For
   | Step
-  (* v---only for post-processing---v *)
+  (* v---only for post-processing purposes---v *)
   | Out
   | Subroutine
 

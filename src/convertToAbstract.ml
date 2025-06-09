@@ -2,19 +2,36 @@ open AbstractTokens
 open LL1
 open Symbols
 
-(** écrase les noeuds à écraser à partir de [t] et l'ajoute à ceux de la liste
-    [l] (pour remonter des arguments par exemple) *)
-let flatten (t : ast) (l : ast list) : ast list =
-  let rec aux (t : ast) (out : ast list) : ast list =
+(** écrase l'entièreté de l'arbre [t] pour enlever les Noeud ToFlatten *)
+let global_flatten (t : ast) : ast =
+  let rec aux (t : ast) : ast list =
     match t with
-    | Noeud (ToFlatten, []) -> out
-    | Noeud (ToFlatten, x :: q) ->
-        (* vide l'entièreté des éléments de x dans out puis ceux de q *)
-        let out = aux x out in
-        aux (Noeud (ToFlatten, q)) out
-    | _ -> t :: out
+    | Noeud (ToFlatten, l) ->
+        List.rev
+          (List.fold_left
+             (fun acc x ->
+               match aux x with
+               | [] -> acc
+               | [ x1 ] -> x1 :: acc
+               | l1 -> List.rev_append l1 acc)
+             [] l)
+    | Noeud (t, l) ->
+        [
+          Noeud
+            ( t,
+              List.rev
+                (List.fold_left
+                   (fun acc x ->
+                     match aux x with
+                     | [] -> acc
+                     | [ x1 ] -> x1 :: acc
+                     | l1 -> List.rev_append l1 acc)
+                   [] l) );
+        ]
   in
-  List.rev_append (aux t []) l
+  match aux t with
+  | [ x ] -> x
+  | _ -> failwith "Il ne peut y avoir qu'un seul Program_Root"
 
 (** convertis l'arbre de syntaxe abstrait [t] pour que les fonctions, dont le
     nom est stocké au fur et à mesure dans [curr_func], aient leur valeur de
@@ -22,12 +39,48 @@ let flatten (t : ast) (l : ast list) : ast list =
 let rec link_return_function (t : ast) (return_val : string option) : ast =
   match t with
   | Noeud (Syntax Function, l) ->
+      let (opt : ast list option ref) = ref None in
       let name, l =
         List.fold_left
           (fun (_name, _l) (x : ast) ->
             match x with
             | Noeud (Name s, []) when _name = "" -> (s, x :: _l)
-            | Noeud (Syntax Out, [ Noeud (Name s, []) ]) -> (s, _l)
+            | Noeud (Syntax Out, []) -> (
+                match !opt with
+                | Some
+                    [ Noeud (NewLine, []); Noeud (t, [ Noeud (Name "", []) ]) ]
+                  ->
+                    ( _name,
+                      List.rev_append
+                        ([
+                           Noeud (NewLine, []);
+                           Noeud (t, [ Noeud (Name _name, []) ]);
+                         ]
+                          : ast list)
+                        _l )
+                | Some l1 -> (_name, List.rev_append l1 _l)
+                | _ -> (_name, _l))
+            | Noeud (Syntax Out, [ Noeud (Name s, []) ]) -> (
+                match !opt with
+                | Some
+                    [ Noeud (NewLine, []); Noeud (t, [ Noeud (Name _, []) ]) ]
+                  ->
+                    ( s,
+                      List.rev_append
+                        ([
+                           Noeud (NewLine, []); Noeud (t, [ Noeud (Name s, []) ]);
+                         ]
+                          : ast list)
+                        _l )
+                | Some l1 -> (s, List.rev_append l1 _l)
+                | None -> (s, _l))
+            | Noeud (Syntax Out, [ Noeud (t, []) ]) ->
+                opt :=
+                  Some
+                    [
+                      Noeud (NewLine, []); Noeud (t, [ Noeud (Name _name, []) ]);
+                    ];
+                (_name, Noeud (t, []) :: _l)
             | _ -> (_name, x :: _l))
           ("", []) l
       in
@@ -56,8 +109,9 @@ let rec link_return_function (t : ast) (return_val : string option) : ast =
   | Noeud (x, l) ->
       Noeud (x, List.map (fun x -> link_return_function x return_val) l)
 
-(** puts the functions contained in the contains section of [t] a level above
-    the function instead of under to treat it properly later *)
+(** met les fonction contenue dans le morceau "contains" de [t] un niveau au
+    dessus des fonctions au lieu d'en dessous pour avoir un traitement correct
+*)
 let increase_function_level (t : ast) : ast =
   match t with
   | Noeud (ProgramRoot, l) ->
@@ -125,27 +179,24 @@ let convert_to_abstract (t : at) : ast =
         ] ->
             Noeud
               ( ProgramRoot,
-                convert_to_abstract_aux (Noeud ((Terminal EOS, s1), []))
-                :: flatten
-                     (convert_to_abstract_aux
-                        (Noeud
-                           ( ( NonTerminal
-                                 Function_or_Subroutine_star_MainProgram,
-                               s ),
-                             l )))
-                     [] )
+                [
+                  convert_to_abstract_aux (Noeud ((Terminal EOS, s1), []));
+                  convert_to_abstract_aux
+                    (Noeud
+                       ( (NonTerminal Function_or_Subroutine_star_MainProgram, s),
+                         l ));
+                ] )
         | [
          Noeud ((NonTerminal Function_or_Subroutine_star_MainProgram, s), l);
         ] ->
             Noeud
               ( ProgramRoot,
-                flatten
-                  (convert_to_abstract_aux
-                     (Noeud
-                        ( ( NonTerminal Function_or_Subroutine_star_MainProgram,
-                            s ),
-                          l )))
-                  [] )
+                [
+                  convert_to_abstract_aux
+                    (Noeud
+                       ( (NonTerminal Function_or_Subroutine_star_MainProgram, s),
+                         l ));
+                ] )
         | _ -> failwith "ExecutableProgram")
     | Noeud ((NonTerminal Function_or_Subroutine_star_MainProgram, _), l) -> (
         match l with
@@ -167,13 +218,6 @@ let convert_to_abstract (t : at) : ast =
                 ] )
         | [
          Noeud ((NonTerminal MainProgram, s), l);
-         Noeud
-           ( (NonTerminal Function_or_Subroutine_star, _),
-             [ Noeud ((Terminal E, _), []) ] );
-        ] ->
-            convert_to_abstract_aux (Noeud ((NonTerminal MainProgram, s), l))
-        | [
-         Noeud ((NonTerminal MainProgram, s), l);
          Noeud ((NonTerminal Function_or_Subroutine_star, s1), l1);
         ] ->
             Noeud
@@ -185,30 +229,20 @@ let convert_to_abstract (t : at) : ast =
                     (Noeud ((NonTerminal Function_or_Subroutine_star, s1), l1));
                 ] )
         | _ -> failwith "Function_or_Subroutine_star_MainProgram")
-    | Noeud ((NonTerminal Function_or_Subroutine_star, _), l) -> (
-        match l with
-        | [
-         Noeud ((NonTerminal Recursive_opt_Function_or_Subroutine, s), l);
-         Noeud
-           ( (NonTerminal Function_or_Subroutine_star, _),
-             [ Noeud ((Terminal E, _), []) ] );
-        ] ->
-            convert_to_abstract_aux
-              (Noeud ((NonTerminal Recursive_opt_Function_or_Subroutine, s), l))
-        | [
-         Noeud ((NonTerminal Recursive_opt_Function_or_Subroutine, s), l);
-         Noeud ((NonTerminal Function_or_Subroutine_star, s1), l1);
-        ] ->
-            Noeud
-              ( ToFlatten,
-                [
-                  convert_to_abstract_aux
-                    (Noeud
-                       ((NonTerminal Recursive_opt_Function_or_Subroutine, s), l));
-                  convert_to_abstract_aux
-                    (Noeud ((NonTerminal Function_or_Subroutine_star, s1), l1));
-                ] )
-        | _ -> failwith "Function_or_Subroutine_star")
+    | Noeud
+        ( (NonTerminal Function_or_Subroutine_star, _),
+          [
+            Noeud ((NonTerminal Recursive_opt_Function_or_Subroutine, s), l);
+            Noeud ((NonTerminal Function_or_Subroutine_star, s1), l1);
+          ] ) ->
+        Noeud
+          ( ToFlatten,
+            [
+              convert_to_abstract_aux
+                (Noeud ((NonTerminal Recursive_opt_Function_or_Subroutine, s), l));
+              convert_to_abstract_aux
+                (Noeud ((NonTerminal Function_or_Subroutine_star, s1), l1));
+            ] )
     | Noeud
         ( (NonTerminal Recursive_opt_Function_or_Subroutine, _),
           [
@@ -240,38 +274,53 @@ let convert_to_abstract (t : at) : ast =
         | [ Noeud ((Terminal Function, _), []) ] ->
             Noeud
               ( Syntax Function,
-                flatten
-                  (Noeud
-                     ( ToFlatten,
-                       [
-                         convert_to_abstract_aux
-                           (Noeud ((NonTerminal FunctionName, s1), l1));
-                         convert_to_abstract_aux
-                           (Noeud ((NonTerminal FunctionRange, s2), l2));
-                       ] ))
-                  [] )
+                [
+                  Noeud
+                    ( ToFlatten,
+                      [
+                        convert_to_abstract_aux
+                          (Noeud ((NonTerminal FunctionName, s1), l1));
+                        convert_to_abstract_aux
+                          (Noeud ((NonTerminal FunctionRange, s2), l2));
+                      ] );
+                ] )
         | _ ->
             Noeud
               ( Syntax Function,
-                flatten
-                  (Noeud
-                     ( ToFlatten,
-                       [
-                         convert_to_abstract_aux
-                           (Noeud ((NonTerminal FunctionPrefix, s), l));
-                         convert_to_abstract_aux
-                           (Noeud ((NonTerminal FunctionName, s1), l1));
-                         convert_to_abstract_aux
-                           (Noeud ((NonTerminal FunctionRange, s2), l2));
-                       ] ))
-                  [] ))
+                [
+                  Noeud
+                    ( ToFlatten,
+                      [
+                        convert_to_abstract_aux
+                          (Noeud ((NonTerminal FunctionPrefix, s), l));
+                        convert_to_abstract_aux
+                          (Noeud ((NonTerminal FunctionName, s1), l1));
+                        convert_to_abstract_aux
+                          (Noeud ((NonTerminal FunctionRange, s2), l2));
+                      ] );
+                ] ))
     | Noeud
         ( (NonTerminal FunctionPrefix, _),
           [
             Noeud ((NonTerminal TypeSpec, s), l);
             Noeud ((Terminal Function, _), []);
           ] ) ->
-        convert_to_abstract_aux (Noeud ((NonTerminal TypeSpec, s), l))
+        Noeud
+          ( Syntax Out,
+            [ convert_to_abstract_aux (Noeud ((NonTerminal TypeSpec, s), l)) ]
+          )
+    | Noeud ((NonTerminal TypeSpec, s), l) ->
+        let t =
+          match l with
+          | [ Noeud ((Terminal Integer, _), []) ] -> Syntax Integer
+          | [ Noeud ((Terminal Double, _), []) ] -> Syntax Double_precision
+          | [ Noeud ((Terminal Complex, _), []) ] -> Syntax Complex
+          | [ Noeud ((Terminal Logical, _), []) ] -> Syntax Logical
+          | [ Noeud ((Terminal Real, _), []) ] -> Syntax Real
+          | [ Noeud ((Terminal Character, _), []) ] -> Syntax Character
+          | _ -> failwith "TypeSpec"
+        in
+        Noeud (t, [])
     | Noeud
         ( (NonTerminal FunctionRange, _),
           [
@@ -281,53 +330,19 @@ let convert_to_abstract (t : at) : ast =
             Noeud ((NonTerminal BodyConstruct_star, s3), l3);
             Noeud ((NonTerminal EndFunctionStmt, s2), l2);
           ] ) ->
-        let n = ref [] in
-        let n3 = ref [] in
-        let n4 = ref [] in
-        (match l3 with
-        | [ Noeud ((Terminal E, _), []) ] -> ()
-        | _ ->
-            n3 :=
-              [
-                convert_to_abstract_aux
-                  (Noeud ((NonTerminal BodyConstruct_star, s3), l3));
-              ]);
-        (match l with
-        | [
-         Noeud ((Terminal LParenthesis, _), []);
-         Noeud
-           ( (NonTerminal FunctionPar_Comma_FunctionPar_star_opt, _),
-             [ Noeud ((Terminal E, _), []) ] );
-         Noeud ((Terminal RParenthesis, _), []);
-        ] ->
-            ()
-        | _ ->
-            n :=
-              [
-                convert_to_abstract_aux
-                  (Noeud ((NonTerminal FunctionParList, s), l));
-              ]);
-        (match l4 with
-        | [ Noeud ((Terminal E, _), []) ] -> ()
-        | _ ->
-            n4 :=
-              [
-                convert_to_abstract_aux
-                  (Noeud ((NonTerminal FunctionResult_opt, s4), l4));
-              ]);
         Noeud
           ( ToFlatten,
-            flatten
-              (Noeud (ToFlatten, !n))
-              (flatten
-                 (Noeud (ToFlatten, !n4))
-                 (convert_to_abstract_aux (Noeud ((Terminal EOS, s1), l1))
-                 :: flatten
-                      (Noeud (ToFlatten, !n3))
-                      [
-                        convert_to_abstract_aux
-                          (Noeud ((NonTerminal EndFunctionStmt, s2), l2));
-                      ])) )
+            [
+              convert_to_abstract_aux
+                (Noeud ((NonTerminal FunctionParList, s), l));
+              convert_to_abstract_aux
+                (Noeud ((NonTerminal FunctionResult_opt, s4), l4));
+              convert_to_abstract_aux (Noeud ((Terminal EOS, s1), l1));
+              convert_to_abstract_aux
+                (Noeud ((NonTerminal BodyConstruct_star, s3), l3));
+              convert_to_abstract_aux
+                (Noeud ((NonTerminal EndFunctionStmt, s2), l2));
+            ] )
     | Noeud
         ( (NonTerminal FunctionResult_opt, _),
           [
@@ -354,15 +369,6 @@ let convert_to_abstract (t : at) : ast =
         ( (NonTerminal FunctionPar_Comma_FunctionPar_star_opt, _),
           [
             Noeud ((NonTerminal FunctionPar, s), l);
-            Noeud
-              ( (NonTerminal Comma_FunctionPar_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] ) ->
-        convert_to_abstract_aux (Noeud ((NonTerminal FunctionPar, s), l))
-    | Noeud
-        ( (NonTerminal FunctionPar_Comma_FunctionPar_star_opt, _),
-          [
-            Noeud ((NonTerminal FunctionPar, s), l);
             Noeud ((NonTerminal Comma_FunctionPar_star, s1), l1);
           ] ) ->
         Noeud
@@ -372,16 +378,6 @@ let convert_to_abstract (t : at) : ast =
               convert_to_abstract_aux
                 (Noeud ((NonTerminal Comma_FunctionPar_star, s1), l1));
             ] )
-    | Noeud
-        ( (NonTerminal Comma_FunctionPar_star, _),
-          [
-            Noeud ((Terminal Comma, _), []);
-            Noeud ((NonTerminal FunctionPar, s), l);
-            Noeud
-              ( (NonTerminal Comma_FunctionPar_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] ) ->
-        convert_to_abstract_aux (Noeud ((NonTerminal FunctionPar, s), l))
     | Noeud
         ( (NonTerminal Comma_FunctionPar_star, _),
           [
@@ -417,11 +413,12 @@ let convert_to_abstract (t : at) : ast =
           ] ) ->
         Noeud
           ( Syntax Subroutine,
-            convert_to_abstract_aux (Noeud ((NonTerminal SubroutineName, s), l))
-            :: flatten
-                 (convert_to_abstract_aux
-                    (Noeud ((NonTerminal SubroutineRange, s1), l1)))
-                 [] )
+            [
+              convert_to_abstract_aux
+                (Noeud ((NonTerminal SubroutineName, s), l));
+              convert_to_abstract_aux
+                (Noeud ((NonTerminal SubroutineRange, s1), l1));
+            ] )
     | Noeud
         ( (NonTerminal SubroutineRange, _),
           [
@@ -430,43 +427,17 @@ let convert_to_abstract (t : at) : ast =
             Noeud ((NonTerminal BodyConstruct_star, s2), l2);
             Noeud ((NonTerminal EndSubroutineStmt, s3), l3);
           ] ) ->
-        let n = ref [] in
-        let n2 = ref [] in
-        (match l with
-        | [ Noeud ((Terminal E, _), []) ] -> ()
-        | _ ->
-            n :=
-              [
-                convert_to_abstract_aux
-                  (Noeud ((NonTerminal SubroutineParList_opt, s), l));
-              ]);
-        (match l2 with
-        | [ Noeud ((Terminal E, _), []) ]
-        | [
-            Noeud ((Terminal LParenthesis, _), []);
-            Noeud
-              ( (NonTerminal SubroutinePar_Comma_SubroutinePar_star_opt, _),
-                [ Noeud ((Terminal E, _), []) ] );
-            Noeud ((Terminal RParenthesis, _), []);
-          ] ->
-            ()
-        | _ ->
-            n2 :=
-              [
-                convert_to_abstract_aux
-                  (Noeud ((NonTerminal BodyConstruct_star, s2), l2));
-              ]);
         Noeud
           ( ToFlatten,
-            flatten
-              (Noeud (ToFlatten, !n))
-              (convert_to_abstract_aux (Noeud ((Terminal EOS, s1), l1))
-              :: flatten
-                   (Noeud (ToFlatten, !n2))
-                   [
-                     convert_to_abstract_aux
-                       (Noeud ((NonTerminal EndSubroutineStmt, s3), l3));
-                   ]) )
+            [
+              convert_to_abstract_aux
+                (Noeud ((NonTerminal SubroutineParList_opt, s), l));
+              convert_to_abstract_aux (Noeud ((Terminal EOS, s1), l1));
+              convert_to_abstract_aux
+                (Noeud ((NonTerminal BodyConstruct_star, s2), l2));
+              convert_to_abstract_aux
+                (Noeud ((NonTerminal EndSubroutineStmt, s3), l3));
+            ] )
     | Noeud
         ( (NonTerminal SubroutineParList_opt, _),
           [
@@ -481,15 +452,6 @@ let convert_to_abstract (t : at) : ast =
         ( (NonTerminal SubroutinePar_Comma_SubroutinePar_star_opt, _),
           [
             Noeud ((NonTerminal SubroutinePar, s), l);
-            Noeud
-              ( (NonTerminal Comma_SubroutinePar_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] ) ->
-        convert_to_abstract_aux (Noeud ((NonTerminal SubroutinePar, s), l))
-    | Noeud
-        ( (NonTerminal SubroutinePar_Comma_SubroutinePar_star_opt, _),
-          [
-            Noeud ((NonTerminal SubroutinePar, s), l);
             Noeud ((NonTerminal Comma_SubroutinePar_star, s1), l1);
           ] ) ->
         Noeud
@@ -500,16 +462,6 @@ let convert_to_abstract (t : at) : ast =
               convert_to_abstract_aux
                 (Noeud ((NonTerminal Comma_SubroutinePar_star, s1), l1));
             ] )
-    | Noeud
-        ( (NonTerminal Comma_SubroutinePar_star, _),
-          [
-            Noeud ((Terminal Comma, _), []);
-            Noeud ((NonTerminal SubroutinePar, s), l);
-            Noeud
-              ( (NonTerminal Comma_SubroutinePar_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] ) ->
-        convert_to_abstract_aux (Noeud ((NonTerminal SubroutinePar, s), l))
     | Noeud
         ( (NonTerminal Comma_SubroutinePar_star, _),
           [
@@ -545,26 +497,16 @@ let convert_to_abstract (t : at) : ast =
           ] ) ->
         Noeud
           ( Syntax Program,
-            flatten
-              (Noeud
-                 ( ToFlatten,
-                   [
-                     convert_to_abstract_aux
-                       (Noeud ((NonTerminal ProgramStmt, s), l));
-                     convert_to_abstract_aux
-                       (Noeud ((NonTerminal MainRange, s1), l1));
-                   ] ))
-              [] )
-    | Noeud
-        ( (NonTerminal Contains_Function, _),
-          [
-            Noeud ((Terminal Contains, _), []);
-            Noeud ((Terminal EOS, s), l);
-            Noeud
-              ( (NonTerminal FunctionSubprogram_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] ) ->
-        convert_to_abstract_aux (Noeud ((Terminal EOS, s), l))
+            [
+              Noeud
+                ( ToFlatten,
+                  [
+                    convert_to_abstract_aux
+                      (Noeud ((NonTerminal ProgramStmt, s), l));
+                    convert_to_abstract_aux
+                      (Noeud ((NonTerminal MainRange, s1), l1));
+                  ] );
+            ] )
     | Noeud
         ( (NonTerminal Contains_Function, _),
           [
@@ -579,24 +521,6 @@ let convert_to_abstract (t : at) : ast =
               convert_to_abstract_aux
                 (Noeud ((NonTerminal FunctionSubprogram_star, s1), l1));
             ] )
-    | Noeud
-        ( (NonTerminal FunctionSubprogram_star, _),
-          [
-            Noeud ((Terminal Recursive, _), []);
-            Noeud ((NonTerminal FunctionSubprogram, s), l);
-            Noeud
-              ( (NonTerminal FunctionSubprogram_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] )
-    | Noeud
-        ( (NonTerminal FunctionSubprogram_star, _),
-          [
-            Noeud ((NonTerminal FunctionSubprogram, s), l);
-            Noeud
-              ( (NonTerminal FunctionSubprogram_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] ) ->
-        convert_to_abstract_aux (Noeud ((NonTerminal FunctionSubprogram, s), l))
     | Noeud
         ( (NonTerminal FunctionSubprogram_star, _),
           [
@@ -641,24 +565,6 @@ let convert_to_abstract (t : at) : ast =
         ( (NonTerminal MainRange, _),
           [
             Noeud ((NonTerminal BodyConstruct, s), l);
-            Noeud
-              ( (NonTerminal BodyConstruct_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-            Noeud ((NonTerminal Contains_Function_opt_EndProgramStmt, s1), l1);
-          ] ) ->
-        Noeud
-          ( ToFlatten,
-            [
-              convert_to_abstract_aux
-                (Noeud ((NonTerminal BodyConstruct, s), l));
-              convert_to_abstract_aux
-                (Noeud
-                   ((NonTerminal Contains_Function_opt_EndProgramStmt, s1), l1));
-            ] )
-    | Noeud
-        ( (NonTerminal MainRange, _),
-          [
-            Noeud ((NonTerminal BodyConstruct, s), l);
             Noeud ((NonTerminal BodyConstruct_star, s2), l2);
             Noeud ((NonTerminal Contains_Function_opt_EndProgramStmt, s1), l1);
           ] ) ->
@@ -676,20 +582,6 @@ let convert_to_abstract (t : at) : ast =
               convert_to_abstract_aux
                 (Noeud
                    ((NonTerminal Contains_Function_opt_EndProgramStmt, s1), l1));
-            ] )
-    | Noeud
-        ( (NonTerminal BodyConstruct_star, _),
-          [
-            Noeud ((NonTerminal BodyConstruct, s), l);
-            Noeud
-              ( (NonTerminal BodyConstruct_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] ) ->
-        Noeud
-          ( ToFlatten,
-            [
-              convert_to_abstract_aux
-                (Noeud ((NonTerminal BodyConstruct, s), l));
             ] )
     | Noeud
         ( (NonTerminal BodyConstruct_star, _),
@@ -804,13 +696,7 @@ let convert_to_abstract (t : at) : ast =
         ( (NonTerminal TypeDeclarationStmt, _),
           [
             Noeud
-              ( (NonTerminal TypeSpec, _),
-                [
-                  Noeud ((Terminal Integer, _), []);
-                  Noeud
-                    ( (NonTerminal KindSelector_opt, _),
-                      [ Noeud ((Terminal E, _), []) ] );
-                ] );
+              ((NonTerminal TypeSpec, _), [ Noeud ((Terminal Integer, _), []) ]);
             Noeud ((NonTerminal Comma_AttrSpec_star, _), l1);
             Noeud ((NonTerminal TypeDecl_Assignment, s), l);
             Noeud ((Terminal EOS, s2), []);
@@ -833,10 +719,10 @@ let convert_to_abstract (t : at) : ast =
             [
               Noeud
                 ( Syntax Integer,
-                  flatten
-                    (convert_to_abstract_aux
-                       (Noeud ((NonTerminal TypeDecl_Assignment, s), l)))
-                    [] );
+                  [
+                    convert_to_abstract_aux
+                      (Noeud ((NonTerminal TypeDecl_Assignment, s), l));
+                  ] );
               convert_to_abstract_aux (Noeud ((Terminal EOS, s2), []));
             ] )
     | Noeud
@@ -873,12 +759,11 @@ let convert_to_abstract (t : at) : ast =
             [
               Noeud
                 ( Syntax Character,
-                  flatten
-                    (Noeud (ToFlatten, !n1))
-                    (flatten
-                       (convert_to_abstract_aux
-                          (Noeud ((NonTerminal TypeDecl_Assignment, s), l)))
-                       []) );
+                  [
+                    Noeud (ToFlatten, !n1);
+                    convert_to_abstract_aux
+                      (Noeud ((NonTerminal TypeDecl_Assignment, s), l));
+                  ] );
               convert_to_abstract_aux (Noeud ((Terminal EOS, s2), []));
             ] )
     | Noeud
@@ -901,13 +786,7 @@ let convert_to_abstract (t : at) : ast =
         ( (NonTerminal TypeDeclarationStmt, _),
           [
             Noeud
-              ( (NonTerminal TypeSpec, _),
-                [
-                  Noeud ((Terminal Complex, _), []);
-                  Noeud
-                    ( (NonTerminal KindSelector_opt, _),
-                      [ Noeud ((Terminal E, _), []) ] );
-                ] );
+              ((NonTerminal TypeSpec, _), [ Noeud ((Terminal Complex, _), []) ]);
             Noeud ((NonTerminal Comma_AttrSpec_star, _), l1);
             Noeud ((NonTerminal TypeDecl_Assignment, s), l);
             Noeud ((Terminal EOS, s2), []);
@@ -930,23 +809,17 @@ let convert_to_abstract (t : at) : ast =
             [
               Noeud
                 ( Syntax Complex,
-                  flatten
-                    (convert_to_abstract_aux
-                       (Noeud ((NonTerminal TypeDecl_Assignment, s), l)))
-                    [] );
+                  [
+                    convert_to_abstract_aux
+                      (Noeud ((NonTerminal TypeDecl_Assignment, s), l));
+                  ] );
               convert_to_abstract_aux (Noeud ((Terminal EOS, s2), []));
             ] )
     | Noeud
         ( (NonTerminal TypeDeclarationStmt, _),
           [
             Noeud
-              ( (NonTerminal TypeSpec, _),
-                [
-                  Noeud ((Terminal Logical, _), []);
-                  Noeud
-                    ( (NonTerminal KindSelector_opt, _),
-                      [ Noeud ((Terminal E, _), []) ] );
-                ] );
+              ((NonTerminal TypeSpec, _), [ Noeud ((Terminal Logical, _), []) ]);
             Noeud ((NonTerminal Comma_AttrSpec_star, _), l1);
             Noeud ((NonTerminal TypeDecl_Assignment, s), l);
             Noeud ((Terminal EOS, s2), []);
@@ -969,23 +842,16 @@ let convert_to_abstract (t : at) : ast =
             [
               Noeud
                 ( Syntax Logical,
-                  flatten
-                    (convert_to_abstract_aux
-                       (Noeud ((NonTerminal TypeDecl_Assignment, s), l)))
-                    [] );
+                  [
+                    convert_to_abstract_aux
+                      (Noeud ((NonTerminal TypeDecl_Assignment, s), l));
+                  ] );
               convert_to_abstract_aux (Noeud ((Terminal EOS, s2), []));
             ] )
     | Noeud
         ( (NonTerminal TypeDeclarationStmt, _),
           [
-            Noeud
-              ( (NonTerminal TypeSpec, _),
-                [
-                  Noeud ((Terminal Real, _), []);
-                  Noeud
-                    ( (NonTerminal KindSelector_opt, _),
-                      [ Noeud ((Terminal E, _), []) ] );
-                ] );
+            Noeud ((NonTerminal TypeSpec, _), [ Noeud ((Terminal Real, _), []) ]);
             Noeud ((NonTerminal Comma_AttrSpec_star, _), l1);
             Noeud ((NonTerminal TypeDecl_Assignment, s), l);
             Noeud ((Terminal EOS, s2), []);
@@ -1008,207 +874,15 @@ let convert_to_abstract (t : at) : ast =
             [
               Noeud
                 ( Syntax Real,
-                  flatten
-                    (convert_to_abstract_aux
-                       (Noeud ((NonTerminal TypeDecl_Assignment, s), l)))
-                    [] );
-              convert_to_abstract_aux (Noeud ((Terminal EOS, s2), []));
-            ] )
-    | Noeud
-        ( (NonTerminal TypeDeclarationStmt, _),
-          [
-            Noeud
-              ( (NonTerminal TypeSpec, _),
-                [
-                  Noeud ((Terminal Integer, _), []);
-                  Noeud ((NonTerminal KindSelector_opt, s1), l1);
-                ] );
-            Noeud ((NonTerminal Comma_AttrSpec_star, _), l3);
-            Noeud ((NonTerminal TypeDecl_Assignment, s), l);
-            Noeud ((Terminal EOS, s2), []);
-          ] ) ->
-        (match l3 with
-        | [ Noeud ((Terminal E, _), []) ]
-        | [
-            Noeud ((Terminal Comma, _), []);
-            Noeud
-              ( (NonTerminal AttrSpec, _),
-                [ Noeud ((NonTerminal Intent_in_out, _), _) ] );
-            Noeud
-              ( (NonTerminal Comma_AttrSpec_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] ->
-            ()
-        | _ -> failwith "TypeDeclarationStmt 6");
-        Noeud
-          ( ToFlatten,
-            [
-              Noeud
-                ( Syntax Integer,
-                  Noeud
-                    ( Syntax Size,
-                      [
-                        convert_to_abstract_aux
-                          (Noeud ((NonTerminal KindSelector_opt, s1), l1));
-                      ] )
-                  :: flatten
-                       (convert_to_abstract_aux
-                          (Noeud ((NonTerminal TypeDecl_Assignment, s), l)))
-                       [] );
-              convert_to_abstract_aux (Noeud ((Terminal EOS, s2), []));
-            ] )
-    | Noeud
-        ( (NonTerminal TypeDeclarationStmt, _),
-          [
-            Noeud
-              ( (NonTerminal TypeSpec, _),
-                [
-                  Noeud ((Terminal Complex, _), []);
-                  Noeud ((NonTerminal KindSelector_opt, s1), l1);
-                ] );
-            Noeud ((NonTerminal Comma_AttrSpec_star, _), l3);
-            Noeud ((NonTerminal TypeDecl_Assignment, s), l);
-            Noeud ((Terminal EOS, s2), []);
-          ] ) ->
-        (match l3 with
-        | [ Noeud ((Terminal E, _), []) ]
-        | [
-            Noeud ((Terminal Comma, _), []);
-            Noeud
-              ( (NonTerminal AttrSpec, _),
-                [ Noeud ((NonTerminal Intent_in_out, _), _) ] );
-            Noeud
-              ( (NonTerminal Comma_AttrSpec_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] ->
-            ()
-        | _ -> failwith "TypeDeclarationStmt 7");
-        Noeud
-          ( ToFlatten,
-            [
-              Noeud
-                ( Syntax Complex,
-                  Noeud
-                    ( Syntax Size,
-                      [
-                        convert_to_abstract_aux
-                          (Noeud ((NonTerminal KindSelector_opt, s1), l1));
-                      ] )
-                  :: flatten
-                       (convert_to_abstract_aux
-                          (Noeud ((NonTerminal TypeDecl_Assignment, s), l)))
-                       [] );
-              convert_to_abstract_aux (Noeud ((Terminal EOS, s2), []));
-            ] )
-    | Noeud
-        ( (NonTerminal TypeDeclarationStmt, _),
-          [
-            Noeud
-              ( (NonTerminal TypeSpec, _),
-                [
-                  Noeud ((Terminal Logical, _), []);
-                  Noeud ((NonTerminal KindSelector_opt, s1), l1);
-                ] );
-            Noeud ((NonTerminal Comma_AttrSpec_star, _), l3);
-            Noeud ((NonTerminal TypeDecl_Assignment, s), l);
-            Noeud ((Terminal EOS, s2), []);
-          ] ) ->
-        (match l3 with
-        | [ Noeud ((Terminal E, _), []) ]
-        | [
-            Noeud ((Terminal Comma, _), []);
-            Noeud
-              ( (NonTerminal AttrSpec, _),
-                [ Noeud ((NonTerminal Intent_in_out, _), _) ] );
-            Noeud
-              ( (NonTerminal Comma_AttrSpec_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] ->
-            ()
-        | _ -> failwith "TypeDeclarationStmt 8");
-        Noeud
-          ( ToFlatten,
-            [
-              Noeud
-                ( Syntax Logical,
-                  Noeud
-                    ( Syntax Size,
-                      [
-                        convert_to_abstract_aux
-                          (Noeud ((NonTerminal KindSelector_opt, s1), l1));
-                      ] )
-                  :: flatten
-                       (convert_to_abstract_aux
-                          (Noeud ((NonTerminal TypeDecl_Assignment, s), l)))
-                       [] );
-              convert_to_abstract_aux (Noeud ((Terminal EOS, s2), []));
-            ] )
-    | Noeud
-        ( (NonTerminal TypeDeclarationStmt, _),
-          [
-            Noeud
-              ( (NonTerminal TypeSpec, _),
-                [
-                  Noeud ((Terminal Real, _), []);
-                  Noeud ((NonTerminal KindSelector_opt, s1), l1);
-                ] );
-            Noeud ((NonTerminal Comma_AttrSpec_star, _), l3);
-            Noeud ((NonTerminal TypeDecl_Assignment, s), l);
-            Noeud ((Terminal EOS, s2), []);
-          ] ) ->
-        (match l3 with
-        | [ Noeud ((Terminal E, _), []) ]
-        | [
-            Noeud ((Terminal Comma, _), []);
-            Noeud
-              ( (NonTerminal AttrSpec, _),
-                [ Noeud ((NonTerminal Intent_in_out, _), _) ] );
-            Noeud
-              ( (NonTerminal Comma_AttrSpec_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] ->
-            ()
-        | _ -> failwith "TypeDeclarationStmt 9");
-        Noeud
-          ( ToFlatten,
-            [
-              Noeud
-                ( Syntax Real,
-                  Noeud
-                    ( Syntax Size,
-                      [
-                        convert_to_abstract_aux
-                          (Noeud ((NonTerminal KindSelector_opt, s1), l1));
-                      ] )
-                  :: flatten
-                       (convert_to_abstract_aux
-                          (Noeud ((NonTerminal TypeDecl_Assignment, s), l)))
-                       [] );
+                  [
+                    convert_to_abstract_aux
+                      (Noeud ((NonTerminal TypeDecl_Assignment, s), l));
+                  ] );
               convert_to_abstract_aux (Noeud ((Terminal EOS, s2), []));
             ] )
     | Noeud ((NonTerminal AttrSpec, _), [ Noeud ((Terminal Parameter, _), []) ])
       ->
         Noeud (Syntax Constant, [])
-    | Noeud
-        ( (NonTerminal Comma_EntityDecl_star, _),
-          [
-            Noeud ((Terminal Comma, _), []);
-            Noeud ((NonTerminal EntityDecl, s), l);
-            Noeud
-              ( (NonTerminal Comma_EntityDecl_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] )
-    | Noeud
-        ( (NonTerminal TypeDecl_Assignment, _),
-          [
-            Noeud ((Terminal Colon, _), []);
-            Noeud ((Terminal Colon, _), []);
-            Noeud ((NonTerminal EntityDecl, s), l);
-            Noeud
-              ( (NonTerminal Comma_EntityDecl_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] ) ->
-        convert_to_abstract_aux (Noeud ((NonTerminal EntityDecl, s), l))
     | Noeud
         ( (NonTerminal Comma_EntityDecl_star, _),
           [
@@ -1235,24 +909,6 @@ let convert_to_abstract (t : at) : ast =
                       (Noeud ((NonTerminal Comma_EntityDecl_star, s2), l2));
                   ] );
             ] )
-    | Noeud
-        ( (NonTerminal Comma_ObjectName_star, _),
-          [
-            Noeud ((Terminal Comma, _), []);
-            Noeud ((NonTerminal ObjectName, s), l);
-            Noeud
-              ( (NonTerminal Comma_ObjectName_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] )
-    | Noeud
-        ( (NonTerminal TypeDecl_Assignment, _),
-          [
-            Noeud ((NonTerminal ObjectName, s), l);
-            Noeud
-              ( (NonTerminal Comma_ObjectName_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] ) ->
-        convert_to_abstract_aux (Noeud ((NonTerminal ObjectName, s), l))
     | Noeud
         ( (NonTerminal Comma_ObjectName_star, _),
           [
@@ -1385,14 +1041,6 @@ let convert_to_abstract (t : at) : ast =
         ((NonTerminal Expr_Or_Asterisk, _), [ Noeud ((NonTerminal Expr, s), l) ])
       ->
         convert_to_abstract_aux (Noeud ((NonTerminal Expr, s), l))
-    | Noeud
-        ( (NonTerminal KindSelector_opt, _),
-          [
-            Noeud ((Terminal LParenthesis, _), []);
-            Noeud ((NonTerminal Expr, s), l);
-            Noeud ((Terminal RParenthesis, _), []);
-          ] ) ->
-        convert_to_abstract_aux (Noeud ((NonTerminal Expr, s), l))
     | Noeud ((NonTerminal ExecutableConstruct, _), l) -> (
         match l with
         | [ Noeud ((NonTerminal ActionStmt, s1), l1) ] ->
@@ -1409,12 +1057,12 @@ let convert_to_abstract (t : at) : ast =
                   convert_to_abstract_aux
                     (Noeud ((NonTerminal DoConstruct, s1), l1));
                 ] )
-        | [ Noeud ((NonTerminal IfConstruct, s1), l1) ] ->
+        | [ Noeud ((NonTerminal IfConstructEndif, s1), l1) ] ->
             Noeud
               ( ToFlatten,
                 [
                   convert_to_abstract_aux
-                    (Noeud ((NonTerminal IfConstruct, s1), l1));
+                    (Noeud ((NonTerminal IfConstructEndif, s1), l1));
                 ] )
         | [
          Noeud
@@ -1469,22 +1117,6 @@ let convert_to_abstract (t : at) : ast =
           [
             Noeud ((Terminal Print, _), []);
             Noeud ((NonTerminal FormatIdentifier, _), _);
-            Noeud
-              ( (NonTerminal Comma_OutputItemList_opt, _),
-                [ Noeud ((Terminal E, _), []) ] );
-            Noeud ((Terminal EOS, s2), []);
-          ] ) ->
-        Noeud
-          ( ToFlatten,
-            [
-              Noeud (Syntax Print, [ Noeud (Chaine "", []) ]);
-              convert_to_abstract_aux (Noeud ((Terminal EOS, s2), []));
-            ] )
-    | Noeud
-        ( (NonTerminal PrintStmt, _),
-          [
-            Noeud ((Terminal Print, _), []);
-            Noeud ((NonTerminal FormatIdentifier, _), _);
             Noeud ((NonTerminal Comma_OutputItemList_opt, s), l);
             Noeud ((Terminal EOS, s2), []);
           ] ) ->
@@ -1493,10 +1125,10 @@ let convert_to_abstract (t : at) : ast =
             [
               Noeud
                 ( Syntax Print,
-                  flatten
-                    (convert_to_abstract_aux
-                       (Noeud ((NonTerminal Comma_OutputItemList_opt, s), l)))
-                    [] );
+                  [
+                    convert_to_abstract_aux
+                      (Noeud ((NonTerminal Comma_OutputItemList_opt, s), l));
+                  ] );
               convert_to_abstract_aux (Noeud ((Terminal EOS, s2), []));
             ] )
     | Noeud
@@ -1506,24 +1138,6 @@ let convert_to_abstract (t : at) : ast =
             Noeud ((NonTerminal OutputItemList, s), l);
           ] ) ->
         convert_to_abstract_aux (Noeud ((NonTerminal OutputItemList, s), l))
-    | Noeud
-        ( (NonTerminal Comma_OutputItem_star, _),
-          [
-            Noeud ((Terminal Comma, _), []);
-            Noeud ((NonTerminal OutputItem, s), l);
-            Noeud
-              ( (NonTerminal Comma_OutputItem_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] )
-    | Noeud
-        ( (NonTerminal OutputItemList, _),
-          [
-            Noeud ((NonTerminal OutputItem, s), l);
-            Noeud
-              ( (NonTerminal Comma_OutputItem_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] ) ->
-        convert_to_abstract_aux (Noeud ((NonTerminal OutputItem, s), l))
     | Noeud
         ( (NonTerminal Comma_OutputItem_star, _),
           [
@@ -1556,48 +1170,6 @@ let convert_to_abstract (t : at) : ast =
           [
             Noeud ((Terminal Do, _), []);
             Noeud ((NonTerminal LoopControl_opt, _), l);
-            Noeud
-              ( (NonTerminal ExecutionPartConstruct_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-            Noeud ((NonTerminal EndDoStmt, _), _);
-          ] ) -> (
-        match l with
-        | [ Noeud ((Terminal EOS, s), []) ] ->
-            Noeud
-              ( Syntax While,
-                [
-                  Noeud (Booleen true, []);
-                  convert_to_abstract_aux (Noeud ((Terminal EOS, s), []));
-                ] )
-        | [
-         Noeud ((NonTerminal LoopControl, s1), l1); Noeud ((Terminal EOS, s), []);
-        ] -> (
-            match l1 with
-            | Noeud ((Terminal While, _), _) :: _ ->
-                Noeud
-                  ( Syntax While,
-                    flatten
-                      (convert_to_abstract_aux
-                         (Noeud ((NonTerminal LoopControl, s1), l1)))
-                      [
-                        convert_to_abstract_aux (Noeud ((Terminal EOS, s), []));
-                      ] )
-            | Noeud ((NonTerminal VariableName, _), _) :: _ ->
-                Noeud
-                  ( Syntax For,
-                    flatten
-                      (convert_to_abstract_aux
-                         (Noeud ((NonTerminal LoopControl, s1), l1)))
-                      [
-                        convert_to_abstract_aux (Noeud ((Terminal EOS, s), []));
-                      ] )
-            | _ -> failwith "BlockDoConstruct 1")
-        | _ -> failwith "BlockDoConstruct 2")
-    | Noeud
-        ( (NonTerminal BlockDoConstruct, _),
-          [
-            Noeud ((Terminal Do, _), []);
-            Noeud ((NonTerminal LoopControl_opt, _), l);
             Noeud ((NonTerminal ExecutionPartConstruct_star, s1), l1);
             Noeud ((NonTerminal EndDoStmt, _), _);
           ] ) -> (
@@ -1618,51 +1190,51 @@ let convert_to_abstract (t : at) : ast =
             | Noeud ((Terminal While, _), _) :: _ ->
                 Noeud
                   ( Syntax While,
-                    flatten
-                      (Noeud
-                         ( ToFlatten,
-                           [
-                             convert_to_abstract_aux
-                               (Noeud ((NonTerminal LoopControl, s2), l2));
-                             convert_to_abstract_aux
-                               (Noeud ((Terminal EOS, s), []));
-                             Noeud
-                               ( ToFlatten,
-                                 flatten
-                                   (convert_to_abstract_aux
-                                      (Noeud
-                                         ( ( NonTerminal
-                                               ExecutionPartConstruct_star,
-                                             s1 ),
-                                           l1 )))
-                                   [] );
-                           ] ))
-                      [] )
+                    [
+                      Noeud
+                        ( ToFlatten,
+                          [
+                            convert_to_abstract_aux
+                              (Noeud ((NonTerminal LoopControl, s2), l2));
+                            convert_to_abstract_aux
+                              (Noeud ((Terminal EOS, s), []));
+                            Noeud
+                              ( ToFlatten,
+                                [
+                                  convert_to_abstract_aux
+                                    (Noeud
+                                       ( ( NonTerminal
+                                             ExecutionPartConstruct_star,
+                                           s1 ),
+                                         l1 ));
+                                ] );
+                          ] );
+                    ] )
             | Noeud ((NonTerminal VariableName, _), _) :: _ ->
                 Noeud
                   ( Syntax For,
-                    flatten
-                      (Noeud
-                         ( ToFlatten,
-                           [
-                             convert_to_abstract_aux
-                               (Noeud ((NonTerminal LoopControl, s2), l2));
-                             convert_to_abstract_aux
-                               (Noeud ((Terminal EOS, s), []));
-                             Noeud
-                               ( ToFlatten,
-                                 flatten
-                                   (convert_to_abstract_aux
-                                      (Noeud
-                                         ( ( NonTerminal
-                                               ExecutionPartConstruct_star,
-                                             s1 ),
-                                           l1 )))
-                                   [] );
-                           ] ))
-                      [] )
-            | _ -> failwith "BlockDoConstruct 3")
-        | _ -> failwith "BlockDoConstruct 4")
+                    [
+                      Noeud
+                        ( ToFlatten,
+                          [
+                            convert_to_abstract_aux
+                              (Noeud ((NonTerminal LoopControl, s2), l2));
+                            convert_to_abstract_aux
+                              (Noeud ((Terminal EOS, s), []));
+                            Noeud
+                              ( ToFlatten,
+                                [
+                                  convert_to_abstract_aux
+                                    (Noeud
+                                       ( ( NonTerminal
+                                             ExecutionPartConstruct_star,
+                                           s1 ),
+                                         l1 ));
+                                ] );
+                          ] );
+                    ] )
+            | _ -> failwith "BlockDoConstruct 1")
+        | _ -> failwith "BlockDoConstruct 2")
     | Noeud
         ( (NonTerminal LoopControl, _),
           [
@@ -1729,114 +1301,115 @@ let convert_to_abstract (t : at) : ast =
           [ Noeud ((NonTerminal Expr, s), l) ] ) ->
         convert_to_abstract_aux (Noeud ((NonTerminal Expr, s), l))
     | Noeud
+        ( (NonTerminal IfConstructEndif, _),
+          [
+            Noeud ((NonTerminal IfConstruct, s), l);
+            Noeud ((NonTerminal ElseIfConstruct_star, s1), l1);
+            Noeud ((NonTerminal EndIfStmt, s2), l2);
+          ] ) ->
+        Noeud
+          ( ToFlatten,
+            [
+              Noeud
+                ( Syntax If,
+                  [
+                    convert_to_abstract_aux
+                      (Noeud ((NonTerminal IfConstruct, s), l));
+                  ] );
+              convert_to_abstract_aux
+                (Noeud ((NonTerminal ElseIfConstruct_star, s1), l1));
+              convert_to_abstract_aux (Noeud ((NonTerminal EndIfStmt, s2), l2));
+            ] )
+    | Noeud
         ( (NonTerminal IfConstruct, _),
           [
-            Noeud ((NonTerminal IfThenStmt, _), l);
+            Noeud ((NonTerminal IfThenStmt, s), l);
             Noeud ((NonTerminal ExecutionPartConstruct_star, s1), l1);
-            Noeud
-              ((NonTerminal ElseIfStmt_ExecutionPartConstruct_star_star, s2), l2);
-            Noeud
-              ((NonTerminal ElseStmt_ExecutionPartConstruct_star_opt, s3), l3);
-            Noeud
-              ( (NonTerminal EndIfStmt, _),
-                [
-                  Noeud ((Terminal EndIf, _), []); Noeud ((Terminal EOS, s4), []);
-                ] );
-          ] ) -> (
-        let next =
-          ref [ convert_to_abstract_aux (Noeud ((Terminal EOS, s4), [])) ]
-        in
-        let inner = ref [] in
-        (match l3 with
-        | [ Noeud ((Terminal E, _), []) ] -> ()
-        | _ ->
-            next :=
+          ] ) ->
+        Noeud
+          ( ToFlatten,
+            [
+              convert_to_abstract_aux (Noeud ((NonTerminal IfThenStmt, s), l));
               convert_to_abstract_aux
-                (Noeud
-                   ( (NonTerminal ElseStmt_ExecutionPartConstruct_star_opt, s3),
-                     l3 ))
-              :: !next);
-        (match l2 with
-        | [ Noeud ((Terminal E, _), []) ] -> ()
-        | _ ->
-            next :=
-              convert_to_abstract_aux
-                (Noeud
-                   ( ( NonTerminal ElseIfStmt_ExecutionPartConstruct_star_star,
-                       s2 ),
-                     l2 ))
-              :: !next);
-        (match l1 with
-        | [ Noeud ((Terminal E, _), []) ] -> ()
-        | _ ->
-            inner :=
-              flatten
-                (convert_to_abstract_aux
-                   (Noeud ((NonTerminal ExecutionPartConstruct_star, s1), l1)))
-                !inner);
-        match l with
-        | [
-         Noeud ((Terminal If, _), []);
-         Noeud ((Terminal LParenthesis, _), []);
-         Noeud ((NonTerminal ScalarLogicalExpr, s), l);
-         Noeud ((Terminal RParenthesis, _), []);
-         Noeud ((Terminal Then, _), []);
-         Noeud ((Terminal EOS, s5), []);
-        ] ->
-            Noeud
-              ( ToFlatten,
-                Noeud
-                  ( Syntax If,
-                    convert_to_abstract_aux
-                      (Noeud ((NonTerminal ScalarLogicalExpr, s), l))
-                    :: flatten
-                         (convert_to_abstract_aux
-                            (Noeud ((Terminal EOS, s5), [])))
-                         !inner )
-                :: !next )
-        | _ -> failwith "IfConstruct")
+                (Noeud ((NonTerminal ExecutionPartConstruct_star, s1), l1));
+            ] )
     | Noeud
-        ( (NonTerminal ElseIfStmt_ExecutionPartConstruct_star_star, _),
+        ( (NonTerminal ElseIfConstruct_star, _),
           [
-            Noeud ((NonTerminal ElseIfStmt, s), l);
-            Noeud ((NonTerminal ExecutionPartConstruct_star, s1), l1);
+            Noeud ((NonTerminal ElseIfConstruct, s), l);
+            Noeud ((NonTerminal ElseIfConstruct_star, s1), l1);
+          ] ) ->
+        Noeud
+          ( ToFlatten,
+            [
+              convert_to_abstract_aux
+                (Noeud ((NonTerminal ElseIfConstruct, s), l));
+              convert_to_abstract_aux
+                (Noeud ((NonTerminal ElseIfConstruct_star, s1), l1));
+            ] )
+    | Noeud
+        ( (NonTerminal ElseIfConstruct, _),
+          [
+            Noeud ((Terminal Else, _), []);
+            Noeud ((NonTerminal IfConstruct_opt, s), l);
           ] ) -> (
-        let inner = ref [] in
-        (match l1 with
-        | [ Noeud ((Terminal E, _), []) ] -> ()
-        | _ ->
-            inner :=
-              flatten
-                (convert_to_abstract_aux
-                   (Noeud ((NonTerminal ExecutionPartConstruct_star, s1), l1)))
-                !inner);
         match l with
-        | [
-         Noeud ((Terminal Else, _), []);
-         Noeud ((Terminal If, _), []);
-         Noeud ((Terminal LParenthesis, _), []);
-         Noeud ((NonTerminal ScalarLogicalExpr, s1), l1);
-         Noeud ((Terminal RParenthesis, _), []);
-         Noeud ((Terminal Then, _), []);
-         Noeud ((Terminal EOS, s2), []);
-        ] ->
+        | [ Noeud ((NonTerminal IfConstruct, _), _) ] ->
             Noeud
               ( Syntax Else_if,
-                convert_to_abstract_aux
-                  (Noeud ((NonTerminal ScalarLogicalExpr, s1), l1))
-                :: convert_to_abstract_aux (Noeud ((Terminal EOS, s2), []))
-                :: !inner )
-        | _ -> failwith "ElseIfStmt_ExecutionPartConstruct_star_star")
-    | Noeud
-        ( (NonTerminal ExecutionPartConstruct_star, _),
-          [
-            Noeud ((NonTerminal ExecutionPartConstruct, s), l);
+                [
+                  convert_to_abstract_aux
+                    (Noeud ((NonTerminal IfConstruct_opt, s), l));
+                ] )
+        | [
+         Noeud ((Terminal EOS, _), _);
+         Noeud ((NonTerminal ExecutionPartConstruct_star, _), _);
+        ] ->
             Noeud
-              ( (NonTerminal ExecutionPartConstruct_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
+              ( Syntax Else,
+                [
+                  convert_to_abstract_aux
+                    (Noeud ((NonTerminal IfConstruct_opt, s), l));
+                ] )
+        | _ -> failwith "ElseIfConstruct")
+    | Noeud
+        ( (NonTerminal IfConstruct_opt, _),
+          [ Noeud ((NonTerminal IfConstruct, s), l) ] ) ->
+        convert_to_abstract_aux (Noeud ((NonTerminal IfConstruct, s), l))
+    | Noeud
+        ( (NonTerminal IfConstruct_opt, _),
+          [
+            Noeud ((Terminal EOS, s), l);
+            Noeud ((NonTerminal ExecutionPartConstruct_star, s1), l1);
           ] ) ->
-        convert_to_abstract_aux
-          (Noeud ((NonTerminal ExecutionPartConstruct, s), l))
+        Noeud
+          ( ToFlatten,
+            [
+              convert_to_abstract_aux (Noeud ((Terminal EOS, s), l));
+              convert_to_abstract_aux
+                (Noeud ((NonTerminal ExecutionPartConstruct_star, s1), l1));
+            ] )
+    | Noeud
+        ( (NonTerminal IfThenStmt, _),
+          [
+            Noeud ((Terminal If, _), []);
+            Noeud ((Terminal LParenthesis, _), []);
+            Noeud ((NonTerminal ScalarLogicalExpr, s), l);
+            Noeud ((Terminal RParenthesis, _), []);
+            Noeud ((Terminal Then, _), []);
+            Noeud ((Terminal EOS, s1), l1);
+          ] ) ->
+        Noeud
+          ( ToFlatten,
+            [
+              convert_to_abstract_aux
+                (Noeud ((NonTerminal ScalarLogicalExpr, s), l));
+              convert_to_abstract_aux (Noeud ((Terminal EOS, s1), l1));
+            ] )
+    | Noeud
+        ( (NonTerminal EndIfStmt, _),
+          [ Noeud ((Terminal EndIf, _), []); Noeud ((Terminal EOS, s), l) ] ) ->
+        convert_to_abstract_aux (Noeud ((Terminal EOS, s), l))
     | Noeud
         ( (NonTerminal ExecutionPartConstruct_star, _),
           [
@@ -1851,27 +1424,6 @@ let convert_to_abstract (t : at) : ast =
               convert_to_abstract_aux
                 (Noeud ((NonTerminal ExecutionPartConstruct_star, s1), l1));
             ] )
-    | Noeud
-        ( (NonTerminal ElseStmt_ExecutionPartConstruct_star_opt, _),
-          [
-            Noeud ((NonTerminal ElseStmt, _), l);
-            Noeud ((NonTerminal ExecutionPartConstruct_star, s1), l1);
-          ] ) -> (
-        let inner = ref [] in
-        (match l1 with
-        | [ Noeud ((Terminal E, _), []) ] -> ()
-        | _ ->
-            inner :=
-              convert_to_abstract_aux
-                (Noeud ((NonTerminal ExecutionPartConstruct_star, s1), l1))
-              :: !inner);
-        match l with
-        | [ Noeud ((Terminal Else, _), []); Noeud ((Terminal EOS, s2), []) ] ->
-            Noeud
-              ( Syntax Else,
-                convert_to_abstract_aux (Noeud ((Terminal EOS, s2), []))
-                :: !inner )
-        | _ -> failwith "ElseStmt_ExecutionPartConstruct_star_opt")
     | Noeud
         ( (NonTerminal ExecutionPartConstruct, _),
           [ Noeud ((NonTerminal ExecutableConstruct, s), l) ] ) ->
@@ -2047,24 +1599,6 @@ let convert_to_abstract (t : at) : ast =
           [
             Noeud ((NonTerminal RelOp, _), _);
             Noeud ((NonTerminal Level3Expr, s), l);
-            Noeud
-              ( (NonTerminal RelOp_Level3Expr_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] )
-    | Noeud
-        ( (NonTerminal Level4Expr, _),
-          [
-            Noeud ((NonTerminal Level3Expr, s), l);
-            Noeud
-              ( (NonTerminal RelOp_Level3Expr_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] ) ->
-        convert_to_abstract_aux (Noeud ((NonTerminal Level3Expr, s), l))
-    | Noeud
-        ( (NonTerminal RelOp_Level3Expr_star, _),
-          [
-            Noeud ((NonTerminal RelOp, _), _);
-            Noeud ((NonTerminal Level3Expr, s), l);
             Noeud ((NonTerminal RelOp_Level3Expr_star, s1), l1);
           ] )
     | Noeud
@@ -2149,25 +1683,6 @@ let convert_to_abstract (t : at) : ast =
           [
             Noeud ((NonTerminal AddOp, _), _);
             Noeud ((NonTerminal Sign_opt_AddOperand, s), l);
-            Noeud
-              ( (NonTerminal AddOp_Sign_opt_AddOperand_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] )
-    | Noeud
-        ( (NonTerminal Level2Expr, _),
-          [
-            Noeud ((NonTerminal Sign_opt_AddOperand, s), l);
-            Noeud
-              ( (NonTerminal AddOp_Sign_opt_AddOperand_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] ) ->
-        convert_to_abstract_aux
-          (Noeud ((NonTerminal Sign_opt_AddOperand, s), l))
-    | Noeud
-        ( (NonTerminal AddOp_Sign_opt_AddOperand_star, _),
-          [
-            Noeud ((NonTerminal AddOp, _), _);
-            Noeud ((NonTerminal Sign_opt_AddOperand, s), l);
             Noeud ((NonTerminal AddOp_Sign_opt_AddOperand_star, s2), l2);
           ] )
     | Noeud
@@ -2177,6 +1692,9 @@ let convert_to_abstract (t : at) : ast =
             Noeud ((NonTerminal AddOp_Sign_opt_AddOperand_star, s2), l2);
           ] ) -> (
         match l2 with
+        | [ Noeud ((Terminal E, _), []) ] ->
+            convert_to_abstract_aux
+              (Noeud ((NonTerminal Sign_opt_AddOperand, s), l))
         | Noeud
             ( (NonTerminal AddOp, _),
               [
@@ -2249,24 +1767,6 @@ let convert_to_abstract (t : at) : ast =
           [
             Noeud ((NonTerminal MultOp, _), _);
             Noeud ((NonTerminal MultOperand, s), l);
-            Noeud
-              ( (NonTerminal MultOp_MultOperand_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] )
-    | Noeud
-        ( (NonTerminal AddOperand, _),
-          [
-            Noeud ((NonTerminal MultOperand, s), l);
-            Noeud
-              ( (NonTerminal MultOp_MultOperand_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] ) ->
-        convert_to_abstract_aux (Noeud ((NonTerminal MultOperand, s), l))
-    | Noeud
-        ( (NonTerminal MultOp_MultOperand_star, _),
-          [
-            Noeud ((NonTerminal MultOp, _), _);
-            Noeud ((NonTerminal MultOperand, s), l);
             Noeud ((NonTerminal MultOp_MultOperand_star, s2), l2);
           ] )
     | Noeud
@@ -2276,6 +1776,8 @@ let convert_to_abstract (t : at) : ast =
             Noeud ((NonTerminal MultOp_MultOperand_star, s2), l2);
           ] ) -> (
         match l2 with
+        | [ Noeud ((Terminal E, _), []) ] ->
+            convert_to_abstract_aux (Noeud ((NonTerminal MultOperand, s), l))
         | Noeud ((NonTerminal MultOp, _), [ Noeud ((Terminal Asterisk, _), []) ])
           :: _ ->
             Noeud
@@ -2371,11 +1873,11 @@ let convert_to_abstract (t : at) : ast =
         ] ->
             Noeud
               ( Syntax Call,
-                Noeud (Name s, [])
-                :: flatten
-                     (convert_to_abstract_aux
-                        (Noeud ((NonTerminal FunctionReference_opt, s1), l1)))
-                     [] )
+                [
+                  Noeud (Name s, []);
+                  convert_to_abstract_aux
+                    (Noeud ((NonTerminal FunctionReference_opt, s1), l1));
+                ] )
         | [
          Noeud ((NonTerminal Scon, _), [ Noeud ((Terminal SconSingle, s), []) ]);
         ] ->
@@ -2426,16 +1928,6 @@ let convert_to_abstract (t : at) : ast =
         ( (NonTerminal FunctionArg_Comma_FunctionArg_star_opt_RParenthesis, _),
           [
             Noeud ((NonTerminal FunctionArg, s), l);
-            Noeud
-              ( (NonTerminal Comma_FunctionArg_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-            Noeud ((Terminal RParenthesis, _), []);
-          ] ) ->
-        convert_to_abstract_aux (Noeud ((NonTerminal FunctionArg, s), l))
-    | Noeud
-        ( (NonTerminal FunctionArg_Comma_FunctionArg_star_opt_RParenthesis, _),
-          [
-            Noeud ((NonTerminal FunctionArg, s), l);
             Noeud ((NonTerminal Comma_FunctionArg_star, s1), l1);
             Noeud ((Terminal RParenthesis, _), []);
           ] ) ->
@@ -2446,16 +1938,6 @@ let convert_to_abstract (t : at) : ast =
               convert_to_abstract_aux
                 (Noeud ((NonTerminal Comma_FunctionArg_star, s1), l1));
             ] )
-    | Noeud
-        ( (NonTerminal Comma_FunctionArg_star, _),
-          [
-            Noeud ((Terminal Comma, _), []);
-            Noeud ((NonTerminal FunctionArg, s), l);
-            Noeud
-              ( (NonTerminal Comma_FunctionArg_star, _),
-                [ Noeud ((Terminal E, _), []) ] );
-          ] ) ->
-        convert_to_abstract_aux (Noeud ((NonTerminal FunctionArg, s), l))
     | Noeud
         ( (NonTerminal Comma_FunctionArg_star, _),
           [
@@ -2492,6 +1974,9 @@ let convert_to_abstract (t : at) : ast =
         Noeud (Name s, [])
     | Noeud ((Terminal EOS, s), []) ->
         Noeud (ToFlatten, convert_comments (Noeud (Commentaire s, [])))
+    | Noeud ((NonTerminal _, _), [ Noeud ((Terminal E, _), []) ])
+    | Noeud ((Terminal E, _), []) ->
+        Noeud (ToFlatten, [])
     | _ ->
         (let string_of_symbol (s : symbol) : string =
            match s with
@@ -2510,4 +1995,4 @@ let convert_to_abstract (t : at) : ast =
         failwith "is not implemented yet"
   in
   increase_function_level
-    (link_return_function (convert_to_abstract_aux t) None)
+    (link_return_function (global_flatten (convert_to_abstract_aux t)) None)

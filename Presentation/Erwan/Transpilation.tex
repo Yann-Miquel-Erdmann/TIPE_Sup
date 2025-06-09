@@ -1,0 +1,29 @@
+\section{Principe de transpilation}
+
+\begin{frame}
+  \frametitle{Principe général}
+  \begin{tikzpicture}
+    \node (0, 0) {}; % to align the scope
+    \begin{scope} [shift={(5.5, 0)}]
+      \node [basic_node, text width=4.5cm, align=left] (Fortran){
+      \scalebox{0.8}{
+        \parbox{\textwidth}{
+          \textbf{Programme Fortran}
+          \inputminted[firstline=1, lastline=3, linenos=false]{fortran}{static/HelloWorld.f90}
+        }
+      }
+    };
+
+    \node [basic_node, text width=5.5cm, align=left, below=1cm of Fortran] (C) {
+      \scalebox{0.8}{
+        \parbox{\textwidth}{
+          \textbf{Programme C}
+          \inputminted{c}{static/HelloWorld.c}
+        }
+      } 
+    };
+
+    \draw [lien, thick] (Fortran.south) to (C.north);
+    \end{scope}
+  \end{tikzpicture}
+\end{frame}

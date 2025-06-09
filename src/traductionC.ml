@@ -15,20 +15,27 @@ let rec generate_library_imports (l : libs) : string =
     fonction [n] à l'aide de [env] *)
 let generate_format_string_of_name (n : string) (env : environnement) : string =
   match Hashtbl.find_opt env n with
-  | Some (Syntax Real) -> "%f "
-  | Some (Syntax Integer) -> "%d "
-  | Some (Syntax Logical) -> "%d "
-  | _ -> failwith "La variable n'est pas dans l'environnement"
+  | Some (Syntax Real) -> "%f"
+  | Some (Syntax Integer) -> "%d"
+  | Some (Syntax Logical) -> "%d"
+  | Some (Syntax Character) -> "%s"
+  | Some (Syntax Double_precision) -> "%ld"
+  | Some t ->
+      print_token t;
+      failwith "Le token donné n'est pas valide"
+  | None ->
+      print_endline n;
+      failwith "La variable n'est pas dans l'environnement"
 
 (** Renvoie le format de string dans les printf pour afficher les éléments de
     [l] en s'aidant des types dans [env] *)
 let rec generate_format_string (l : ast list) (env : environnement) : string =
   match l with
   | [] -> ""
-  | Noeud (Chaine _, []) :: q -> "%s " ^ generate_format_string q env
-  | Noeud (Integer _, []) :: q -> "%d " ^ generate_format_string q env
-  | Noeud (Floating _, []) :: q -> "%f " ^ generate_format_string q env
-  | Noeud (Booleen _, []) :: q -> "%d " ^ generate_format_string q env
+  | Noeud (Chaine _, []) :: q -> "%s" ^ generate_format_string q env
+  | Noeud (Integer _, []) :: q -> "%d" ^ generate_format_string q env
+  | Noeud (Floating _, []) :: q -> "%f" ^ generate_format_string q env
+  | Noeud (Booleen _, []) :: q -> "%d" ^ generate_format_string q env
   | Noeud (Name n, []) :: q ->
       generate_format_string_of_name n env ^ generate_format_string q env
   | Noeud (Syntax Call, Noeud (Name n, []) :: _) :: _ ->
@@ -188,13 +195,48 @@ let rec convert_ast_to_C_sosl (ast : ast list) (env : environnement)
           s;
           convert_ast_to_C_sosl q env nb_tab;
         ]
-  | Noeud (Operateur Assignation, Noeud (Name s, []) :: l) :: q ->
+  | Noeud (Operateur Assignation, [ Noeud (Name s, []); node ])
+    :: Noeud (Operateur Assignation, l1)
+    :: q ->
       L
         [
           Traduction.tabs_to_string nb_tab;
           S s;
           S " = ";
-          convert_ast_to_C_sosl l env 0;
+          convert_ast_to_C_sosl [ node ] env 0;
+          S ", ";
+          convert_ast_to_C_sosl
+            (Noeud (Operateur Assignation, l1) :: q)
+            env nb_tab;
+        ]
+  | Noeud (Operateur Assignation, [ Noeud (Name s, []); node ])
+    :: Noeud (Name s1, [])
+    :: q ->
+      L
+        [
+          Traduction.tabs_to_string nb_tab;
+          S s;
+          S " = ";
+          convert_ast_to_C_sosl [ node ] env 0;
+          S ", ";
+          convert_ast_to_C_sosl (Noeud (Name s1, []) :: q) env nb_tab;
+        ]
+  | [ Noeud (Operateur Assignation, [ Noeud (Name s, []); node ]) ] ->
+      L
+        [
+          Traduction.tabs_to_string nb_tab;
+          S s;
+          S " = ";
+          convert_ast_to_C_sosl [ node ] env 0;
+          S ";";
+        ]
+  | Noeud (Operateur Assignation, [ Noeud (Name s, []); node ]) :: q ->
+      L
+        [
+          Traduction.tabs_to_string nb_tab;
+          S s;
+          S " = ";
+          convert_ast_to_C_sosl [ node ] env 0;
           S ";";
           convert_ast_to_C_sosl q env nb_tab;
         ]
@@ -217,6 +259,13 @@ let rec convert_ast_to_C_sosl (ast : ast list) (env : environnement)
             env nb_tab;
         ]
   | Noeud (Syntax Any, []) :: q -> convert_ast_to_C_sosl q env 0
+  | Noeud (Name s, []) :: Noeud (Name s1, []) :: q ->
+      L
+        [
+          S s;
+          S ", ";
+          convert_ast_to_C_sosl (Noeud (Name s1, []) :: q) env nb_tab;
+        ]
   | Noeud (Name s, []) :: q -> L [ S s; convert_ast_to_C_sosl q env nb_tab ]
   | Noeud (Operateur Plus, elem :: l) :: q ->
       L
@@ -394,7 +443,7 @@ let rec convert_ast_to_C_sosl (ast : ast list) (env : environnement)
           convert_ast_to_C_sosl
             [ Noeud (Operateur Assignation, [ variable; valeur ]) ]
             env 0;
-          S " ";
+          S "; ";
           convert_ast_to_C_sosl
             [ Noeud (Comparateur StrictPlusPetit, [ variable; fin ]) ]
             env 0;
@@ -454,6 +503,7 @@ let rec convert_ast_to_C_sosl (ast : ast list) (env : environnement)
           convert_ast_to_C_sosl l2 env (nb_tab + 1);
           tabs_to_string nb_tab;
           S "}\n";
+          convert_ast_to_C_sosl q env nb_tab;
         ]
   | Noeud (Syntax Call, Noeud (Name n, []) :: l) :: q ->
       L
@@ -478,9 +528,8 @@ let rec convert_ast_to_C_sosl (ast : ast list) (env : environnement)
       print_token t;
       failwith "La syntaxe donnée n'est pas encore prise en charge\n"
 
-(** convertit l'arbre de syntaxe abstrait [ast] et ajoute les librairies
-    nécessaires depuis [biblios] grace à [env] *)
-let convert_ast_to_C (ast : ast list) (env : environnement)
-    (biblios : Bibliotheques.libs) : string =
-  generate_library_imports biblios
-  ^ Traduction.string_of_string_or_string_list (convert_ast_to_C_sosl ast env 0)
+(** convertit l'arbre de syntaxe abstrait [ast] vers le C grace à [env] *)
+let convert_ast_to_C (ast : ast) (env : environnement) : string =
+  generate_library_imports (generate_libs ast)
+  ^ Traduction.string_of_string_or_string_list
+      (convert_ast_to_C_sosl [ ast ] env 0)

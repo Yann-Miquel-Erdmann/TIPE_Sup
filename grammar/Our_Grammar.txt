@@ -80,12 +80,9 @@ CharLength -> LParenthesis TypeParamValue RParenthesis | ScalarIntLiteralConstan
 TypeParamValue -> Expr_Or_Asterisk
 Expr_Or_Asterisk -> Expr | Asterisk
 
-TypeSpec -> Integer KindSelector_opt | Double | Complex KindSelector_opt | Logical KindSelector_opt | Real KindSelector_opt | Character
+TypeSpec -> Integer | Double | Complex | Logical | Real | Character
 
-
-KindSelector_opt -> LParenthesis Expr RParenthesis | E
-
-ExecutableConstruct -> ActionStmt | DoConstruct | IfConstruct | ReturnStmt
+ExecutableConstruct -> ActionStmt | DoConstruct | IfConstructEndif | ReturnStmt
 
 ReturnStmt -> Return EOS
 
@@ -119,16 +116,15 @@ Comma_IntRealDpExpression_opt -> Comma IntRealDpExpression | E
 
 IntRealDpExpression -> Expr
 
+IfConstructEndif -> IfConstruct ElseIfConstruct_star EndIfStmt
+IfConstruct -> IfThenStmt ExecutionPartConstruct_star
+ElseIfConstruct_star -> ElseIfConstruct ElseIfConstruct_star | E
+ElseIfConstruct -> Else IfConstruct_opt
+IfConstruct_opt -> IfConstruct | EOS ExecutionPartConstruct_star
 
-
-IfConstruct -> IfThenStmt ExecutionPartConstruct_star ElseIfStmt_ExecutionPartConstruct_star_star ElseStmt_ExecutionPartConstruct_star_opt EndIfStmt
-ElseIfStmt_ExecutionPartConstruct_star_star -> ElseIfStmt ExecutionPartConstruct_star ElseIfStmt_ExecutionPartConstruct_star_star | E
 ExecutionPartConstruct_star -> ExecutionPartConstruct ExecutionPartConstruct_star | E
-ElseStmt_ExecutionPartConstruct_star_opt -> ElseStmt ExecutionPartConstruct_star | E
 
 IfThenStmt -> If LParenthesis ScalarLogicalExpr RParenthesis Then EOS
-ElseIfStmt -> Else If LParenthesis ScalarLogicalExpr RParenthesis Then EOS
-ElseStmt -> Else EOS
 EndIfStmt -> EndIf EOS
 
 ExecutionPartConstruct -> ExecutableConstruct
@@ -206,14 +202,14 @@ ScalarIntLiteralConstant -> Icon
 Dcon -> r'(([0-9]+\.[0-9]*)|(\.[0-9]+))(d(\+|-)?[0-9]+)'
 Rcon -> r'(([0-9]+\.[0-9]*)|(\.[0-9]+))(e(\+|-)?[0-9]+)?'
 Icon -> r'[0-9]+(e(\+|-)?[0-9]+)?'
-SconSingle -> r'['](~[']|'')*[']'
-SconDouble -> r'["](~["]|"")*["]'
+SconSingle -> r''(~'|'')*''
+SconDouble -> r'"(~"|"")*"'
 Scon -> SconSingle | SconDouble
 
 
 Ident -> s'[A-Za-z][A-Za-z0-9_]*'
 
-EOS -> r'((!~[\n]*)?\n[ ]*)+'
+EOS -> r'((!~(\n)*)?\n( )*)+'
 
 Return -> 'return'
 Result -> 'result'

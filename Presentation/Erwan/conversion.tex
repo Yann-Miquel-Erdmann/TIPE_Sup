@@ -1,4 +1,31 @@
 \section{Traduction vers le langage de sortie}
+
+% TODO ajouter une diapo pour expliquer le but général (transformer l'arbre de syntaxe abstraite vers le langage de sortie)
+
+\begin{frame}
+  \frametitle{Principe général de la traduction}
+  \begin{tikzpicture}
+    \node (0, 0) {}; % to align the scope
+    \begin{scope} [shift={(5.5, 0)}]
+      \node [basic_node, text width=5.5cm, align=left] (Fortran) {
+        \scalebox{0.8}{\textbf{Arbre de syntaxe abstraite}}
+        \scalebox{0.9}{\input{tikz/arbre_de_syntaxe_abstraite.tex}}
+      };
+
+      \node [basic_node, text width=5.5cm, align=left, below=1cm of Fortran] (C) {
+        \scalebox{0.8}{
+          \parbox{\textwidth}{
+            \textbf{Programme C}
+            \inputminted{c}{static/HelloWorld.c}
+          }
+        } 
+      };
+
+      \draw [lien, thick] (Fortran.south) to (C.north);
+    \end{scope}
+  \end{tikzpicture}
+\end{frame}
+
 \begin{frame}
   \frametitle{Traduction\esp}
 
@@ -7,9 +34,9 @@
     \node[frame] (frame) {};
     \tikzstyle{faded}=[draw=black!20,color=black!20]
     
-    \node[below=4cm of frame.west, anchor=west, box, faded] (state_1) {\scriptsize Analyse Lexicale};
-    \node[right=0.5cm of state_1.east, anchor=west, box, faded] (state_2) {\scriptsize Analyse Syntaxique};
-    \node[right=0.5cm of state_2.east, anchor=west, box, faded] (state_3) {\scriptsize Syntaxe Abstraite};
+    \node[below=4cm of frame.west, anchor=west, box, faded] (state_1) {\scriptsize Analyse lexicale};
+    \node[right=0.5cm of state_1.east, anchor=west, box, faded] (state_2) {\scriptsize Analyse syntaxique};
+    \node[right=0.5cm of state_2.east, anchor=west, box, faded] (state_3) {\scriptsize Abstraction};
     \node[right=0.5cm of state_3.east, anchor=west, box] (state_4) {\scriptsize Conversion};
     \draw[->, >=latex, faded] (state_1.east) -- (state_2.west);
     \draw[->, >=latex, faded] (state_2.east) -- (state_3.west);
@@ -17,7 +44,7 @@
     \draw[dashed] (frame.south west) -- (state_4.north west);
     \draw[dashed] (frame.south east) -- (state_4.north east);
 
-    \node(def){parcours en profondeur};
+    \node(def) at (0, 0.5) {parcours en profondeur de l'AST};
     \node[below] at (def.south) {conversion en chaîne};
 
   \end{tikzpicture}

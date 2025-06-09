@@ -1,5 +1,27 @@
+\section{Analyse syntaxique}
+\begin{frame}
+  \frametitle{Principe général de l'analyse syntaxique}
+  \begin{tikzpicture}
+    \node (0, 0) {}; % to align the scope
+    \begin{scope} [shift={(5.5, 0)}]
+      \node [basic_node, text width=10.5cm, align=left] (Fortran) {
+        \scalebox{0.8}{
+          \parbox{\textwidth}{
+            \textbf{Liste de lexèmes}
+            \footnotesize \inputminted[frame=none, xleftmargin=0pt, linenos=false, breaklines=false]{ocaml}{static/listeLexemes.ml}
+          }
+        } 
+      };
 
-\section{Analyse Syntaxique}
+      \node [basic_node, text width=10cm, below=1cm of Fortran, align=left] (C) {
+        \scalebox{0.8}{\textbf{Arbre de syntaxe}}
+        \scalebox{0.85}{\input{tikz/arbre_de_syntaxe.tex}}
+      };
+
+      \draw [lien, thick] (Fortran.south) to (C.north);
+    \end{scope}
+  \end{tikzpicture}
+\end{frame}
 
 \tikzstyle{box}=[draw, rounded corners=4pt]
 \tikzstyle{frame}=[box, minimum width=11.3cm, minimum height=6cm]
@@ -9,7 +31,7 @@
 %------------grammaire-----------
 \subsection{La grammaire}
 \begin{frame}
-  \frametitle{Analyse Syntaxique\esp}
+  \frametitle{Analyse syntaxique\esp}
 
   \begin{tikzpicture}
     % frame
@@ -19,9 +41,9 @@
     \node[faded, below=0.6cm of 1.west, anchor=west] (_2) {\point LL1};
 
     \tikzstyle{faded}=[draw=black!20,color=black!20]
-    \node[below=4cm of frame.west, anchor=west, box, faded] (state_1) {\scriptsize Analyse Lexicale};
-    \node[right=0.5cm of state_1.east, anchor=west, box] (state_2) {\scriptsize Analyse Syntaxique};
-    \node[right=0.5cm of state_2.east, anchor=west, box, faded] (state_3) {\scriptsize Syntaxe Abstraite};
+    \node[below=4cm of frame.west, anchor=west, box, faded] (state_1) {\scriptsize Analyse lexicale};
+    \node[right=0.5cm of state_1.east, anchor=west, box] (state_2) {\scriptsize Analyse syntaxique};
+    \node[right=0.5cm of state_2.east, anchor=west, box, faded] (state_3) {\scriptsize Abstraction};
     \node[right=0.5cm of state_3.east, anchor=west, box, faded] (state_4) {\scriptsize Conversion};
     \draw[->, >=latex, faded] (state_1.east) -- (state_2.west);
     \draw[->, >=latex, faded] (state_2.east) -- (state_3.west);
@@ -29,45 +51,54 @@
     \draw[dashed] (frame.south west) -- (state_2.north west);
     \draw[dashed] (frame.south east) -- (state_2.north east);
 
-    % définition
+    % définition 
     \only<1->{
-      \node[right=3.2cm of 1.east, anchor=west] (def) {Règles de production:};
-      \node[below=0.25cm, font=\ttfamily] (def1) at (def) {A -> B};
-      \node[below=0.25cm, font=\ttfamily] (def2) at (def1) {A -> $c, c\in \Sigma^*$};
+      \node[right=4.2cm of 1.east, anchor=west] (def) {$\mathcal{G}=(\Sigma, V, P, \mathcal{S})$};
+      \node[below=0.25cm, font=\ttfamily] (def1) at (def) {$R\in V\rightarrow W_1...W_n \in (V\times\Sigma)^{n}$};
     }
 
     % exemple simple
     \only<2->{
-      \node[below=0.5cm of def2]{Exemple:};
-      \node[below=2.3cm of def.200, anchor = north west] {
+      \node[below=0.2 cm of def1] {Exemple:};
+      \node[below=1.4cm of def.200, anchor = north west] {
         \begin{minipage}{0.5\textwidth}
-          \inputminted{text}{static/Grammaire_example.txt}
+          \inputminted[linenos=true]{text}{static/Grammaire_example.txt}
         \end{minipage}
       };
+      \node[below=4.4cm of def.200, font=\scriptsize, anchor=west] {Grammaire de $a^* \cdot b^*$};
     }
 
     % application à une chaine simple
     \only<3->{
-      \begin{scope}[scale=1, shift={(-2, 1.8)}, font=\footnotesize]
-      
-        \node (0) at (0, 0) {S};
-        \node [below=0.3cm of 0] (1) {A};
-        \node [below=0.3cm of 1.south west] (2) {a};
-        \node [below=0.3cm of 1.south east] (3) {A};
-        \node [below=0.3cm of 3] (4) {B};
-        \node [below=0.3cm of 4.south west] (5) {b};
-        \node [below=0.3cm of 4.south east] (6) {B};
-        \node [below=0.3cm of 6] (7) {$\varepsilon$};
+      \begin{scope}[shift={(-2.5, 1.8)}, font=\footnotesize]
+        \tikzstyle{style1}=[hidden]
+        \tikzstyle{style2}=[hidden]
+        \tikzstyle{style3}=[hidden]
+        \tikzstyle{style4}=[hidden]
+        \tikzstyle{style5}=[hidden]
 
-        \node [below=0.1cm of 7] {Arbre de dérivation de ab};
+        \only<4->{\tikzstyle{style1}=[font=\ttfamily]}
+        \only<5->{\tikzstyle{style2}=[font=\ttfamily]}
+        \only<6->{\tikzstyle{style3}=[font=\ttfamily]}
+        \only<7->{\tikzstyle{style4}=[font=\ttfamily]}
+        \only<8->{\tikzstyle{style5}=[font=\ttfamily]}
 
-        \draw (0) -- (1);
-        \draw (1) -- (2);
-        \draw (1) -- (3);
-        \draw (3) -- (4);
-        \draw (4) -- (5);
-        \draw (4) -- (6);
-        \draw (6) -- (7);
+        \node [font=\ttfamily] (0) at (0, 0) {S};
+        \node [below=0.3cm of 0, style1] (1) {A};
+        \node [below=0.3cm of 1.south west, style2] (2) {$a$};
+        \node [below=0.3cm of 1.south east, style2] (3) {A};
+        \node [below=0.3cm of 3, style3] (4) {B};
+        \node [below=0.3cm of 4.south west, style4] (5) {$b$};
+        \node [below=0.3cm of 4.south east, style4] (6) {B};
+        \node [below=0.3cm of 6, style5] (7) {$\varepsilon$};
+
+        \draw [style1] (0) -- (1);
+        \draw [style2] (1) -- (2);
+        \draw [style2] (1) -- (3);
+        \draw [style3] (3) -- (4);
+        \draw [style4] (4) -- (5);
+        \draw [style4] (4) -- (6);
+        \draw [style5] (6) -- (7);
       \end{scope}
     }
 
@@ -86,9 +117,9 @@
     \node[below=0.6cm of 1.west, anchor=west] (_2) {\point LL1};
 
     \tikzstyle{faded}=[draw=black!20,color=black!20]
-    \node[below=4cm of frame.west, anchor=west, box, faded] (state_1) {\scriptsize Analyse Lexicale};
-    \node[right=0.5cm of state_1.east, anchor=west, box] (state_2) {\scriptsize Analyse Syntaxique};
-    \node[right=0.5cm of state_2.east, anchor=west, box, faded] (state_3) {\scriptsize Syntaxe Abstraite};
+    \node[below=4cm of frame.west, anchor=west, box, faded] (state_1) {\scriptsize Analyse lexicale};
+    \node[right=0.5cm of state_1.east, anchor=west, box] (state_2) {\scriptsize Analyse syntaxique};
+    \node[right=0.5cm of state_2.east, anchor=west, box, faded] (state_3) {\scriptsize Abstraction};
     \node[right=0.5cm of state_3.east, anchor=west, box, faded] (state_4) {\scriptsize Conversion};
     \draw[->, >=latex, faded] (state_1.east) -- (state_2.west);
     \draw[->, >=latex, faded] (state_2.east) -- (state_3.west);
@@ -98,23 +129,23 @@
 
     % petite description de LL1
     \node[font=\ttfamily] (list) at (-4, 0){[a, b]};
-    \node[right] (+) at (list.east) {$+$};
+    \node[right] (+) at (list.east) {et};
     \node[right] at (+.east) {
         \begin{minipage}{0.5\textwidth}
           \inputminted{text}{static/Grammaire_example.txt}
         \end{minipage}
     };
-    \only<1>{
-      \node[font=\ttfamily] at (0.5, 0) {=>};
+    \only<2>{
+      \node[font=\ttfamily] at (0.5, 0) {$\Rightarrow$};
       \begin{scope}[shift={(2.5, 1.8)}, font=\footnotesize]
         
-        \node (0) at (0, 0) {S};
-        \node [below=0.3cm of 0] (1) {A};
-        \node [below=0.3cm of 1.south west] (2) {a};
-        \node [below=0.3cm of 1.south east] (3) {A};
-        \node [below=0.3cm of 3] (4) {B};
-        \node [below=0.3cm of 4.south west] (5) {b};
-        \node [below=0.3cm of 4.south east] (6) {B};
+        \node [font=\ttfamily] (0) at (0, 0) {S};
+        \node [below=0.3cm of 0, font=\ttfamily] (1) {A};
+        \node [below=0.3cm of 1.south west, font=\ttfamily] (2) {$a$};
+        \node [below=0.3cm of 1.south east, font=\ttfamily] (3) {A};
+        \node [below=0.3cm of 3, font=\ttfamily] (4) {B};
+        \node [below=0.3cm of 4.south west, font=\ttfamily] (5) {$b$};
+        \node [below=0.3cm of 4.south east, font=\ttfamily] (6) {B};
         \node [below=0.3cm of 6] (7) {$\varepsilon$};
 
         \draw (0) -- (1);

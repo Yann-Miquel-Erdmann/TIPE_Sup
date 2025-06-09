@@ -1,7 +1,8 @@
 type string_or_string_list = S of string | L of string_or_string_list list
 
 (** crée une chaîne de [n] tabulations *)
-let tabs_to_string (n : int) : string_or_string_list = S (String.make n '\t')
+let tabs_to_string (n : int) : string_or_string_list =
+  S (String.make (4 * n) ' ')
 
 (** crée une chaîne de [n] retours à la ligne *)
 let rec n_new_lines (n : int) : string_or_string_list = S (String.make n '\n')
