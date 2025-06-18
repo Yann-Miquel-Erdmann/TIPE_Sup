@@ -19,16 +19,19 @@
         }
     };
 
-    \node [basic_node, text width=6cm, align=left] (AS) [right=1cm of Lexemes] {
-        
-         \scalebox{0.7}{
-            \parbox{\textwidth}{
-                \textbf{Arbre de syntaxe}
 
-                \input{tikz/arbre_de_syntaxe.tex}
+    \begin{scope}[shift={(6, 0)}]  
+        \node [basic_node, text width=6cm, align=left] (AS) { 
+            \scalebox{0.7}{
+                \parbox{\textwidth}{
+                    \textbf{Arbre de syntaxe}
+
+                    \input{tikz/arbre_de_syntaxe.tex}
+                }
             }
-        }
-    };
+        };
+    \end{scope}
+    
  
     \draw [lien] (Lexemes.north) to[out=45, in=135]  node[midway, above] {\textbf{Analyse syntaxique}}   (AS.north west) ; 
 

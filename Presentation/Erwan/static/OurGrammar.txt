@@ -166,6 +166,8 @@ Comma_FunctionArg_star -> Comma FunctionArg Comma_FunctionArg_star | E
 
 FunctionArg -> Expr
 
+// Expr -> Expr _
+
 Name -> Ident
 ArrayName -> Ident
 ComponentName -> Ident
