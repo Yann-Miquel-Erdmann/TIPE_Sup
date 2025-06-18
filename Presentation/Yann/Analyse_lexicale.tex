@@ -7,7 +7,7 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Définition\esp}
+  \frametitle{Définition d'un automate\esp}
 
   
   Les automates sont définis par $(\mathcal{A} = \Sigma, Q, I, F, \delta)$\\
@@ -20,9 +20,9 @@
     \node [state, accepting right] (3) [right=1cm of 2] {3};
 
     \path [->]
-    (1) edge              node [above] {a} (2)
-    (2) edge              node [above] {c} (3)
-    (2) edge [loop above] node [above] {b} (2)
+    (1) edge              node [above] {$a$} (2)
+    (2) edge              node [above] {$c$} (3)
+    (2) edge [loop above] node [above] {$b$} (2)
     ;
 
   \end{tikzpicture}\\
@@ -34,19 +34,20 @@
 %------------étude d'un exemple-----------
 \begin{frame}
   \frametitle{Les automates: étude d'un exemple \esp}
-  \begin{tikzpicture}
+    \begin{tikzpicture}
+    \node at (3, 0) (text) {\ttfamily print*,"Hello World"};
     \begin{scope}
-      [every node/.style={scale=0.6,font=\Large}, scale=0.4, initial text=]
-      \tikzstyle{style0}=[draw=black]
-      \tikzstyle{style1}=[draw=black]
-      \tikzstyle{style2}=[draw=black]
-      \tikzstyle{style3}=[draw=black]
-      \tikzstyle{style4}=[draw=black]
-      \tikzstyle{style5}=[draw=black]
-      \tikzstyle{style6}=[draw=black]
-      \tikzstyle{style7}=[draw=black]
-      \tikzstyle{style8}=[draw=black]
-      \tikzstyle{style9}=[draw=black]
+      [every node/.style={scale=0.6,font=\Large}, scale=0.4, initial text=, shift={(-13, 0)}]
+      \tikzstyle{style0}=[]
+      \tikzstyle{style1}=[]
+      \tikzstyle{style2}=[]
+      \tikzstyle{style3}=[]
+      \tikzstyle{style4}=[] 
+      \tikzstyle{style5}=[]
+      \tikzstyle{style6}=[]
+      \tikzstyle{style7}=[]
+      \tikzstyle{style8}=[]
+      \tikzstyle{style9}=[]
 
       \only<1> {\tikzstyle{style0}=[draw=blue!50,very thick,fill=blue!20]}
       \only<2> {\tikzstyle{style1}=[draw=blue!50,very thick,fill=blue!20]}
@@ -88,13 +89,11 @@
       
       
       (0) edge                node[above] {$"$} (6)
-      (6) edge [loop above]   node[above] {\large$[a-z]|[A-Z]|[0-9]|\_$} (6)
+      (6) edge [loop above]   node[above] {$[a-z]|[A-Z]$} (6)
       (6) edge                node[above] {$"$} (7)
       ;
       
     \end{scope}
-
-    \node at (8, 0) (text) {\ttfamily print*,"Hello World"};
     \foreach \step in {1,2,...,6}{
       \node<\step>[right=\fpeval{\step * 5.75 - 3}pt of text.west, draw=blue, fill=blue!20, inner sep=0pt, minimum width=2pt, minimum height=10pt]{};
     }
@@ -107,14 +106,16 @@
     \foreach \step in {11,12,...,24}{
       \node<\step>[right=\fpeval{(\step - 3) * 5.75 - 3}pt of text.west, draw=blue, fill=blue!20, inner sep=0pt, minimum width=2pt, minimum height=10pt]{};
     }
-    
-    \node at (0, -2.3) (lb) {\small \texttt{res = [}};
 
-    \only<7-> {\node [right] at (lb.east) (lb) {\small \texttt{Print}};}
-    \only<9-> {\node [right] at (lb.east) (lb) {\small \texttt{, Astérisque}};} 
-    \only<11-> {\node [right] at (lb.east) (lb) {\small \texttt{, Virgule}};}
-    \only<25> {\node [right] at (lb.south) (lb) {\small \texttt{, Chaîne('"Hello World"')}};}
-    \node [right] at (lb.east) {\small \texttt{]}};
+    \node at (0, -2.3) (lb) {
+      \begin{minipage}{\textwidth}
+        \only<1-6>  {\inputminted[firstline=1, lastline=1, linenos=false, frame=none, xleftmargin=0pt,]{ocaml}{static/exampleList.ml}}
+        \only<7-8>  {\inputminted[firstline=2, lastline=2, linenos=false, frame=none, xleftmargin=0pt,]{ocaml}{static/exampleList.ml}}
+        \only<9-10> {\inputminted[firstline=3, lastline=3, linenos=false, frame=none, xleftmargin=0pt,]{ocaml}{static/exampleList.ml}}
+        \only<11-24>{\inputminted[firstline=4, lastline=4, linenos=false, frame=none, xleftmargin=0pt,]{ocaml}{static/exampleList.ml}}
+        \only<25>   {\inputminted[firstline=5, lastline=5, linenos=false, frame=none, xleftmargin=0pt,]{ocaml}{static/exampleList.ml}}
+      \end{minipage}
+    };
   \end{tikzpicture}
 \end{frame}
 
@@ -123,8 +124,12 @@
 \begin{frame}
   \frametitle{Les automates: étude d'un exemple\esp}
   \begin{tikzpicture}
+    \node at (1, 0) (text1) {\ttfamily print};
+    \node [right=-5pt of text1.east, anchor=west] (text2) {\ttfamily print};
+    \node [right=-5pt of text2.east, anchor=west] (text3) {\ttfamily "Hello World"};
+
     \begin{scope}
-      [every node/.style={scale=0.6,font=\Large}, scale=0.4, initial text=]
+      [every node/.style={scale=0.6,font=\Large}, scale=0.4, initial text=, shift={(-13, 0)}]
       \tikzstyle{style0}=[]
       \tikzstyle{style1}=[]
       \tikzstyle{style2}=[]
@@ -159,24 +164,23 @@
       
       
       (0) edge [style2]             node[above] {$"$} (6)
-      (6) edge [loop above, style2] node[above] {\large$[a-z]|[A-Z]|[0-9]|\_$} (6)
+      (6) edge [loop above, style2] node[above] {$[a-z]|[A-Z]$} (6)
       (6) edge [style2]             node[above] {$"$} (7)
       ;
       
     \end{scope}
-    \node at (6, 0) (text1) {\ttfamily print};
-    \node [right=-5pt of text1.east, anchor=west] (text2) {\ttfamily print};
-    \node [right=-5pt of text2.east, anchor=west] (text3) {\ttfamily "Hello World"};
     
     \node<2>[fit=(text1), draw=blue, fill=blue!20, inner sep=-2pt, fill opacity=0.5]{};
     \node<3>[fit=(text2), draw=blue, fill=blue!20, inner sep=-2pt, fill opacity=0.5]{};
     \node<4>[fit=(text3), draw=blue, fill=blue!20, inner sep=-2pt, fill opacity=0.5]{};
-    
-    \node at (0, -2.3) (lb) {\texttt{res = [}};
-    \only<2-> {\node [right] at (lb.east) (lb) {\texttt{Print}};}
-    \only<3-> {\node [right] at (lb.east) (lb) {\texttt{, Print}};} 
-    \only<4> {\node [right] at (lb.east) (lb) {\texttt{, Chaîne('"Hello World"')}};}
-    \node [right] at (lb.east) {\texttt{]}};
+    \node at (0, -2.3) {
+      \begin{minipage}{\textwidth}
+        \only<1>{\inputminted[firstline=1, lastline=1, linenos=false, frame=none, xleftmargin=0pt,]{ocaml}{static/exampleList.ml}}
+        \only<2>{\inputminted[firstline=2, lastline=2, linenos=false, frame=none, xleftmargin=0pt,]{ocaml}{static/exampleList.ml}}
+        \only<3>{\inputminted[firstline=6, lastline=6, linenos=false, frame=none, xleftmargin=0pt,]{ocaml}{static/exampleList.ml}}
+        \only<4>{\inputminted[firstline=7, lastline=7, linenos=false, frame=none, xleftmargin=0pt,]{ocaml}{static/exampleList.ml}}
+      \end{minipage}
+    };
   \end{tikzpicture}
 \end{frame}
 

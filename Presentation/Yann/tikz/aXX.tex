@@ -1,0 +1,43 @@
+\tikzstyle{feuille}=[draw, rectangle, inner sep = 0.12cm]
+\tikzstyle{noeud}=[draw, rectangle,rounded corners, minimum width= 0.64cm, line width = 1pt]
+\begin{tikzpicture}[
+        baseline=(base), 
+        level/.style={sibling distance = 1cm/#1, level distance = 0.5cm},
+        every node/.style={scale=0.7, font=\smaller}
+    ]
+    
+    \node[ noeud] (1) {X}
+    child { 
+        node[feuille] {a}
+    }
+    child { 
+        node [ noeud] {X}
+        child {
+            node[feuille] {a}
+        }
+    }
+    child { 
+        node[ noeud] {X}
+        child { 
+            node [feuille] {$\varepsilon$}
+        }
+    };
+
+    \node[ noeud, right= 3cm of 1] {X}
+    child { 
+        node[feuille] {a}
+    }
+    child { 
+        node[ noeud] {X}
+        child { 
+            node [feuille] {$\varepsilon$}
+        }
+    }
+    child { 
+        node [ noeud] {X}
+        child {
+            node[feuille] {a}
+        }
+    };
+
+\end{tikzpicture}

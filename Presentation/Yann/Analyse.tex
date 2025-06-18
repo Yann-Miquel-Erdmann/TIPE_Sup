@@ -2,50 +2,61 @@
 
 \subsection{Grammaire}
 \begin{frame}
-    \frametitle{Définition \esp}
+    \frametitle{Définition d'une grammaire\esp}
 
-    \textbf{Grammaire non contextuelle:}\\
-    $\bullet \ G=(\Sigma, V, P, S)$\\
-    $\bullet$ les règles de productions sont de la forme $W \rightarrow U_1...U_k\ et\ \forall i \in \llbracket1,\ k\rrbracket, U_i \in V \cup \Sigma , \ W \in V $
-    \vspace{0.5cm}
-    $ $\\
-    {
-        $\Sigma = \{a,b\}, V = \{A,B\}, S = A, P = \{$\\
-        $ S \rightarrow A ;$\\
-        $ A \rightarrow aA ;$\\
-        $ A \rightarrow B ;$\\
-        $ B \rightarrow bB ;$\\
-        $ B \rightarrow \varepsilon$\\
-        $\}$\\
-        $\mathcal{L} (G) = a^*b^*$
-    }
+    \textbf{Grammaire non contextuelle:}
+    \begin{minipage}[t]{0.7\textwidth}
+        \vspace{-1.5em}
+        \begin{align*}
+            &\bullet\quad G = (\Sigma, V, P, S) \\
+            &\bullet\quad \text{Les règles de production sont de la forme}\\
+            & W \rightarrow U_1 \dots U_k \text{ avec } \forall i \in \llbracket 1, k \rrbracket,\ U_i \in V \cup \Sigma,\ W \in V \\
+            \\[-2ex]
+            &\Sigma = \{a,b\}, V = \{A,B\}, S = A, P = \{\\
+            &\quad S \rightarrow A \\
+            &\quad A \rightarrow aA \\
+            &\quad A \rightarrow B \\
+            &\quad B \rightarrow bB \\
+            &\quad B \rightarrow \varepsilon \\
+            &\}\\
+            \\[-2ex]
+            &\mathcal{L}(G) = a^* b^*
+        \end{align*}
+    \end{minipage}
+    
 \end{frame}
 
 \begin{frame}
     \frametitle{Un exemple de grammaire\esp}
-    \inputminted[breaklines, fontsize=\smaller]{text}{static/Grammaire_exemple.txt}
-\end{frame}
-
-\begin{frame}
-    \frametitle{Nos types ocaml\esp}
     \noindent
-    \begin{minipage}[t]{0.48\textwidth}
-        \scalebox{0.9}{
-            \parbox{\textwidth}{
-                \inputminted[breaklines, fontsize=\smaller]{ocaml}{static/type_symbol.ml}
-            }
-        }
-    \end{minipage}
-        \hfill
-    \begin{minipage}[t]{0.48\textwidth}
-        \scalebox{0.9}{
-        \parbox{\textwidth}{
-        \inputminted[breaklines, fontsize=\small]{ocaml}{static/type_grammaire.ml}        
-        }
-        }
-    \end{minipage}
+    \begin{tikzpicture}[remember picture, overlay]
+    \node[anchor=south east, xshift=-1cm, yshift=2cm, ] at (current page.south east) {
+        \begin{minipage}[b]{\linewidth}
+        \inputminted[breaklines, fontsize=\smaller]{ocaml}{static/Grammaire_exemple.txt}
+        \end{minipage}
+    };
+    \node<1>[anchor=south east, xshift=5cm] at (current page.south east) {
+        \begin{minipage}[b]{\linewidth}
+        \textbf{Types symbole OCaml}
+        
+        \inputminted[fontsize=\smaller]{ocaml}{static/type_symbol.ml}
 
+        \end{minipage}
+    };
+    \node<2>[anchor=south east, xshift=5cm, yshift=0.38cm] at (current page.south east) {
+        \begin{minipage}[b]{\linewidth}
+        \textbf{Types grammaire OCaml}
+        
+        \inputminted[fontsize=\smaller]{ocaml}{static/type_grammaire.ml}
+
+        \end{minipage}
+    };
+
+
+
+    \end{tikzpicture}
 \end{frame}
+
 
 
 

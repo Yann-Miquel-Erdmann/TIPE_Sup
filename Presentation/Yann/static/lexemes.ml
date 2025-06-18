@@ -1,11 +1,10 @@
-[Programme; 
- NomProgramme("hello"); 
- NouvelleLigne; 
- Print; 
- Asterisque; 
- Virgule; 
- Chaine("Hello World!"); 
- NouvelleLigne; 
- FinProgramme; 
- NomProgramme("hello")
+[
+  ProgramMC;
+  NomProg "hello";
+  PrintMC;
+  Asterisque;
+  Virgule;
+  Chaine "Hello World!";
+  EndProgramMC;
+  NomProg "hello";
 ]

@@ -8,8 +8,8 @@
     \tikzstyle{faded}=[draw=black!20, color=black!20]
     
 
-    \node [basic_node, text width=4cm, align=left] (AST) {
-         \scalebox{0.7}{
+    \node [basic_node, text width=4.7cm, align=left] (AST) {
+         \scalebox{0.8}{
             \parbox{\textwidth}{
                 \textbf{Arbre de syntaxe abstraite}
                 \input{tikz/arbre_de_syntaxe_abstraite.tex}
@@ -17,13 +17,14 @@
         }
     };
 
-    \node [basic_node, text width=6cm, align=left] (C) [right=1cm of AST] {
-        \scalebox{0.8}{
+    \node [basic_node, text width=5.3cm, align=left] (C) [right=1cm of AST] {
+        \scalebox{0.9}{
             \parbox{\textwidth}{
                 \textbf{Programme C}
 
-        \inputminted[firstline=1, lastline=4,firstnumber=1]{c}{static/HelloWorld.c}
-            } } 
+                \inputminted[firstline=1, lastline=4,firstnumber=1]{c}{static/HelloWorld.c}
+            } 
+        } 
     };
  
     \draw [lien] (AST.north) to[out=45, in=135]  node[midway, above] {\textbf{Traduction en C}}  (C.north west) ; 

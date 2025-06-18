@@ -1,15 +1,14 @@
-Programme -> ProgramMC NomProgramme NLigne Print NLigne EndProgramMC NomProgramme
+Programme -> ProgramMC NomProg Print EndProgramMC NomProg
 
-Print -> PrintMC Espace Asterisque Virgule Espace Chaine ParamListe
-ParamListe -> Virgule Espace Chaine ParamListe | Epsilon 
+Print -> PrintMC Asterisque Virgule Chaine ParamListe
+ParamListe -> Virgule Chaine ParamListe 
+ParamListe -> Epsilon 
 
-PrintMC -> 'print'
-ProgramMC -> 'program'
-EndProgramMC -> 'end program'
-Virgule -> ','
-Asterisque -> '\*'
-Espace -> ' '
-NLigne -> '\n'
+PrintMC -> "print"
+ProgramMC -> "program"
+EndProgramMC -> "end program"
+Virgule -> ","
+Asterisque -> "*"
 
-NomProgramme -> '([a-z]|[A-Z])*'
-Chaine -> '".*"'
+NomProg -> "([a-z]|[A-Z])*"
+Chaine -> "".*""

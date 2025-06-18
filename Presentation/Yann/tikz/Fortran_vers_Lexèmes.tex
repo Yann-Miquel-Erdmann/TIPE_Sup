@@ -18,7 +18,7 @@
     };
 
     \node [basic_node, text width=5cm, align=left] (Lexemes) [right=1cm of Fortran] {
-        \scalebox{0.7}{
+        \scalebox{0.8}{
             \parbox{\textwidth}{
 
                 \textbf{Liste de lexèmes}
@@ -28,6 +28,6 @@
         }
     };
  
-    \draw [lien] (Fortran.north) to[out=45, in=135]  node[midway, above] {\textbf{Analyse lexicale}}   (Lexemes.north west) ; 
+    \draw [lien] (Fortran.north) to[out=45, in=135]  node[midway, above] {\textbf{Analyse lexicale}}   (Lexemes.west) ; 
 
 \end{tikzpicture}

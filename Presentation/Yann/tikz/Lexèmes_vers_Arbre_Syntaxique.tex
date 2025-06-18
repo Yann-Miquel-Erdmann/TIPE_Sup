@@ -1,5 +1,6 @@
 \begin{tikzpicture}
     
+    
     \tikzstyle{lien} = [->, >=latex]
     \tikzstyle{basic_text}=[text width=2cm, text badly centered]
     \tikzstyle{basic_node}=[draw = black,rounded corners=4pt, basic_text]
@@ -8,30 +9,30 @@
     \tikzstyle{faded}=[draw=black!20, color=black!20]
     
 
-    \node [basic_node, text width=4cm, align=left] (Lexemes) {
+    \node [basic_node, text width=3cm, align=left] (Lexemes) {
         \scalebox{0.7}{
-            \parbox{\textwidth}{
-
+            \begin{minipage}{0.48\textwidth}    
+                    
                 \textbf{Liste de lexèmes}
                 \inputminted{ocaml}{static/lexemes.ml}
 
-            }
+            \end{minipage}
         }
     };
 
-
-    \begin{scope}[shift={(6, 0)}]  
-        \node [basic_node, text width=6cm, align=left] (AS) { 
-            \scalebox{0.7}{
-                \parbox{\textwidth}{
-                    \textbf{Arbre de syntaxe}
-
-                    \input{tikz/arbre_de_syntaxe.tex}
-                }
-            }
-        };
-    \end{scope}
+    \begin{scope}[shift={(6,0)}]
     
+        \node [basic_node, text width=7cm, align=left] (AS)  {
+            
+            \scalebox{0.85}{
+            \parbox{\textwidth}{
+                \textbf{Arbre de syntaxe}
+                \input{tikz/arbre_de_syntaxe.tex}}
+            }
+
+        };
+
+    \end{scope};
  
     \draw [lien] (Lexemes.north) to[out=45, in=135]  node[midway, above] {\textbf{Analyse syntaxique}}   (AS.north west) ; 
 

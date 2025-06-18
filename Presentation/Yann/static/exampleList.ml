@@ -1,0 +1,7 @@
+res = []
+res = [PrintMC]
+res = [PrintMC; Asterisque]
+res = [PrintMC; Asterisque; Virgule]
+res = [PrintMC; Asterisque; Virgule; Chaine "\"Hello World\""]
+res = [PrintMC; PrintMC]
+res = [PrintMC; PrintMC; Chaine "\"Hello World\""]

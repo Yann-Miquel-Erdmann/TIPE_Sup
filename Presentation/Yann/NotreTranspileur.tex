@@ -12,9 +12,11 @@
 \end{frame}
 
 
-\begin{frame}
+\begin{frame}[fragile]
+\scriptsize
 \noindent
 \begin{minipage}[t]{0.48\textwidth}
+
     \scalebox{0.6}{
         \parbox{\textwidth}{
             \inputminted{fortran}{static/fibonacci.f90}
@@ -24,7 +26,10 @@
 \end{minipage}
 \hfill
 \begin{minipage}[t]{0.48\textwidth}
-    \scalebox{0.6}{
+    \scalebox{0.5}{
+        \color{black!20}
+        \vrule{\color{white}u}
+        \color{black}
         \parbox{\textwidth}{
             \inputminted{c}{static/fibonacci.c}
         }

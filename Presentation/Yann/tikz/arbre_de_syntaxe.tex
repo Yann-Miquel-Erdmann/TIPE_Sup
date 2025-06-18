@@ -1,51 +1,38 @@
-\tikzstyle{feuille}=[draw, rectangle, inner sep = 0.12cm, minimum width=0.7cm, minimum height=0.7cm]
-\tikzstyle{noeud}=[draw, rectangle,rounded corners, minimum width= 0.64cm, line width = 1pt]
+    
+\tikzstyle{feuille}=[ draw, rectangle, inner sep = 0.12cm]
+\tikzstyle{noeud}=[ draw, rectangle,rounded corners, minimum width= 0.64cm, line width = 1pt]
 \begin{tikzpicture}[
         baseline=(base), 
-        level/.style={sibling distance = 2cm/#1, level distance = 1cm},
+        level/.style={sibling distance = 1.6cm/#1, level distance = 1cm},
         every node/.style={scale=0.6, font=\footnotesize}
     ]
     
     \node[ noeud] {Programme}
     child { 
-        node[ noeud] (base) {ProgramMC}
-        child { 
-            node [ feuille] {program}
-        }
+        node[noeud] (base) {ProgramMC}
     }
-    child { 
-        node[ noeud] {NLigne}
-        child { 
-            node [ feuille] {\textbackslash n}
-        }
+    child {
+        node[noeud] {NomProg}
+        child {node[feuille] {"hello"}}
     }
     child [ level distance=2cm]{ 
         node [ noeud] {Print}
-        child {
+        child [sibling distance= 1cm] {
             node [noeud] {PrintMC}
-            child { 
-                node [ feuille] {print}
-            }
         }
-        child{
+        child [sibling distance= 1cm]{
             node [noeud] {Asterisque}
-            child { 
-                node [feuille] {*}
-            }
         }
-        child{
+        child [sibling distance= 1cm]{
             node [noeud] {Virgule}
-            child { 
-                node [feuille] {,}
-            }
         }
-        child{
+        child [sibling distance= 1cm]{
             node [noeud] {Chaine}
             child { 
                 node [feuille] {"Hello World"}
             }
         }
-        child{
+        child [sibling distance= 1cm] {
             node [noeud] {Paramliste}
             child { 
                 node [feuille] {$\varepsilon$}
@@ -54,9 +41,10 @@
     }
     child { 
         node[ noeud] {EndProgramMC}
-        child { 
-            node [ feuille] {end program}
-        }
+    }
+    child {
+        node[noeud] {NomProg}
+        child {node[feuille] {"hello"}}
     };
 
 \end{tikzpicture}

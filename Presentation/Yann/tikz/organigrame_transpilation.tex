@@ -2,8 +2,8 @@
 
   \begin{tikzpicture}
     \tikzstyle{lien} = [->, >=latex]
-    \tikzstyle{basic_text}=[text width=2cm, text badly centered]
-    \tikzstyle{basic_node}=[draw = black,rounded corners=4pt, basic_text]
+    \tikzstyle{basic_text}=[text width=2cm, text badly centered, , minimum height=1cm]
+    \tikzstyle{basic_node}=[draw = black,rounded corners=4pt, basic_text ]
     \tikzstyle{wrapper}=[basic_node, inner sep=3pt]
 
     
@@ -14,9 +14,9 @@
 
     \node[basic_node] (A) at (0, 0) {analyse lexicale};
     \node[basic_node] (B) [right=0.5cm of A] {analyse syntaxique};
-    \node[basic_node] (C) [right=0.5cm of B] {syntaxe abstraite};
+    \node[basic_node] (C) [right=0.5cm of B] {abstraction};
 
-    \node[basic_node] (D) [right = 0.75cm of C] {conversion langage B};
+    \node[basic_node] (D) [right = 0.75cm of C] {traduction vers C};
     
     \draw [lien] (A) -- (B);
     \draw [lien] (B) -- (C);
@@ -24,8 +24,8 @@
     
     
     \only{
-      \node[basic_node] (E) [above = 0.75cm of D] {conversion langage A};
-      \node[basic_node] (F) [below = 0.75cm of D] {conversion langage C};
+      \node[basic_node] (E) [above = 0.75cm of D] {traduction vers Fortran};
+      \node[basic_node] (F) [below = 0.75cm of D] {traduction vers Python};
       
       \node [wrapper, fit=(E), draw=red] (red_fit_2) {};
       \node [wrapper, fit=(F), draw=red] (red_fit_3) {};
