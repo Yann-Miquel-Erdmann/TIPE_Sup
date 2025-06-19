@@ -443,7 +443,7 @@ let rec convert_ast_to_C_sosl (ast : ast list) (env : environnement)
           convert_ast_to_C_sosl
             [ Noeud (Operateur Assignation, [ variable; valeur ]) ]
             env 0;
-          S "; ";
+          S " ";
           convert_ast_to_C_sosl
             [ Noeud (Comparateur StrictPlusPetit, [ variable; fin ]) ]
             env 0;
