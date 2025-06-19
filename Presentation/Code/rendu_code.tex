@@ -1,0 +1,73 @@
+\documentclass[12pt,a4paper,fleqn]{article}
+
+%%%%%%%%%%%%%%%%%%%%%% LES PACKAGES
+\input{packages_MPI.tex}
+
+%%%%%%%%%%%%%%%%%%%%%% MISE EN FORME
+\colorlet{expli}{gray}
+\input{mise_en_forme_MPI_Yann.tex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\pagestyle{fancy} %active les pieds de pages
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\titreRenduCode{La transpilation de Fortran vers C}{Juillet 2025}
+
+\tableofcontents
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Grammaire et exemples}
+\subsection{Grammaire du Fortran}
+\inputminted{ocaml}{../../grammar/Our_Grammar.txt}
+    \newpage
+    {
+    \tiny
+    \textcolor{white}{test}
+    }
+
+\subsection{Exemple Fibonacci}
+\inputminted{ocaml}{../../tests/Fortran/fibonacci.f90}
+\inputminted{c}{../../tests/C/fibonacci.c}
+\newpage
+
+\subsection{Exemple conversion binaire}
+\inputminted{ocaml}{../../tests/Fortran/fibonacci.f90}
+\inputminted{c}{../../tests/C/fibonacci.c}
+
+\newpage
+{
+\tiny
+\textcolor{white}{test}
+}
+
+\section{Code du pré-calcul}
+%======================================
+
+
+\foreach \name in{src/preprocessing/generateMlFiles.ml, src/prebuild/buildAutomaton.ml}{
+    \subsection{\name}
+    \inputminted{ocaml}{../../\name}
+    \newpage
+    {
+    \tiny
+    \textcolor{white}{test}
+    }
+}
+
+
+\section{Code du transpileur}
+\foreach \name in{src/abstractTokens.ml, src/bibliotheques.ml, src/environnement.ml, src/symbols.ml, src/traduction.ml, src/regex.ml, src/grammarFunctions.ml, src/grammar.ml, src/automates.ml, src/LL1.ml, src/convertToAbstract.ml,  src/traductionC.ml, src/traductionFortran.ml, src/transpileurs.ml, src/main.ml}{
+    \subsection{\name}
+    \inputminted{ocaml}{../../\name}
+    \newpage
+    {
+    \tiny
+    \textcolor{white}{test}
+    }
+}
+
+
+\end{document}
